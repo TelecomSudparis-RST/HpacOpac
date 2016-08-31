@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module HpacOpacLib.Optimizer</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="HpacOpacLib.html"><font color="#ffffff">HpacOpacLib</font></a>.Optimizer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.3/bin/HpacOpacLib/Optimizer.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.3/bin/HpacOpacLib/Optimizer.py</a></font></td></tr></table>
+    <p><tt>HpacOpac&nbsp;Optimization&nbsp;Controller<br>
+=======================================<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.3<br>
+&gt;&nbsp;Date:&nbsp;August&nbsp;2016<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;main&nbsp;controller&nbsp;of&nbsp;OPAC&nbsp;demo<br>
+&nbsp;<br>
+..note::&nbsp;When&nbsp;updating&nbsp;the&nbsp;items&nbsp;in&nbsp;the&nbsp;DB,&nbsp;do&nbsp;not&nbsp;set&nbsp;the&nbsp;date/time&nbsp;by&nbsp;localfunctions;&nbsp;Let&nbsp;the&nbsp;DB&nbsp;handle&nbsp;all&nbsp;timestamps&nbsp;using&nbsp;ONUPDATE&nbsp;and&nbsp;DEFAULT<br>
+&nbsp;<br>
+All&nbsp;messages&nbsp;and&nbsp;logs&nbsp;are&nbsp;in&nbsp;Messages.py.&nbsp;This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easy&nbsp;to&nbsp;change&nbsp;languages&nbsp;and&nbsp;to&nbsp;have&nbsp;unified&nbsp;messages<br>
+&nbsp;<br>
+For&nbsp;&nbsp;DB&nbsp;operations,&nbsp;mostly&nbsp;queries&nbsp;and&nbsp;listing,&nbsp;destroy&nbsp;the&nbsp;objects&nbsp;after&nbsp;use&nbsp;with&nbsp;del&nbsp;ARRAY[:]&nbsp;and&nbsp;end&nbsp;the&nbsp;Transaction&nbsp;with&nbsp;DBConn.endTransaction()&nbsp;<br>
+For&nbsp;&nbsp;DB&nbsp;modifications,&nbsp;update/add/deletes&nbsp;queries,&nbsp;end&nbsp;the&nbsp;Transaction&nbsp;with&nbsp;DBConn.endTransaction()&nbsp;before&nbsp;moving&nbsp;to&nbsp;another&nbsp;Query&nbsp;o&nbsp;listing<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;OpacModel.py&nbsp;Messages.py<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-connect">connect</a>(&nbsp;db_url&nbsp;)&nbsp;#&nbsp;Connect&nbsp;to&nbsp;the&nbsp;DB<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-createRandomInfrastructure">createRandomInfrastructure</a>()&nbsp;&nbsp;#Create&nbsp;a&nbsp;random&nbsp;topology&nbsp;and&nbsp;build&nbsp;a&nbsp;model<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-buildModel">buildModel</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-updatePOPs">updatePOPs</a>()&nbsp;&nbsp;&nbsp;#&nbsp;update&nbsp;the&nbsp;latest&nbsp;OpenStack&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updateMetris()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-createRandomDemands">createRandomDemands</a>()&nbsp;&nbsp;#&nbsp;Create&nbsp;a&nbsp;Random&nbsp;set&nbsp;of&nbsp;Demands&nbsp;and&nbsp;optimize&nbsp;based&nbsp;on&nbsp;them<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-consumeDemands">consumeDemands</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-optimize">optimize</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-simulate">simulate</a>()&nbsp;&nbsp;#&nbsp;Simulate&nbsp;the&nbsp;impact&nbsp;on&nbsp;the&nbsp;Infrastructure&nbsp;of&nbsp;the&nbsp;selected&nbsp;changes</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="HpacOpacLib.DBConnection.html">HpacOpacLib.DBConnection</a><br>
+<a href="HpacOpacLib.Messages.html">HpacOpacLib.Messages</a><br>
+</td><td width="25%" valign=top><a href="HpacOpacLib.OpenStackConnection.html">HpacOpacLib.OpenStackConnection</a><br>
+<a href="HpacOpacLib.OptimizationModels.html">HpacOpacLib.OptimizationModels</a><br>
+</td><td width="25%" valign=top><a href="HpacOpacLib.SettingsFile.html">HpacOpacLib.SettingsFile</a><br>
+<a href="logging.html">logging</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-buildModel"><strong>buildModel</strong></a>()</dt><dd><tt>Gathers&nbsp;information&nbsp;from&nbsp;the&nbsp;DB&nbsp;and&nbsp;calls&nbsp;creates&nbsp;an&nbsp;HPAC/OPAC&nbsp;Model<br>
+..note::&nbsp;Call&nbsp;this&nbsp;before&nbsp;<a href="#-optimize">optimize</a>()<br>
+&nbsp;<br>
+This&nbsp;resets/rebuils&nbsp;the&nbsp;global&nbsp;object&nbsp;Model<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;Model&nbsp;was&nbsp;built;&nbsp;False&nbsp;if&nbsp;not.</tt></dd></dl>
+ <dl><dt><a name="-connect"><strong>connect</strong></a>(url)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;provided&nbsp;DB&nbsp;String<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;url&nbsp;is&nbsp;a&nbsp;sqlalchemy&nbsp;string,&nbsp;just&nbsp;like&nbsp;the&nbsp;ones&nbsp;in&nbsp;nova.conf&nbsp;[database]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type&nbsp;url&nbsp;String<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;True&nbsp;if&nbsp;connection&nbsp;OK,&nbsp;False&nbsp;if&nbsp;not</tt></dd></dl>
+ <dl><dt><a name="-consumeDemands"><strong>consumeDemands</strong></a>()</dt><dd><tt>Gets&nbsp;the&nbsp;Demands&nbsp;from&nbsp;the&nbsp;Database&nbsp;and,&nbsp;one&nbsp;by&nbsp;one;&nbsp;removes&nbsp;the&nbsp;Demanded&nbsp;BW&nbsp;from&nbsp;the&nbsp;Capacity&nbsp;Graph&nbsp;of&nbsp;the&nbsp;Model<br>
+&nbsp;<br>
+Invalid&nbsp;demands&nbsp;are&nbsp;ignored.&nbsp;Demands&nbsp;that&nbsp;request&nbsp;a&nbsp;pair&nbsp;(vCDN,POP)&nbsp;that&nbsp;does&nbsp;not&nbsp;exist&nbsp;are&nbsp;IGNORED.&nbsp;<br>
+&nbsp;<br>
+A&nbsp;new&nbsp;model&nbsp;is&nbsp;created&nbsp;here,&nbsp;taking&nbsp;fresh&nbsp;information&nbsp;from&nbsp;the&nbsp;DB.&nbsp;This&nbsp;is&nbsp;because&nbsp;the&nbsp;Operator&nbsp;can&nbsp;be&nbsp;working&nbsp;on&nbsp;the&nbsp;Demands,&nbsp;alters&nbsp;or&nbsp;receives&nbsp;a&nbsp;change&nbsp;it&nbsp;the&nbsp;Topologie&nbsp;information&nbsp;(clientGroups,&nbsp;Locations,&nbsp;NetLinks,&nbsp;POPs,&nbsp;etc)<br>
+and&nbsp;would&nbsp;like&nbsp;to&nbsp;re-run&nbsp;the&nbsp;Demands&nbsp;on&nbsp;top.&nbsp;So&nbsp;a&nbsp;new&nbsp;fresh&nbsp;Model&nbsp;is&nbsp;needed&nbsp;in&nbsp;this&nbsp;case&nbsp;to&nbsp;include&nbsp;the&nbsp;possible&nbsp;backend&nbsp;changes<br>
+&nbsp;<br>
+..seealso::&nbsp;OptimizationModels.Model.<a href="#-consumeDemands">consumeDemands</a>()<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;all&nbsp;OK;&nbsp;False&nbsp;if&nbsp;there&nbsp;were&nbsp;some&nbsp;errors</tt></dd></dl>
+ <dl><dt><a name="-createRandomDemands"><strong>createRandomDemands</strong></a>()</dt><dd><tt>Updates&nbsp;values&nbsp;from&nbsp;the&nbsp;Demand&nbsp;registers,&nbsp;non-OpenStack.<br>
+These&nbsp;values&nbsp;are&nbsp;parameters&nbsp;set&nbsp;by&nbsp;the&nbsp;Operator&nbsp;and&nbsp;its&nbsp;systems.<br>
+&nbsp;<br>
+In&nbsp;this&nbsp;DEMO,&nbsp;this&nbsp;is&nbsp;a&nbsp;fake&nbsp;function&nbsp;to&nbsp;generate&nbsp;values&nbsp;and&nbsp;put&nbsp;them&nbsp;in&nbsp;the&nbsp;OPAC&nbsp;DB.<br>
+&nbsp;<br>
+A&nbsp;demand,&nbsp;in&nbsp;OPAC&nbsp;paper;&nbsp;is&nbsp;said&nbsp;to&nbsp;be&nbsp;d[v][f],&nbsp;but&nbsp;as&nbsp;only&nbsp;1&nbsp;server&nbsp;is&nbsp;to&nbsp;supply&nbsp;this&nbsp;demand,&nbsp;and&nbsp;q&nbsp;vCDN&nbsp;can&nbsp;be&nbsp;in&nbsp;more&nbsp;than&nbsp;1&nbsp;server,&nbsp;this&nbsp;leads&nbsp;to&nbsp;associate&nbsp;a&nbsp;demand&nbsp;to&nbsp;an&nbsp;Instance,&nbsp;which&nbsp;is&nbsp;1&nbsp;server&nbsp;that&nbsp;holds&nbsp;a&nbsp;vCDN&nbsp;inside<br>
+&nbsp;<br>
+The&nbsp;Demands&nbsp;are&nbsp;created&nbsp;via&nbsp;a&nbsp;random&nbsp;number&nbsp;and&nbsp;a&nbsp;threshold<br>
+For&nbsp;all&nbsp;Clients&nbsp;and&nbsp;all&nbsp;Instances:&nbsp;There&nbsp;is&nbsp;a&nbsp;demand&nbsp;if&nbsp;a&nbsp;random&nbsp;probability&nbsp;is&nbsp;bigger&nbsp;than&nbsp;'demandProbability'&nbsp;value.<br>
+If&nbsp;so,&nbsp;the&nbsp;bw&nbsp;of&nbsp;the&nbsp;demand&nbsp;is&nbsp;set&nbsp;in&nbsp;the&nbsp;range&nbsp;of&nbsp;values&nbsp;[0&nbsp;;&nbsp;demandAmplitude]&nbsp;aproximately.<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;all&nbsp;ok;&nbsp;False&nbsp;if&nbsp;there&nbsp;were&nbsp;some&nbsp;errors.</tt></dd></dl>
+ <dl><dt><a name="-createRandomInfrastructure"><strong>createRandomInfrastructure</strong></a>()</dt><dd><tt>Updates&nbsp;values&nbsp;from&nbsp;the&nbsp;Infrastructure,&nbsp;non-OpenStack<br>
+&nbsp;<br>
+These&nbsp;values&nbsp;are&nbsp;parameters&nbsp;set&nbsp;by&nbsp;the&nbsp;Operator&nbsp;and&nbsp;its&nbsp;systems,&nbsp;in&nbsp;the&nbsp;production&nbsp;case.<br>
+In&nbsp;this&nbsp;DEMO,&nbsp;this&nbsp;is&nbsp;a&nbsp;fake&nbsp;function&nbsp;to&nbsp;generate&nbsp;values&nbsp;and&nbsp;put&nbsp;them&nbsp;in&nbsp;the&nbsp;OPAC&nbsp;DB.<br>
+&nbsp;<br>
+Changes&nbsp;produced:&nbsp;ClientGroups.location&nbsp;and&nbsp;NetworkLinks&nbsp;table&nbsp;are&nbsp;shuffled&nbsp;ar&nbsp;random<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;all&nbsp;ok;&nbsp;False&nbsp;if&nbsp;there&nbsp;were&nbsp;some&nbsp;errors<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;done&nbsp;by&nbsp;mapping&nbsp;the&nbsp;Model&nbsp;to&nbsp;a&nbsp;Random&nbsp;Tree&nbsp;graph</tt></dd></dl>
+ <dl><dt><a name="-getInstance"><strong>getInstance</strong></a>(pop, vcdn)</dt><dd><tt>For&nbsp;a&nbsp;given&nbsp;POP&nbsp;and&nbsp;a&nbsp;vCDN,&nbsp;this&nbsp;function&nbsp;retuns&nbsp;the&nbsp;Instance&nbsp;of&nbsp;them&nbsp;both,&nbsp;if&nbsp;it&nbsp;exists<br>
+&nbsp;<br>
+:param&nbsp;pop:&nbsp;POP&nbsp;to&nbsp;check&nbsp;for&nbsp;a&nbsp;valid&nbsp;Instance<br>
+:type&nbsp;pop:&nbsp;POP<br>
+:param&nbsp;vcdn:&nbsp;vCDN&nbsp;to&nbsp;check&nbsp;for&nbsp;a&nbsp;valid&nbsp;Instance<br>
+:type&nbsp;vcdn:&nbsp;vCDN<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;&nbsp;the&nbsp;Instance&nbsp;object&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;Instance&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-getInstanceforDemand"><strong>getInstanceforDemand</strong></a>(d)</dt><dd><tt>For&nbsp;a&nbsp;given&nbsp;Demand&nbsp;d,&nbsp;requesting&nbsp;a&nbsp;vCDN&nbsp;from&nbsp;a&nbsp;POP,&nbsp;this&nbsp;function&nbsp;checks&nbsp;if&nbsp;effectively&nbsp;there&nbsp;is&nbsp;any&nbsp;Instance&nbsp;of&nbsp;the&nbsp;vCDN&nbsp;in&nbsp;that&nbsp;POP<br>
+&nbsp;<br>
+:param&nbsp;d:&nbsp;demand&nbsp;to&nbsp;check&nbsp;for&nbsp;a&nbsp;valid&nbsp;Instance<br>
+:type&nbsp;d:&nbsp;Demand<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;&nbsp;the&nbsp;Instance&nbsp;object&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;Instance&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-optimize"><strong>optimize</strong></a>()</dt><dd><tt>Gathers&nbsp;information&nbsp;from&nbsp;the&nbsp;DB&nbsp;and&nbsp;calls&nbsp;HpacOpac&nbsp;optimization&nbsp;with&nbsp;the&nbsp;information.<br>
+&nbsp;<br>
+This&nbsp;optimization&nbsp;is&nbsp;a&nbsp;Heurisitic&nbsp;approach,&nbsp;based&nbsp;on&nbsp;the&nbsp;Demands.<br>
+&nbsp;<br>
+The&nbsp;Global&nbsp;Model&nbsp;is&nbsp;built&nbsp;from&nbsp;fresh&nbsp;information&nbsp;from&nbsp;the&nbsp;DB,&nbsp;this&nbsp;is&nbsp;to&nbsp;include&nbsp;any&nbsp;backend&nbsp;changes&nbsp;made&nbsp;to&nbsp;the&nbsp;Topology&nbsp;or&nbsp;Demands.<br>
+&nbsp;<br>
+This&nbsp;stores&nbsp;the&nbsp;result&nbsp;in&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
+:returns:s&nbsp;the&nbsp;amount&nbsp;of&nbsp;seconds&nbsp;it&nbsp;took&nbsp;to&nbsp;calculate&nbsp;this,&nbsp;or&nbsp;Optimization_ERROR&nbsp;if&nbsp;error<br>
+:rtype:&nbsp;float&nbsp;&gt;&nbsp;0.0&nbsp;or&nbsp;Optimization_ERROR<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;OptimizationModels.Model.optimizeHPAC()</tt></dd></dl>
+ <dl><dt><a name="-random"><strong>random</strong></a>(...)</dt><dd><tt><a href="#-random">random</a>()&nbsp;-&gt;&nbsp;x&nbsp;in&nbsp;the&nbsp;interval&nbsp;[0,&nbsp;1).</tt></dd></dl>
+ <dl><dt><a name="-readSettingsFile"><strong>readSettingsFile</strong></a>()</dt><dd><tt>This&nbsp;function&nbsp;asks&nbsp;the&nbsp;INI&nbsp;file&nbsp;parser&nbsp;module,&nbsp;that&nbsp;must&nbsp;have&nbsp;read&nbsp;the&nbsp;INI&nbsp;file,&nbsp;to&nbsp;look&nbsp;for&nbsp;the&nbsp;options&nbsp;in&nbsp;the&nbsp;sections&nbsp;and&nbsp;variables&nbsp;that&nbsp;are&nbsp;of&nbsp;interest&nbsp;for&nbsp;this&nbsp;module.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;options&nbsp;are&nbsp;not&nbsp;present&nbsp;in&nbsp;the&nbsp;INI&nbsp;file,&nbsp;the&nbsp;existing&nbsp;values&nbsp;are&nbsp;not&nbsp;modified<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;so&nbsp;that&nbsp;we&nbsp;add&nbsp;or&nbsp;remove&nbsp;options&nbsp;from&nbsp;the&nbsp;INI&nbsp;file&nbsp;just&nbsp;by&nbsp;mofiying&nbsp;this&nbsp;functions.&nbsp;Also,&nbsp;the&nbsp;same&nbsp;INI&nbsp;entry&nbsp;can&nbsp;be&nbsp;read&nbsp;by&nbsp;many&nbsp;modules<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Make&nbsp;sure&nbsp;that&nbsp;the&nbsp;SettingsFile&nbsp;module&nbsp;has&nbsp;been&nbsp;initialized&nbsp;and&nbsp;read&nbsp;a&nbsp;valid&nbsp;file<br>
+&nbsp;<br>
+::Example::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SettingsFile.read(INI_file)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Optimizer.<a href="#-readSettingsFile">readSettingsFile</a>()</tt></dd></dl>
+ <dl><dt><a name="-simulate"><strong>simulate</strong></a>(migrationList<font color="#909090">=[]</font>, redirectList<font color="#909090">=[]</font>, instantiationList<font color="#909090">=[]</font>)</dt><dd><tt>This&nbsp;functions&nbsp;simulates&nbsp;that&nbsp;the&nbsp;Migrations/Redirections/Instantiations&nbsp;were&nbsp;actually&nbsp;executed;&nbsp;changed&nbsp;the&nbsp;Data&nbsp;in&nbsp;the&nbsp;Systems&nbsp;and&nbsp;would&nbsp;be&nbsp;reflected&nbsp;as&nbsp;changes&nbsp;in&nbsp;the&nbsp;Model<br>
+&nbsp;<br>
+This&nbsp;procedure&nbsp;starts&nbsp;from&nbsp;a&nbsp;new&nbsp;Model,&nbsp;having&nbsp;fresh&nbsp;Topologie&nbsp;information&nbsp;from&nbsp;the&nbsp;DB.<br>
+&nbsp;<br>
+Then&nbsp;the&nbsp;requested&nbsp;changes&nbsp;are&nbsp;simulated,&nbsp;altering&nbsp;the&nbsp;list&nbsp;of&nbsp;Instances&nbsp;in&nbsp;the&nbsp;Model,&nbsp;and&nbsp;also&nbsp;altering&nbsp;the&nbsp;list&nbsp;of&nbsp;Demands.&nbsp;<br>
+This&nbsp;is&nbsp;because&nbsp;the&nbsp;simulation&nbsp;suposes&nbsp;that&nbsp;the&nbsp;CDN&nbsp;system&nbsp;performs&nbsp;all&nbsp;the&nbsp;needed&nbsp;changes&nbsp;so&nbsp;that&nbsp;the&nbsp;Demands&nbsp;will&nbsp;point&nbsp;to&nbsp;where&nbsp;the&nbsp;vCDN&nbsp;were&nbsp;Migrated&nbsp;or&nbsp;Instantiated&nbsp;or&nbsp;Redirected.<br>
+So&nbsp;the&nbsp;Model&nbsp;now&nbsp;works&nbsp;on&nbsp;a&nbsp;simulated&nbsp;list&nbsp;of&nbsp;Instances&nbsp;and&nbsp;updated&nbsp;Demands<br>
+&nbsp;<br>
+Then&nbsp;the&nbsp;Model&nbsp;is&nbsp;asked&nbsp;to&nbsp;check&nbsp;the&nbsp;representation&nbsp;of&nbsp;the&nbsp;number&nbsp;of&nbsp;Instances,&nbsp;from&nbsp;the&nbsp;new&nbsp;list&nbsp;of&nbsp;simulated&nbsp;instances<br>
+&nbsp;<br>
+The&nbsp;simulated&nbsp;Demands&nbsp;are&nbsp;checked&nbsp;against&nbsp;the&nbsp;simulated&nbsp;list&nbsp;of&nbsp;Instances;&nbsp;as&nbsp;the&nbsp;moving&nbsp;of&nbsp;Instances&nbsp;could&nbsp;have&nbsp;caused&nbsp;some&nbsp;Demands&nbsp;to&nbsp;now&nbsp;become&nbsp;invalid<br>
+&nbsp;<br>
+Finally,&nbsp;the&nbsp;Model&nbsp;is&nbsp;asked&nbsp;to&nbsp;consume&nbsp;the&nbsp;simulated&nbsp;list&nbsp;of&nbsp;Demands&nbsp;to&nbsp;have&nbsp;an&nbsp;updated&nbsp;Gomory-Ho&nbsp;Tree&nbsp;of&nbsp;remaining&nbsp;capacity.&nbsp;Hopefully,&nbsp;a&nbsp;better&nbsp;scenario&nbsp;that&nbsp;the&nbsp;original<br>
+&nbsp;<br>
+All&nbsp;simulated&nbsp;objects&nbsp;and&nbsp;elements&nbsp;are&nbsp;deleted,&nbsp;the&nbsp;DB&nbsp;is&nbsp;not&nbsp;altered&nbsp;in&nbsp;any&nbsp;way<br>
+&nbsp;<br>
+&nbsp;<br>
+:param&nbsp;migrationsList:&nbsp;List&nbsp;of&nbsp;Migrations&nbsp;to&nbsp;execute<br>
+:type&nbsp;migrationsList:&nbsp;HpacResult[]<br>
+:param&nbsp;redirectsList:&nbsp;List&nbsp;of&nbsp;Redirects&nbsp;to&nbsp;execute<br>
+:type&nbsp;redirectsList:&nbsp;Redirect[]<br>
+:param&nbsp;invalidDemandList:&nbsp;List&nbsp;of&nbsp;Demands&nbsp;to&nbsp;instantiate<br>
+:type&nbsp;invalidDemandList:&nbsp;Demands[]<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;all&nbsp;OK;&nbsp;False&nbsp;if&nbsp;there&nbsp;were&nbsp;some&nbsp;errors<br>
+&nbsp;<br>
+..note::&nbsp;This&nbsp;function&nbsp;updates/Changes&nbsp;the&nbsp;Model's&nbsp;gomory-Ho&nbsp;Tree.</tt></dd></dl>
+ <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
+Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
+ <dl><dt><a name="-updateMetrics"><strong>updateMetrics</strong></a>()</dt><dd><tt>Reads&nbsp;values&nbsp;of&nbsp;the&nbsp;OpenStack&nbsp;Telemetry&nbsp;APIs&nbsp;for&nbsp;all&nbsp;the&nbsp;Instances<br>
+With&nbsp;the&nbsp;login&nbsp;provided&nbsp;for&nbsp;each&nbsp;vCDN,&nbsp;a&nbsp;user&nbsp;with&nbsp;"member"&nbsp;access&nbsp;to&nbsp;the&nbsp;Tenant&nbsp;and&nbsp;read&nbsp;access&nbsp;to&nbsp;Telemetry<br>
+&nbsp;<br>
+Better&nbsp;if&nbsp;executed&nbsp;after&nbsp;<a href="#-updatePOPs">updatePOPs</a>()&nbsp;to&nbsp;have&nbsp;up-to-date&nbsp;Instance&nbsp;information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Starts&nbsp;looking&nbsp;for&nbsp;all&nbsp;Instances&nbsp;in&nbsp;a&nbsp;POP.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;this&nbsp;instance,&nbsp;the&nbsp;vCDN&nbsp;credentials&nbsp;are&nbsp;used&nbsp;to&nbsp;access&nbsp;the&nbsp;Telemetry&nbsp;of&nbsp;the&nbsp;vCDN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;Metrics&nbsp;are&nbsp;updated&nbsp;for&nbsp;this&nbsp;Instance.&nbsp;If&nbsp;there&nbsp;is&nbsp;no&nbsp;Metrics,&nbsp;the&nbsp;next&nbsp;Instance&nbsp;in&nbsp;the&nbsp;loop&nbsp;is&nbsp;taken<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;vCDN&nbsp;credentials&nbsp;do&nbsp;not&nbsp;login&nbsp;to&nbsp;the&nbsp;Telemetry,&nbsp;the&nbsp;next&nbsp;Instance&nbsp;is&nbsp;the&nbsp;look&nbsp;is&nbsp;taken<br>
+&nbsp;<br>
+Finished&nbsp;once&nbsp;checked&nbsp;all&nbsp;the&nbsp;POPs<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;is&nbsp;all&nbsp;the&nbsp;POPs&nbsp;were&nbsp;updated;&nbsp;False&nbsp;if&nbsp;any&nbsp;of&nbsp;the&nbsp;POPs&nbsp;failed</tt></dd></dl>
+ <dl><dt><a name="-updatePOPs"><strong>updatePOPs</strong></a>()</dt><dd><tt>Reads&nbsp;values&nbsp;of&nbsp;the&nbsp;OpenStack&nbsp;APIs&nbsp;for&nbsp;the&nbsp;POPs<br>
+&nbsp;<br>
+With&nbsp;the&nbsp;login&nbsp;provided&nbsp;in&nbsp;the&nbsp;POP&nbsp;(&nbsp;the&nbsp;provided&nbsp;user&nbsp;must&nbsp;have&nbsp;"admin"&nbsp;access)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;updates&nbsp;the&nbsp;Hypervisors&nbsp;table,&nbsp;adding&nbsp;if&nbsp;new&nbsp;hypervisors&nbsp;are&nbsp;found.&nbsp;The&nbsp;total&nbsp;POP&nbsp;capacity&nbsp;values&nbsp;are&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;its&nbsp;hypervisors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;updates&nbsp;the&nbsp;Flavors&nbsp;table,&nbsp;only&nbsp;with&nbsp;the&nbsp;Public&nbsp;Flavors&nbsp;(as&nbsp;Tenants&nbsp;should&nbsp;use&nbsp;these&nbsp;flavors).&nbsp;Only&nbsp;rootDisk&nbsp;information&nbsp;is&nbsp;captured<br>
+&nbsp;<br>
+With&nbsp;the&nbsp;login&nbsp;provided&nbsp;for&nbsp;each&nbsp;vCDN,&nbsp;a&nbsp;user&nbsp;with&nbsp;"_member_"&nbsp;access&nbsp;to&nbsp;the&nbsp;Tenant:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;updates&nbsp;the&nbsp;limits&nbsp;found&nbsp;for&nbsp;the&nbsp;Tenant&nbsp;in&nbsp;the&nbsp;POPs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;updates&nbsp;the&nbsp;number&nbsp;of&nbsp;instances&nbsp;for&nbsp;the&nbsp;Tenant&nbsp;in&nbsp;the&nbsp;POPs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;is&nbsp;all&nbsp;the&nbsp;POPs&nbsp;were&nbsp;updated;&nbsp;False&nbsp;if&nbsp;any&nbsp;of&nbsp;the&nbsp;POPs&nbsp;failed</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>DBConn</strong> = None<br>
+<strong>INI_Section</strong> = 'DEFAULT'<br>
+<strong>Model</strong> = None<br>
+<strong>OSMan</strong> = &lt;HpacOpacLib.OpenStackConnection.APIConnection object&gt;<br>
+<strong>Optimization_ERROR</strong> = -1<br>
+<strong>demandAmplitude</strong> = 100.0<br>
+<strong>demandProbability</strong> = 0.5<br>
+<strong>logger</strong> = &lt;logging.Logger object&gt;<br>
+<strong>meterDurationHours</strong> = 6</td></tr></table>
+</body></html>

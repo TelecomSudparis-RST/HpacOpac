@@ -1,0 +1,129 @@
+<!--
+
+Ignacio Tamayo, TSP, 2016
+Version 1.3
+Date: July 2016
+
+	Web Page showing the current Demands in the Infrastructure
+	
+	There is a Button to create a Random set of demands, based on random probability parameters (either default or read from the ConfigFile)
+	
+	.. todo:: Do the Button thing. Need to have already started a Optimizer class
+	
+	:param demandsList: List of Demands to show in a nice table
+	:type demandsList: DataModels.Demand[]
+	
+
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+
+<h2>List of Demands for vCDNS in the Operator's Infrastructure</h2>
+<p> Values taken from Operator's input</p>
+<br/> 
+
+<p>
+	<form method="POST" action="{{ url_for('demandsTable') }}">
+		<input type="submit" value="Create random demands" name="createRandomDemandss"  id="createRandomDemandss" onclick="this.style.display='none';">
+	</form>
+</p>
+
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    ClientGroup Name
+                </th>
+                <th class="column-header">
+					ClientGroup Location
+                </th>
+                <th class="column-header">
+                    vCDN requested
+                </th>
+                <th class="column-header">
+					POP requested
+                </th>
+                <th class="column-header">
+					Demand volume* 
+                </th>
+                <th class="column-header">
+					Demand BW** [Mbps]
+                </th>
+               
+                <th class="column-header">
+					Created At
+                </th>
+            </tr>
+        </thead>
+        {% for d in demandsList %}
+			<tr>
+				<td class="col-name" >  {{ d.clientGroup.name }}  </td>
+				<td class="col-name">   {{ d.clientGroup.location.name }}   </td>
+				<td class="col-name">   {{ d.vcdn.name }}    </td>
+				<td class="col-name">   {{ d.pop.name }}   </td>
+				<td class="col-name">   {{ d.volume }}   </td>
+				<td class="col-name">   {{ d.bw|round(2) }}   </td>
+				
+				<td class="col-name">   {{ d.created_at }}   </td>
+				
+			</tr>
+        {% endfor %}
+	</table>
+	<br>
+
+<small> 
+	(**) The <b>Demand BW </b> is compared to the Topologie's Links capacity in the Optimization process
+	<br>
+	(**) The <b>Demand volume</b> is an informative value, used for sorting the Demands according to their relative importance.
+</small>
+
+	<br>
+       
+       <p>
+	<form method="POST" action="{{ url_for('migrationsTable') }}">
+		<input type="submit" value="Run Optimization" name="optimize"  id="optimize" onclick="this.style.display='none';">
+	</form>
+</p>
+    
+    
+<p>
+	<form method="POST" action="{{ url_for('demandsTable') }}">
+		<input type="submit" value="Draw Demanded Topologie" name="drawTopologieDemands"  id="drawTopologieDemands" onclick="this.style.display='none';">
+	</form>
+</p>
+
+<table class="table table-bordered" >
+<thead>
+	<tr>
+		<th class="column-header">Capacity Gomuri Tree before Demands</th>
+		<th class="column-header">Capacity Gomuri Tree after Demands</th>
+	</tr>
+</thead>
+<tr>
+	<td>
+		
+			<a href="{{ url_for('image', imageFilename=Topologie_Gomuri_filename, imageTitle='Capacity Gomory-Hu Tree')  }}" target="_blank" >
+			<img src="{{ url_for('static', filename=Topologie_Gomuri_filename)  }}" alt="Capacity" class="topologieImg">
+		</a>
+
+	</td>
+	<td>
+		
+			<a href="{{ url_for('image', imageFilename=Topologie_Gomuri_Demanded_filename, imageTitle='Capacity Gomory-Hu Tree after Demands')  }}" target="_blank" >
+			<img src="{{ url_for('static', filename=Topologie_Gomuri_Demanded_filename)  }}" alt="LeftCapacity" class="topologieImg">
+		</a>
+	</td>
+</tr>
+</table>
+
+<br>
+
+<small>Click to open in a separate window. Take care of refreshing the page to update the browser's cache.</small>
+<br>
+<small>The edges values are given in [Mbps]. Negative values indicate saturation of the link. The edges values are given in [Mbps]. The radius of the POP node is proportional to the amount of Instances it contains</small>
+
+{% endblock %}

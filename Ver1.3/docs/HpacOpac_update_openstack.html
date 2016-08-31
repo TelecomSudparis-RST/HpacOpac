@@ -1,0 +1,64 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module HpacOpac_update_openstack</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>HpacOpac_update_openstack</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.3/bin/HpacOpac_update_openstack.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.3/bin/HpacOpac_update_openstack.py</a></font></td></tr></table>
+    <p><tt>OPAC&nbsp;Demo&nbsp;daemon<br>
+================<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.3<br>
+&gt;&nbsp;Date:&nbsp;August&nbsp;2016<br>
+&nbsp;<br>
+OPAC&nbsp;Daemon&nbsp;to&nbsp;be&nbsp;run&nbsp;in&nbsp;the&nbsp;Crontab&nbsp;(or&nbsp;similar)<br>
+&nbsp;<br>
+This&nbsp;daemon&nbsp;automatically&nbsp;loads&nbsp;the&nbsp;configuration&nbsp;file,&nbsp;connects&nbsp;to&nbsp;the&nbsp;DB,&nbsp;connects&nbsp;to&nbsp;all&nbsp;OpenStack&nbsp;POPs&nbsp;and&nbsp;updates&nbsp;the&nbsp;information.&nbsp;This&nbsp;is&nbsp;intended&nbsp;not&nbsp;to&nbsp;leave&nbsp;any&nbsp;output&nbsp;or&nbsp;trace.<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;This&nbsp;is&nbsp;an&nbsp;executable&nbsp;file,&nbsp;make&nbsp;sure&nbsp;permissions&nbsp;are&nbsp;in&nbsp;place<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;opac_update_openstack_daemon.py&nbsp;-f|--config-file&nbsp;&lt;INI&nbsp;configuration&nbsp;file&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;opac_update_openstack_daemon.py&nbsp;-h|--help&nbsp;Help<br>
+&nbsp;<br>
+Reads&nbsp;a&nbsp;Config&nbsp;file&nbsp;in&nbsp;INI&nbsp;Format.&nbsp;The&nbsp;only&nbsp;compulsory&nbsp;value&nbsp;is:<br>
+&nbsp;<br>
+----------------------<br>
+[database]<br>
+url&nbsp;=&nbsp;""<br>
+-----------------------<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;&nbsp;Optimizer.py</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="HpacOpacLib.html">HpacOpacLib</a><br>
+<a href="HpacOpacLib.Messages.html">HpacOpacLib.Messages</a><br>
+</td><td width="25%" valign=top><a href="Messages.html">Messages</a><br>
+<a href="HpacOpacLib.Optimizer.html">HpacOpacLib.Optimizer</a><br>
+</td><td width="25%" valign=top><a href="HpacOpacLib.SettingsFile.html">HpacOpacLib.SettingsFile</a><br>
+<a href="getopt.html">getopt</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-main"><strong>main</strong></a>(argv)</dt><dd><tt>Main&nbsp;program&nbsp;to&nbsp;execute&nbsp;if&nbsp;this&nbsp;file&nbsp;is&nbsp;called&nbsp;as&nbsp;executable<br>
+&nbsp;<br>
+:param&nbsp;argv:&nbsp;This&nbsp;is&nbsp;sys.argv[1:]&nbsp;to&nbsp;get&nbsp;the&nbsp;CLI&nbsp;options&nbsp;passed&nbsp;at&nbsp;call<br>
+:type&nbsp;argv:&nbsp;String[]</tt></dd></dl>
+</td></tr></table>
+</body></html>

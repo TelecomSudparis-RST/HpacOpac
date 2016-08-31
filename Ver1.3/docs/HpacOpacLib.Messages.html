@@ -1,0 +1,168 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module HpacOpacLib.Messages</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="HpacOpacLib.html"><font color="#ffffff">HpacOpacLib</font></a>.Messages</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.3/bin/HpacOpacLib/Messages.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.3/bin/HpacOpacLib/Messages.py</a></font></td></tr></table>
+    <p><tt>Messages&nbsp;dictionary<br>
+==================<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;takes&nbsp;care&nbsp;of&nbsp;logging,&nbsp;using&nbsp;levels&nbsp;ERROR|DEBUG.&nbsp;Other&nbsp;levels&nbsp;could&nbsp;be&nbsp;added&nbsp;in&nbsp;the&nbsp;future<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;the&nbsp;language&nbsp;of&nbsp;this&nbsp;tool&nbsp;and&nbsp;to&nbsp;centralize&nbsp;the&nbsp;logging&nbsp;behavior<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.3<br>
+&gt;&nbsp;Date:&nbsp;August&nbsp;2016</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>Added_Client_S_in_S</strong> = 'Added clientGroup %s to node %s'<br>
+<strong>Added_D_Clients</strong> = 'Added %d ClientGroups to the Model'<br>
+<strong>Added_D_POPs</strong> = 'Added %d POPs to the Model'<br>
+<strong>Added_Fake_Instace_POP_S_vCDN_S</strong> = "Adding Fake Instance in POP '%s' of vCDN '%s'"<br>
+<strong>Added_Instance_S_at_POP_S</strong> = 'Added instance of %s at Pop %s '<br>
+<strong>Added_Link_S_to_S_of_D</strong> = 'Added link from %s to %s, %d Mbps'<br>
+<strong>Added_Metric_Instance_D</strong> = 'Added Metrics for Instance ID %s'<br>
+<strong>Added_Node_S</strong> = 'Added node %s '<br>
+<strong>Added_Pop_S_in_S</strong> = 'Added pop %s to node %s'<br>
+<strong>Adjusting_Instances_Demands</strong> = 'Adjusting the Instances and Demands to the selected changes'<br>
+<strong>Adjusting_Model</strong> = "Adjusting the Model's Graph to reflect the simulated Instances"<br>
+<strong>AdminPageTitle</strong> = 'HPAC/OPAC Demo - DB Management'<br>
+<strong>AuthOS_region_S</strong> = "Authenticating to Region '%s'"<br>
+<strong>AuthOS_url_S_user_s_tenant_S</strong> = "Authenticating to URL %s as User '%s' of Tenant '%s'"<br>
+<strong>Authenticated</strong> = 'Authenticated'<br>
+<strong>Building_Model</strong> = 'Building a new Model'<br>
+<strong>Built_Model_D_locations_D_links</strong> = 'A new model was built with %d locations and %d links '<br>
+<strong>ClientLocation_S_requests_S_from_S_TotalBW_F</strong> = "Clients located in '%s' request vCDN '%s' from POP '%s', needing %.2f Mbps of BW"<br>
+<strong>ClientLocation_S_requests_from_S_TotalBW_F</strong> = "Consuming fake Demand of ClientGroup at '%s' to POP '%s' with BW '%.2f'"<br>
+<strong>Client_S_requests_S_from_S_BW_D</strong> = 'Demand from ClientGroup at %s requesting vCDN %s from Pop %s with BW %d'<br>
+<strong>CollectSamples_S_since_S</strong> = "Collecting stats of meter '%s' since '%s' "<br>
+<strong>ConnectDB_S</strong> = "Connecting to DB with url '%s' "<br>
+<strong>Connected_POP_S</strong> = "Connected to POP '%s'"<br>
+<strong>Consuming_Demands</strong> = 'Consuming Demands BW on topologie capacity'<br>
+<strong>Consuming_Simulated_Redirects</strong> = 'Adding the Demands on the simulated path after redirection'<br>
+<strong>Create_Random_Demands</strong> = 'Creating Random Demands'<br>
+<strong>Create_Random_Topologie</strong> = 'Creating a Random Topologie'<br>
+<strong>Created_D_Demands</strong> = 'Created %d random demands '<br>
+<strong>Created_Demands</strong> = 'Demands generated randomly'<br>
+<strong>Created_Flavor_S_POP_S</strong> = " Created flavor '%s' for POP '%s' "<br>
+<strong>Created_Hypervisor_S_POP_S</strong> = " Created hypervisor '%s' for POP '%s' "<br>
+<strong>CreatingRandomDemands_D_probaF_amplitudeD</strong> = 'Creating random %d Demands, p=%f, amplitude=%d '<br>
+<strong>Deleted_Demands</strong> = 'Demands deleted from the DB'<br>
+<strong>Deleted_Fake_Instace_POP_S_vCDN_S</strong> = "Deleting Fake Instance in POP '%s' of vCDN '%s'"<br>
+<strong>Deleted_Instance_S_at_POP_S</strong> = 'Deleted instance of %s at Pop %s '<br>
+<strong>Deleted_Migrations</strong> = 'Migrations deleted from the DB'<br>
+<strong>Demand_id_D_isValid</strong> = 'Demand %d has a valid Instace, unable to simulate an Instantiation'<br>
+<strong>Draw_File_S</strong> = 'Graph drawn to file %s'<br>
+<strong>ERROR_consuming_Demands</strong> = 'ERROR calculating capacity consumed by demands'<br>
+<strong>ERROR_creating_Demands</strong> = 'ERROR creating random demands'<br>
+<strong>ERROR_optimizing</strong> = 'ERROR while optimizing'<br>
+<strong>Error_building_Topologie</strong> = 'There were some errors while building the Topologie graph'<br>
+<strong>Errors_random_links</strong> = 'There were some errors while creating random Links'<br>
+<strong>Errors_simulating</strong> = 'Some error occured while executing the simulation'<br>
+<strong>Errors_updating_Metrics</strong> = 'There were some errors while updating the Metrics from the POPs'<br>
+<strong>Errors_updating_POPs</strong> = 'There were some errors while updating the POPs'<br>
+<strong>Exception_Building_Model</strong> = 'Exception ocurred while building the OPAC/HPAC Model'<br>
+<strong>Exception_Ceilometer_url_S_region_S_user_S_tenant_S</strong> = "Unable to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"<br>
+<strong>Exception_Consuming_Demand_D_Graph</strong> = 'Exception while consuming Demand %d on a Topologie Graph'<br>
+<strong>Exception_Consuming_Fake_Demand</strong> = 'Exception occured while Consuming a simulated Demand'<br>
+<strong>Exception_Metrics_Tenant_S_POP_S</strong> = 'Unable to get Metrics for Tenant %s in POP %s '<br>
+<strong>Exception_Migrating_vCDN_S_PopSrc_S_PopDts_S</strong> = "Exception occured while calculating migration of vCDN '%s' from POP '%s' to POP '%s'"<br>
+<strong>Exception_Model_Clients</strong> = 'Exception ocurred while placing the Clients in the OPAC/HPAC Model'<br>
+<strong>Exception_Model_POPS</strong> = 'Exception ocurred while placing the POPs in the OPAC/HPAC Model'<br>
+<strong>Exception_Nova_url_S_region_S_user_S_tenant_S</strong> = "Unable to authenticate to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"<br>
+<strong>Exception_Removing_Demand_D_Graph</strong> = 'Exception while returning Demand %d on a Topologie Graph'<br>
+<strong>Exception_Simulating</strong> = 'Exception occured while running the simulation'<br>
+<strong>Exception_Update_Flavor_S_POP_S</strong> = "Exception ocurred while updating the flavors  '%s' on POP '%s' "<br>
+<strong>Exception_Update_Hypervisor_S_POP_S</strong> = "Exception ocurred while updating the hypervisor '%s' on POP '%s'"<br>
+<strong>Exception_Update_vCDN_S_POP_S</strong> = "Exception ocurred while updating the vCDN '%s' on POP '%s'"<br>
+<strong>Exception_drawing_Topologie</strong> = 'Exception ocurred while drawing the Topologie'<br>
+<strong>Exception_optimizing</strong> = 'Exception ocurred while executing the Optimization'<br>
+<strong>Exception_updating_Demand</strong> = 'Exception ocurred while creating random Demands'<br>
+<strong>Exception_updating_Infrastructure</strong> = 'Exception ocurred while updating the Infrastructure Topologie'<br>
+<strong>Exception_updating_Topologie</strong> = 'Exception ocurred while updating the Topologie'<br>
+<strong>Found_Instance_S_at_POP_S_LimitsInstances_D</strong> = 'Found instance of %s at Pop %s with %d VMs '<br>
+<strong>Getting_Metric_Pop_D_tenant_S</strong> = "Obtaining metrics from POP '%s' for vCDN '%s'"<br>
+<strong>Graph_Capacity_Consume_Demands</strong> = 'Consuming a Capacity Graph with a set of demands'<br>
+<strong>Graph_Consume_D_Demands</strong> = 'Consumed %d Demands from the Graph'<br>
+<strong>Graph_Return_D_Demands</strong> = 'Returned %d Demands to the Graph'<br>
+<strong>Graph_Topologie_Consume_Demands</strong> = 'Consuming a Topologie Graph with a set of demands'<br>
+<strong>HPAC_optimized</strong> = 'Finished running HPAC'<br>
+<strong>HPAC_optimized_D_migrations_D_invalidDemands</strong> = 'HPAC optimization determined %d migrations and %d invalid demands'<br>
+<strong>Invalid_Demand_Client_S_vCDN_S_POP_S</strong> = "Invalid demand from ClientGroup '%s' for vCDN '%s' at POP '%s' "<br>
+<strong>LastSample_S_at_S</strong> = "Last sample of meter '%s' at '%s' "<br>
+<strong>Meter_Stats_minD_maxD_avgD</strong> = 'Values collected are: Min=%d Max=%d Avg=%d '<br>
+<strong>Migrate_vCDN_S_srcPOP_S_dstPOP_S</strong> = "Migrate vCDN '%s' from POP '%s' to POP '%s' "<br>
+<strong>Migration_Condition_Hold_B_NetCapacity_D_Mbps</strong> = 'The Migration was rejected because HoldvCDN = %s and Remaining BW in POP is %d Mbps'<br>
+<strong>Migration_check_PopSrc_S_PopDts_S</strong> = "Checking possible migration from POP '%s' to POP '%s'"<br>
+<strong>Migration_condition_BWNeeded_D_GomuriCap_D_PopCap_PopCanHost_S</strong> = 'Migration condition: DemandedBW=%d LinkBW=%d PopBW=%d PopCanHost=%s'<br>
+<strong>Migration_path_D_Hops_F_BW</strong> = 'Migration path of %d hops and %.2f Mbps minimal BW'<br>
+<strong>Migration_to_POP_S</strong> = 'Migration to Pop %s'<br>
+<strong>Missing_Elements_to_Build_Model</strong> = 'Missing elements to build an OPAC/HPAC Model (Locations and Network Links)'<br>
+<strong>NeedeBW_D_more_LinkBW_D</strong> = 'The needed BW %d Mbps is more than the available link %d Mbps'<br>
+<strong>NoClients</strong> = 'There are no ClientGroups found in the DB'<br>
+<strong>NoConnect_Pop_S</strong> = "Unable to connect and login to POP '%s' "<br>
+<strong>NoDemands</strong> = 'There are no demands registered in the DB'<br>
+<strong>NoInstances</strong> = 'No Instances found in the DB'<br>
+<strong>NoInstantiationsSelected</strong> = 'No Instantiations selected'<br>
+<strong>NoMetrics_Meter_S</strong> = "No Metric collected for meter '%s' "<br>
+<strong>NoMigrations</strong> = 'No Migrations found in the DB'<br>
+<strong>NoMigrationsSelected</strong> = 'No Migrations selected'<br>
+<strong>NoModel</strong> = 'There is no Model to work with'<br>
+<strong>NoNetworkLinks</strong> = 'There are no Network Links registered in the DB'<br>
+<strong>NoPOPs</strong> = 'There are no POPs found in the DB'<br>
+<strong>NoRedirectsSelected</strong> = 'No Redirections selected'<br>
+<strong>No_OPAC_Optimize</strong> = 'Unable to perform OPAC optimization'<br>
+<strong>NovCDNs</strong> = 'There are no vCDNs found in the DB'<br>
+<strong>OPAC_optimized</strong> = 'Created OPAC CPLEX data file'<br>
+<strong>Optimizating</strong> = 'Running the Optimization algorithm'<br>
+<strong>Optimized_F</strong> = 'Optimization executed in %f seconds'<br>
+<strong>POP_not_found</strong> = 'POP not found in DB'<br>
+<strong>RandomGraph_locationsD</strong> = 'Created random Graph of %d nodes'<br>
+<strong>RandomGraph_locationsD_maxCapaD</strong> = 'Creating random Graph for %d locations with maxCapacity=%d '<br>
+<strong>Random_Graph_Created</strong> = 'A Random Topologie Graph has been created'<br>
+<strong>Redirect_D_invalid</strong> = 'Redirect %d is invalid; could be a Migration'<br>
+<strong>Redirect_Demand_Client_S_vCDN_S_srcPOP_S_dstPOP_S</strong> = "Scale-out and redirect Demands of clientGroup '%s' for vCDN '%s' from POP '%s' to POP '%s'"<br>
+<strong>Removing_Simulated_Redirects</strong> = 'Removing the Demands from the previous path before redirection'<br>
+<strong>Running_Demands</strong> = 'Running the simulated Demands'<br>
+<strong>Scale_Condition_NetCapacity_D_Mbps</strong> = 'The Scaling was rejected because Remaining BW in POP is %d Mbps'<br>
+<strong>ShortestPath_S</strong> = "The SPT for this demand is '%s' "<br>
+<strong>Simulate_Instantiation_vCDN_S_on_POP_S</strong> = "Simulate Instantiation of vcdn '%s' on POP '%s' "<br>
+<strong>Simulate_Migration_vCDN_S_from_POP_S_to_POP_S</strong> = "Simulate Migration of vcdn '%s' from POP '%s' to POP '%s'"<br>
+<strong>Simulate_Redirection_vCDN_S_from_POP_S_to_POP_S</strong> = "Simulate Redirection of vcdn '%s' from POP '%s' to POP '%s'"<br>
+<strong>Simulated_D_Instantiations</strong> = 'Simulated %d Instantiations in the Model'<br>
+<strong>Simulated_D_Migrations</strong> = 'Simulated %d Migrations in the Model'<br>
+<strong>Simulated_D_Redirections</strong> = 'Simulated %d Redirections in the Model'<br>
+<strong>Simulating_Instantiations</strong> = 'Simulating the Instantiations'<br>
+<strong>Simulating_Migrations</strong> = 'Simulating the Migrations'<br>
+<strong>Simulating_Redirections</strong> = 'Simulating the Redirections'<br>
+<strong>Update_Fake_Demand_fromPOP_S_toPOP_S</strong> = "Update of Demand from POP '%s' to POP '%s'"<br>
+<strong>Updated_ClientLocations</strong> = 'The Client Groups have been distributed in the new topologie'<br>
+<strong>Updated_Demands_QosBW</strong> = 'Updated the demanded QoSBW based on vCDN information'<br>
+<strong>Updated_Flavor_S_POP_S</strong> = ' Updated flavor %s for Pop %s'<br>
+<strong>Updated_Hypervisor_S_POP_S</strong> = ' Updated hypervisor %s for POP %s'<br>
+<strong>Updated_Instance_S_at_POP_S</strong> = 'Updated instance of %s at Pop %s'<br>
+<strong>Updated_Metric_Instance_D</strong> = 'Updated Metrics of Instance ID %s'<br>
+<strong>Updated_Metrics_Pop_S</strong> = "Updated Tenants metrics from POP '%s'"<br>
+<strong>Updated_MigrationCost_MigrationId_D</strong> = 'Migration cost updated for Migration %d'<br>
+<strong>Updated_NetworkLinks</strong> = 'The Network Links have been replaced by the random topologie'<br>
+<strong>Updated_POPs</strong> = 'Information updated from OpenStack Controllers'<br>
+<strong>Updated_Pop_S</strong> = "Updated information from POP '%s'"<br>
+<strong>Updated_Tenants_Pop_S</strong> = "Updated Tenants instances from POP '%s' "<br>
+<strong>Updated_Topo</strong> = 'Topologie updated with random links'<br>
+<strong>Updated__D_OpenStack_Metrics</strong> = 'Updated OpenStack Metrics for %d instances'<br>
+<strong>Updating_OpenStack</strong> = 'Updating the OpenStack POP information'<br>
+<strong>Updating_OpenStack_Metrics</strong> = 'Updating the OpenStack Metrics information for all Tenants'<br>
+<strong>vCDN_not_found</strong> = 'vCDN not found in DB'</td></tr></table>
+</body></html>
