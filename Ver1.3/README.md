@@ -24,21 +24,21 @@ This version of vIOSimulator is designed and adjusted for the DVD2C project, on 
 
 These Python modules are needed: 
 
-	docutils (0.12)
-	Flask (0.11.1)
-	Flask-Admin (1.4.2)
-	Jinja2 (2.8)
-	keystoneauth1 (2.4.0)
-	keystonemiddleware (4.4.0)
-	mysql-connector-python (2.0.4)
-	mysql-utilities (1.6.1)
-	mysqlclient (1.3.7)
-	python-ceilometerclient (2.4.0)
-	python-igraph (0.7.1.post6)
-	python-keystoneclient (2.3.1)
-	python-novaclient (3.3.1)
-	simplejson (3.8.1)
-	SQLAlchemy (1.0.13)
+		docutils (0.12)
+		Flask (0.11.1)
+		Flask-Admin (1.4.2)
+		Jinja2 (2.8)
+		keystoneauth1 (2.4.0)
+		keystonemiddleware (4.4.0)
+		mysql-connector-python (2.0.4)
+		mysql-utilities (1.6.1)
+		mysqlclient (1.3.7)
+		python-ceilometerclient (2.4.0)
+		python-igraph (0.7.1.post6)
+		python-keystoneclient (2.3.1)
+		python-novaclient (3.3.1)
+		simplejson (3.8.1)
+		SQLAlchemy (1.0.13)
 
 
 ## Environment Open Stack
@@ -72,16 +72,16 @@ The OpenStack DataCenters should have given `Tenants` created, associating each 
 
 Once dowloaded the repository, first create a DataBase by executing the SQL script
 
-	mysql -u root -p [-h <server>] <  db/vIOS_db.sql
+		mysql -u root -p [-h <server>] <  db/vIOS_db.sql
 
 Test the connectivity by
 
-	mysql -u vios -p  [-h <server>]  vios
+		mysql -u vios -p  [-h <server>]  vios
 
 Install python, pip, and the Python dependencies
 	
-	sudo apt-get install python python-pip python-ceilometerclient  python-novaclient python-keystoneclient 
-	pip install python-igraph, mysqlclient, Flask-Admin, Flask, SQLAlchemy
+		sudo apt-get install python python-pip python-ceilometerclient  python-novaclient python-keystoneclient 
+		pip install python-igraph, mysqlclient, Flask-Admin, Flask, SQLAlchemy
 	
 Adjust the desired configurations in `config_demo.ini`, at least the MySQL DB url
 
@@ -92,7 +92,7 @@ Adjust the desired configurations in `config_demo.ini`
 
 #### To launch the Demo in the CLI:
 
-	bin/vIOSimulator.py -f config_demo.ini
+		bin/vIOSimulator.py -f config_demo.ini
 
 Connect to the HTTP Server, on the IP and Port set in `config_demo.ini`
 
@@ -102,42 +102,42 @@ Connect to the HTTP Server, on the IP and Port set in `config_demo.ini`
  
 Create a file `/etc/init/vIOS.conf`:
 
-	description "Running vIOS (vCDN Infrastructure Optimization Simulator)"
-	author "Jose Ignacio Tamayo - Telecom SudParis 2016"
-	start on runlevel [2345]
-	stop on runlevel [!2345] 
-	# Respawn and stop respawning if it got respawned 10 time in 10 seconds
-	respawn limit 2 2 
-	# prepare environment
-	pre-start script
-			mkdir /var/log/vIOS
-	end script
-	script 
-	cd <installation folder>
-			/usr/bin/python bin/vIOSimulator.py -f <config file> -l <log file>
-	end script
+		description "Running vIOS (vCDN Infrastructure Optimization Simulator)"
+		author "Jose Ignacio Tamayo - Telecom SudParis 2016"
+		start on runlevel [2345]
+		stop on runlevel [!2345] 
+		# Respawn and stop respawning if it got respawned 10 time in 10 seconds
+		respawn limit 2 2 
+		# prepare environment
+		pre-start script
+				mkdir /var/log/vIOS
+		end script
+		script 
+		cd <installation folder>
+				/usr/bin/python bin/vIOSimulator.py -f <config file> -l <log file>
+		end script
 
 Restart the Service Daemon
 
-	$ sudo initctl reload-configuration
-	$ sudo init-checkconf /etc/init/vIOS.conf
-	$ sudo service vIOS start|stop|status
+		$ sudo initctl reload-configuration
+		$ sudo init-checkconf /etc/init/vIOS.conf
+		$ sudo service vIOS start|stop|status
  
   * Ubuntu 16.04
  
-Create a file `/lib/systemd/system/vIOS.service`:
+Create a file `/lib/systemd/system/vIOS.service`, replacing the simbols by the appropriate values:
 
-	[Unit]
-	Description=Running vIOS (vCDN Infrastructure Optimization Simulator)
-	[Service]
-	Type=simple
-	Environment=statedir=<installation folder>
-	Environment=PYTHONPATH=<python packages folder>
-	WorkingDirectory=<installation folder>
-	ExecStartPre=bin/mkdir -p /var/log/vIOS
-	ExecStart=/usr/bin/python bin/vIOSimulator.py -f <config file> -l <log file>
-	[Install]
-	WantedBy=multi-user.target
+		[Unit]
+		Description=Running vIOS (vCDN Infrastructure Optimization Simulator)
+		[Service]
+		Type=simple
+		Environment=statedir=<installation folder>
+		Environment=PYTHONPATH=<python packages folder>
+		WorkingDirectory=<installation folder>
+		ExecStartPre=/bin/mkdir -p /var/log/vIOS
+		ExecStart=/usr/bin/python bin/vIOSimulator.py -f <config file> -l <log file>
+		[Install]
+		WantedBy=multi-user.target
 
 Restart the Service Daemon
 
@@ -161,11 +161,7 @@ Restart the Service Daemon
  * Improved documentation
  * LoadTest on big MySQL DB 
  * OMAC Integration
- 
- TODO
-
- * Document Flow Diagram and Sequence of complex modules
- 
+  
 ### Feature Pipeline
 
  * Deployer les Types de vCDNs
@@ -188,7 +184,7 @@ This code is free, under MIT licence [Reference](http://choosealicense.com/licen
 --------------------------------
 vIOS (vCDN Infrastructure Optimization Simulator)
 
-Copyright (c) 2019 Telecom SudParis - RST Department
+Copyright (c) 2016 Telecom SudParis - RST Department
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

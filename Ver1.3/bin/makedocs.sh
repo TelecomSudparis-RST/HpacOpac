@@ -1,7 +1,7 @@
 #!/bin/bash
 
 """
-HMAC/OMAC Documentation
+VIOS Documentation
 ================
 
 Ignacio Tamayo, TSP, 2016
@@ -13,7 +13,6 @@ This script calls Pydoc on all the Python source files to generate the .html doc
 """
 
 
-
 pydoc -w ./
 
-mv *.html ../docs
+mv *.html ../docs/pydoc
