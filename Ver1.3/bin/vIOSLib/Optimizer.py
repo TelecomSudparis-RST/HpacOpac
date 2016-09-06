@@ -284,12 +284,12 @@ def createRandomDemands():
 		DBConn.start()
 		
 		# Get all instances of all Instances. Get all clientGroups
-		InstaceList = DBConn.getInstanceList()
+		vCDNList = DBConn.getvCDNs()
 		ClientGroupList = DBConn.getClientGroups()
 		
-		if InstaceList  and ClientGroupList  :
+		if vCDNList  and ClientGroupList  :
 			
-			logger.debug(Messages.CreatingRandomDemands_D_probaF_amplitudeD % (len(InstaceList) *len(ClientGroupList),demandProbability,demandAmplitude))
+			logger.debug(Messages.CreatingRandomDemands_D_probaF_amplitudeD % (len(vCDNList) *len(ClientGroupList),demandProbability,demandAmplitude))
 			
 			# Remove all Demands.
 			demands = DBConn.getDemands()
@@ -302,22 +302,31 @@ def createRandomDemands():
 			
 			# Make random associations
 			accum = 0
-			for i in InstaceList:
+			for v in vCDNList:
 				seed()
+				
 				for clientGroup in ClientGroupList:
 					rnd = random()
-					if rnd < demandProbability:
-						d = Demand(clientGroupId = clientGroup.id, 
-									popId = i.popId,vcdnId=i.vcdnId, 
-									volume =  (demandProbability - rnd) * 2 * 100, 
-									bw =  (demandProbability - rnd) * 2 * demandAmplitude 
-									)  
-						
-						
-						# (demandProbability - rnd) gives a number  in the interval [0,demandProbability]; demandProbability < 1
-						# (demandProbability - rnd) * 2 * demandAmplitude gives a number in the desired range
-						DBConn.add(d)
-						accum = accum+1
+					instancesList = v.instances
+					if instancesList:
+						for i in instancesList:
+							if rnd < demandProbability:
+								d = Demand(clientGroupId = clientGroup.id, 
+											popId = i.popId,vcdnId=i.vcdnId, 
+											volume =  (demandProbability - rnd) * 2 * 100, 
+											bw =  (demandProbability - rnd) * 2 * demandAmplitude 
+											)  
+								
+								
+								# (demandProbability - rnd) gives a number  in the interval [0,demandProbability]; demandProbability < 1
+								# (demandProbability - rnd) * 2 * demandAmplitude gives a number in the desired range
+								DBConn.add(d)
+								accum = accum+1
+								break
+							#endif
+						#endfor
+					#endif
+				#endfor
 			
 			# Update DB
 			DBConn.applyChanges()
@@ -848,7 +857,7 @@ def updateMetrics():
 	
 	DBConn.applyChanges()		### This updates all the values left for update
 	DBConn.end()
-	return _errors
+	return not _errors
 	
 #enddef
 

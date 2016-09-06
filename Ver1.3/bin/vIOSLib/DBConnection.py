@@ -207,12 +207,12 @@ class DBConnection(object):
 				for element in self.DBSession.query(Redirect).join(Instance,Redirect.instanceId == Instance.id).join(vCDN,Instance.vcdnId == vCDN.id).order_by(vCDN.name):
 					dataset.append(element)
 				
-			if field=="fromPOP":
+			elif field=="fromPOP":
 				
 				for element in self.DBSession.query(Redirect).join(Instance,Redirect.instanceId == Instance.id).join(POP,Instance.popId == POP.id).order_by(POP.name):
 					dataset.append(element)
 				
-			if field=="toPOP":
+			elif field=="toPOP":
 				
 				for element in self.DBSession.query(Redirect).join(POP,Redirect.dstPopId == POP.id).order_by(POP.name):
 					dataset.append(element)
@@ -252,17 +252,17 @@ class DBConnection(object):
 				for element in self.DBSession.query(HmacResult).join(Instance,HmacResult.instanceId == Instance.id).filter(HmacResult.migrate==True).order_by(Instance.vcdnId):
 					dataset.append(element)
 				
-			if field=="fromPOP":
+			elif field=="fromPOP":
 				
 				for element in self.DBSession.query(HmacResult).join(Instance,HmacResult.instanceId == Instance.id).filter(HmacResult.migrate==True).order_by(Instance.popId):
 					dataset.append(element)
 				
-			if field=="toPOP":
+			elif field=="toPOP":
 				
 				for element in self.DBSession.query(HmacResult).join(POP,HmacResult.dstPopId == POP.id).filter(HmacResult.migrate==True).order_by(POP.name):
 					dataset.append(element)
 				
-			if field=="cost":
+			elif field=="cost":
 				
 				for element in self.DBSession.query(HmacResult).filter(HmacResult.migrate==True).order_by(HmacResult.cost):
 					dataset.append(element)

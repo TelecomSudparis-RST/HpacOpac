@@ -196,9 +196,9 @@ def build():
 		# In layout.html; the Flash messages of this category are painted red. Check templates/layout.html
 		
 		Topologie_Graph_filename = "topologie.png"
-		Topologie_Gomuri_filename = "gomury.png"
+		Topologie_Gomuri_filename = "gomory.png"
 		Topologie_Graph_Demanded_filename = "demanded_topologie.png"
-		Topologie_Gomuri_Demanded_filename = "demanded_gomury.png"
+		Topologie_Gomuri_Demanded_filename = "demanded_gomory.png"
 		Topologie_Gomuri_Simulated_filename = "simulated_gomory.png"
 		
 		@app.route('/')
@@ -280,6 +280,7 @@ def build():
 					
 					if Optimizer.createRandomInfrastructure():
 						draw = True
+						flash(Messages.Updated_Topo_Random)
 					else:
 						flash(Messages.Errors_random_links,Flash_msg_error)
 				#endif
@@ -293,7 +294,7 @@ def build():
 							pass
 						if Optimizer.Model.drawTopologie( filename= app.static_folder + "/" + Topologie_Graph_filename ) and \
 									Optimizer.Model.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_filename ) :
-							flash(Messages.Updated_Topo)
+							flash(Messages.Updated_Graph)
 						else:
 							flash(Messages.Exception_drawing_Topologie,Flash_msg_error)
 					else:
@@ -325,6 +326,7 @@ def build():
 					if Optimizer.createRandomDemands():
 						flash(Messages.Created_Demands)
 						draw = True
+						
 					else:
 						flash(Messages.ERROR_creating_Demands,Flash_msg_error)
 						
@@ -343,7 +345,8 @@ def build():
 							except OSError:
 								pass
 							if Optimizer.Model.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_Demanded_filename ) :
-								flash(Messages.Updated_Topo)
+								flash(Messages.Updated_Graph)
+								
 						else:
 							flash(Messages.ERROR_consuming_Demands,Flash_msg_error)
 					else:
