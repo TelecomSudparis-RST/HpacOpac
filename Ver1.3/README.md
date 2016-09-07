@@ -39,10 +39,12 @@ These Python modules are needed:
 		python-novaclient (3.3.1)
 		simplejson (3.8.1)
 		SQLAlchemy (1.0.13)
+		
+For Ubuntu systems, these modules are to be installed:
 
-
-sudo apt-get udpate
-	sudo apt-get install python python-novaclient python-keystoneauth1  python-keystoneclient  python-sqlalchemy python-ceilometerclient  python-pip
+	sudo apt-get udpate
+	sudo apt-get install python python-pip python-sqlalchemy
+	sudo apt-get install  python-novaclient python-keystoneauth1  python-keystoneclient  python-ceilometerclient  
 	pip install Flask Flask-Admin python-igraph
 	
 	
