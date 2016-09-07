@@ -41,6 +41,11 @@ These Python modules are needed:
 		SQLAlchemy (1.0.13)
 
 
+sudo apt-get udpate
+	sudo apt-get install python python-novaclient python-keystoneauth1  python-keystoneclient  python-sqlalchemy python-ceilometerclient  python-pip
+	pip install Flask Flask-Admin python-igraph
+	
+	
 ## Environment Open Stack
 
 This demo operates in an OpenStack distributed environment, tested using both `OpenStack Icehouse` and `OpenStack Mitaka`. 
