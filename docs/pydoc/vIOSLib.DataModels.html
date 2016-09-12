@@ -1,0 +1,1342 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module vIOSLib.DataModels</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="vIOSLib.html"><font color="#ffffff">vIOSLib</font></a>.DataModels</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/DataModels.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/DataModels.py</a></font></td></tr></table>
+    <p><tt>Modules&nbsp;for&nbsp;the&nbsp;Data&nbsp;Model,&nbsp;DB&nbsp;Tables,&nbsp;on&nbsp;sqlalchemy<br>
+====================================================<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.4<br>
+&gt;&nbsp;Date:&nbsp;Sept&nbsp;2016<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;vIOS_db.sql<br>
+&nbsp;<br>
+When&nbsp;updating&nbsp;the&nbsp;items&nbsp;in&nbsp;the&nbsp;DB,&nbsp;do&nbsp;not&nbsp;set&nbsp;the&nbsp;date/time&nbsp;by&nbsp;localfunctions.&nbsp;<br>
+Let&nbsp;the&nbsp;DB&nbsp;handle&nbsp;all&nbsp;timestamps&nbsp;using&nbsp;ONUPDATE&nbsp;and&nbsp;DEFAULT<br>
+&nbsp;<br>
+..&nbsp;warning::&nbsp;The&nbsp;funtions&nbsp;__unicode__&nbsp;is&nbsp;needed&nbsp;for&nbsp;Flask-Admin,&nbsp;representing&nbsp;in&nbsp;the&nbsp;WEB&nbsp;a&nbsp;single&nbsp;instance&nbsp;of&nbsp;the&nbsp;object.<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Because&nbsp;of&nbsp;SQLAlchemy,&nbsp;the&nbsp;`modified_at`&nbsp;value&nbsp;is&nbsp;actually&nbsp;when&nbsp;the&nbsp;last&nbsp;MODIFICATION&nbsp;took&nbsp;place,&nbsp;not&nbsp;the&nbsp;last&nbsp;time&nbsp;it&nbsp;was&nbsp;queried&nbsp;for&nbsp;information<br>
+&nbsp;<br>
+Units&nbsp;and&nbsp;Values<br>
+----------------<br>
+&nbsp;<br>
+&nbsp;*&nbsp;All&nbsp;Integers;&nbsp;except&nbsp;Metrics&nbsp;values&nbsp;and&nbsp;the&nbsp;<a href="#MigrationCostMultiplier">MigrationCostMultiplier</a>&nbsp;that&nbsp;are&nbsp;Floats<br>
+&nbsp;<br>
+|&nbsp;&nbsp;&nbsp;Disk&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Unit&nbsp;|<br>
+|&nbsp;------------------------------------------&nbsp;|&nbsp;----&nbsp;|<br>
+|&nbsp;<a href="#POP">POP</a>.totalDisk,&nbsp;.maxDisk,&nbsp;.curDisk&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;GB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Hypervisor">Hypervisor</a>.maxDisk,&nbsp;.curDisk&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;GB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Flavor">Flavor</a>.rootDisk&nbsp;(*)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;GB&nbsp;&nbsp;|&nbsp;<br>
+|&nbsp;<a href="#Metric">Metric</a>.diskrootsize_x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;GB&nbsp;&nbsp;|&nbsp;&nbsp;<br>
+|&nbsp;<a href="#vCDN">vCDN</a>.vDisk&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;GB&nbsp;&nbsp;|<br>
+&nbsp;<br>
+(*)&nbsp;.ephemeralDisk,&nbsp;.swapDisk&nbsp;not&nbsp;used<br>
+&nbsp;<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Unit&nbsp;|<br>
+|&nbsp;------------------------------------------&nbsp;|&nbsp;----&nbsp;|<br>
+|&nbsp;<a href="#POP">POP</a>.totalRAM,&nbsp;.maxRAM,&nbsp;.curRAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;MB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Hypervisor">Hypervisor</a>.maxRAM,&nbsp;.curRAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;MB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Flavor">Flavor</a>.RAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;MB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Metric">Metric</a>.memory_x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;MB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#vCDN">vCDN</a>.vRAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;MB&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Instance">Instance</a>.maxRAM,&nbsp;.curRAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;MB&nbsp;&nbsp;|<br>
+&nbsp;<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual&nbsp;CPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;Unit&nbsp;&nbsp;|<br>
+|&nbsp;------------------------------------------&nbsp;|&nbsp;------&nbsp;|<br>
+|&nbsp;<a href="#POP">POP</a>.totalCPU,&nbsp;.maxCPU,&nbsp;.curCPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Hypervisor">Hypervisor</a>.maxCPU,&nbsp;.curCPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Flavor">Flavor</a>.CPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Metric">Metric</a>.vcpus_x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#vCDN">vCDN</a>.vCPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Instance">Instance</a>.maxCPU,&nbsp;.curCPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+&nbsp;<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Instances&nbsp;&nbsp;=&nbsp;VMs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;Unit&nbsp;&nbsp;|<br>
+|&nbsp;------------------------------------------&nbsp;|&nbsp;------&nbsp;|<br>
+|&nbsp;<a href="#POP">POP</a>.curInstances&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Hypervisor">Hypervisor</a>.curInstances&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Metric">Metric</a>.instance_x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+|&nbsp;<a href="#Instance">Instance</a>.curInstances,&nbsp;.maxInstances&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;unit&nbsp;&nbsp;|<br>
+&nbsp;<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Unit&nbsp;|<br>
+|&nbsp;------------------------------------------&nbsp;|&nbsp;----&nbsp;|<br>
+|&nbsp;<a href="#vCDN">vCDN</a>.defaultQosBW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;kbps&nbsp;|<br>
+|&nbsp;<a href="#Demand">Demand</a>.bs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Mbps&nbsp;|<br>
+|&nbsp;<a href="#Metric">Metric</a>.networkXBps&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;kbps&nbsp;|<br>
+|&nbsp;<a href="#POP">POP</a>.totalNetBW,&nbsp;.maxNetBW,&nbsp;.curNetBW&nbsp;(*)&nbsp;&nbsp;&nbsp;|&nbsp;Mbps&nbsp;|<br>
+|&nbsp;<a href="#NetworkLink">NetworkLink</a>.capacity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Mbps&nbsp;|<br>
+|&nbsp;clientGroup.connectionBW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Mbps&nbsp;|<br>
+|&nbsp;<a href="#HmacResult">HmacResult</a>.minBW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Mbps&nbsp;|<br>
+&nbsp;<br>
+(*)&nbsp;Calculated&nbsp;value&nbsp;as&nbsp;the&nbsp;SUM&nbsp;of&nbsp;the&nbsp;VirtualMachies&nbsp;of&nbsp;the&nbsp;Tenant&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;(via&nbsp;its&nbsp;Metrics.&nbsp;Check&nbsp;updateMetrics()&nbsp;)<br>
+&nbsp;<br>
+<a href="#Hypervisor">Hypervisor</a>.maxNetBW,&nbsp;<a href="#Hypervisor">Hypervisor</a>.curNetBW&nbsp;&nbsp;are&nbsp;not&nbsp;used<br>
+&nbsp;<br>
+&nbsp;<br>
+<a href="#MigrationCostMultiplier">MigrationCostMultiplier</a>.costMultiplier&nbsp;is&nbsp;a&nbsp;float&nbsp;value,&nbsp;with&nbsp;no&nbsp;units.&nbsp;This&nbsp;float&nbsp;is&nbsp;multiplied&nbsp;to&nbsp;the&nbsp;internal&nbsp;<a href="#HmacResult">HmacResult</a>&nbsp;cost&nbsp;calculated&nbsp;by&nbsp;OMAC<br>
+so&nbsp;the&nbsp;Operator&nbsp;can&nbsp;weight&nbsp;their&nbsp;migration&nbsp;decision.<br>
+&nbsp;<br>
+The&nbsp;<a href="#HmacResult">HmacResult</a>.cost&nbsp;is&nbsp;calculated&nbsp;as&nbsp;<a href="#vCDN">vCDN</a>.vDisk&nbsp;*&nbsp;<a href="#HmacResult">HmacResult</a>&nbsp;path&nbsp;hops&nbsp;in&nbsp;the&nbsp;Topologie&nbsp;Graph,&nbsp;in&nbsp;[GB]&nbsp;units<br>
+&nbsp;<br>
+&gt;&nbsp;..note::&nbsp;In&nbsp;order&nbsp;to&nbsp;use&nbsp;the&nbsp;CASCADE&nbsp;from&nbsp;the&nbsp;DB&nbsp;instead&nbsp;of&nbsp;the&nbsp;CASCADE&nbsp;SQLAlchemy,&nbsp;the&nbsp;relationship&nbsp;is&nbsp;declared&nbsp;in&nbsp;the&nbsp;TARGET&nbsp;table&nbsp;using&nbsp;casacade="all"<br>
+&gt;<br>
+&gt;&nbsp;SQLAlchemy&nbsp;links&nbsp;the&nbsp;tables&nbsp;in&nbsp;inverse&nbsp;order;&nbsp;from&nbsp;the&nbsp;one-to-many&nbsp;side.&nbsp;[Reference](<a href="http://docs.sqlalchemy.org/en/latest/orm/collections.html#passive-deletes">http://docs.sqlalchemy.org/en/latest/orm/collections.html#passive-deletes</a>)<br>
+&gt;&nbsp;We&nbsp;use&nbsp;passive_deletes=True&nbsp;in&nbsp;the&nbsp;PARENT&nbsp;Class;&nbsp;in&nbsp;the&nbsp;relation&nbsp;attribute.<br>
+&gt;&nbsp;Otherwise,&nbsp;it&nbsp;will&nbsp;load&nbsp;the&nbsp;object&nbsp;and&nbsp;set&nbsp;the&nbsp;FK&nbsp;to&nbsp;NULL,&nbsp;which&nbsp;would&nbsp;break&nbsp;the&nbsp;DB&nbsp;Consistency<br>
+&gt;&nbsp;All&nbsp;the&nbsp;relationships&nbsp;declared&nbsp;ON&nbsp;CASCADE&nbsp;in&nbsp;the&nbsp;DB&nbsp;have&nbsp;"passive_deletes=True"&nbsp;attribute&nbsp;set</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial">sqlalchemy.ext.declarative.api.Base(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#AlteredDemand">AlteredDemand</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#ClientGroup">ClientGroup</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#Demand">Demand</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#Flavor">Flavor</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#HmacResult">HmacResult</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#Hypervisor">Hypervisor</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#Instance">Instance</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#Location">Location</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#Metric">Metric</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#MigrationCostMultiplier">MigrationCostMultiplier</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#NetworkLink">NetworkLink</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#POP">POP</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.DataModels.html#vCDN">vCDN</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="AlteredDemand">class <strong>AlteredDemand</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>An&nbsp;Altered&nbsp;<a href="#Demand">Demand</a>&nbsp;is&nbsp;a&nbsp;<a href="#Demand">Demand</a>&nbsp;that&nbsp;has&nbsp;to&nbsp;be&nbsp;re-directed&nbsp;to&nbsp;another&nbsp;<a href="#POP">POP</a>&nbsp;as&nbsp;to&nbsp;optimize&nbsp;it<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#AlteredDemand">AlteredDemand</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="AlteredDemand-__init__"><strong>__init__</strong></a>(self, demandId<font color="#909090">=1</font>, dstPopId<font color="#909090">=1</font>)</dt><dd><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#:param&nbsp;demandId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;original&nbsp;<a href="#Demand">Demand</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#:type&nbsp;demandId:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#:param&nbsp;popId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;where&nbsp;to&nbsp;alter&nbsp;this&nbsp;<a href="#Demand">Demand</a>&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#:type&nbsp;popId:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#Set&nbsp;(demandId)&nbsp;is&nbsp;UNIQUE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+#</tt></dd></dl>
+
+<dl><dt><a name="AlteredDemand-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;<a href="#Demand">Demand</a>&nbsp;Id<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>demandId</strong></dt>
+</dl>
+<dl><dt><strong>dstPopId</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d47210; AlteredDemand&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('AlteredDemands', MetaData(bind=None), Col...tions.now at 0x7f1613d3ced0; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'AlteredDemands'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ClientGroup">class <strong>ClientGroup</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;Set&nbsp;of&nbsp;Clients&nbsp;that&nbsp;request&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>&nbsp;service.<br>
+&nbsp;<br>
+UNIQUE&nbsp;(name).&nbsp;As&nbsp;the&nbsp;Clients&nbsp;can&nbsp;be&nbsp;placed&nbsp;in&nbsp;any&nbsp;location,&nbsp;the&nbsp;name&nbsp;must&nbsp;be&nbsp;unique&nbsp;to&nbsp;be&nbsp;able&nbsp;to&nbsp;identify&nbsp;them.<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;<a href="#Demand">Demand</a>.clientGroup,&nbsp;QOSMap.clientGroup<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#ClientGroup">ClientGroup</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ClientGroup-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, locationId<font color="#909090">=1</font>, connectionBW<font color="#909090">=0</font>)</dt><dd><tt>:param&nbsp;name:&nbsp;Name&nbsp;of&nbsp;the&nbsp;client&nbsp;group.&nbsp;Is&nbsp;not&nbsp;unique<br>
+:type&nbsp;name:&nbsp;String<br>
+:param&nbsp;location:&nbsp;A&nbsp;valid&nbsp;location&nbsp;Id,&nbsp;from&nbsp;a&nbsp;Locations<br>
+:type&nbsp;location:&nbsp;int<br>
+&nbsp;<br>
+(name,location)&nbsp;is&nbsp;UNIQUE</tt></dd></dl>
+
+<dl><dt><a name="ClientGroup-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;clientGroup.name<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="ClientGroup-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>name&nbsp;and&nbsp;location&nbsp;cannot&nbsp;be&nbsp;blank</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>connectionBW</strong></dt>
+</dl>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>demands</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>locationId</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e29e10; ClientGroup&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('ClientGroups', MetaData(bind=None), Colum...tions.now at 0x7f1613e29ad0; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'ClientGroups'</dl>
+
+<dl><dt><strong>connectionBWUnits</strong> = 'Mbps'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Demand">class <strong>Demand</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;<a href="#Demand">Demand</a>&nbsp;comes&nbsp;from&nbsp;a&nbsp;clientGroup&nbsp;(which&nbsp;is&nbsp;attached&nbsp;to&nbsp;a&nbsp;<a href="#Location">Location</a>),&nbsp;asking&nbsp;for&nbsp;a&nbsp;<a href="#vCDN">vCDN</a>&nbsp;from&nbsp;a&nbsp;<a href="#POP">POP</a>&nbsp;(CDN&nbsp;DNS&nbsp;or&nbsp;Anycast&nbsp;mechanisms&nbsp;could&nbsp;be&nbsp;in&nbsp;place,&nbsp;this&nbsp;reflects&nbsp;how&nbsp;the&nbsp;clients&nbsp;are&nbsp;directed&nbsp;to&nbsp;the&nbsp;appropriate&nbsp;CDN&nbsp;servers).<br>
+A&nbsp;<a href="#Demand">Demand</a>&nbsp;might&nbsp;actually&nbsp;ask&nbsp;for&nbsp;an&nbsp;inexisting&nbsp;pair&nbsp;(<a href="#vCDN">vCDN</a>,<a href="#POP">POP</a>)&nbsp;(This&nbsp;pair&nbsp;is&nbsp;an&nbsp;Intance),&nbsp;then&nbsp;turning&nbsp;this&nbsp;<a href="#Demand">Demand</a>&nbsp;in&nbsp;an&nbsp;InvalidDemand.<br>
+&nbsp;<br>
+These&nbsp;values&nbsp;are&nbsp;external&nbsp;to&nbsp;vIOSimulator&nbsp;because&nbsp;they&nbsp;must&nbsp;be&nbsp;gathered&nbsp;by&nbsp;the&nbsp;CDN&nbsp;services.<br>
+&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(ClientGroupId,popId,vcdnId).&nbsp;As&nbsp;only&nbsp;1&nbsp;optimal&nbsp;server&nbsp;is&nbsp;to&nbsp;supply&nbsp;the&nbsp;demand&nbsp;for&nbsp;a&nbsp;<a href="#vCDN">vCDN</a>,<br>
+This&nbsp;should&nbsp;ideally&nbsp;associate&nbsp;a&nbsp;<a href="#Demand">Demand</a>&nbsp;to&nbsp;an&nbsp;<a href="#Instance">Instance</a>,&nbsp;but&nbsp;not&nbsp;necessarily&nbsp;as&nbsp;the&nbsp;<a href="#Instance">Instance</a>&nbsp;can&nbsp;just&nbsp;have&nbsp;disappeared&nbsp;when&nbsp;the&nbsp;<a href="#Demand">Demand</a>&nbsp;was&nbsp;calculated&nbsp;or&nbsp;measured<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#Demand">Demand</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Demand-__init__"><strong>__init__</strong></a>(self, clientGroupId<font color="#909090">=1</font>, popId<font color="#909090">=1</font>, vcdnId<font color="#909090">=1</font>, volume<font color="#909090">=0</font>, bw<font color="#909090">=0.0</font>)</dt><dd><tt>:param&nbsp;clientGroupId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#ClientGroup">ClientGroup</a>&nbsp;demanding&nbsp;videos<br>
+:type&nbsp;clientGroupId:&nbsp;int<br>
+:param&nbsp;popId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;related&nbsp;to&nbsp;this&nbsp;<a href="#Demand">Demand</a><br>
+:type&nbsp;popId:&nbsp;int<br>
+:param&nbsp;vcdnId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>&nbsp;being&nbsp;requested&nbsp;in&nbsp;this&nbsp;<a href="#Demand">Demand</a><br>
+:type&nbsp;vcdnId:&nbsp;int<br>
+:param&nbsp;volume:&nbsp;An&nbsp;informational&nbsp;value,&nbsp;used&nbsp;for&nbsp;sorting&nbsp;the&nbsp;Demands<br>
+:type&nbsp;volume:&nbsp;int<br>
+:param&nbsp;bw:&nbsp;BW&nbsp;taken&nbsp;by&nbsp;this&nbsp;demand,&nbsp;in&nbsp;[Mbps]<br>
+:type&nbsp;bw:&nbsp;float<br>
+&nbsp;<br>
+The&nbsp;set&nbsp;(clientGroupId,popId,&nbsp;vcdnId)&nbsp;is&nbsp;UNIQUE</tt></dd></dl>
+
+<dl><dt><a name="Demand-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;<a href="#Demand">Demand</a>&nbsp;Id<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>bw</strong></dt>
+</dl>
+<dl><dt><strong>clientGroupId</strong></dt>
+</dl>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>hmacResultId</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>invalidInstance</strong></dt>
+</dl>
+<dl><dt><strong>popId</strong></dt>
+</dl>
+<dl><dt><strong>redirect</strong></dt>
+</dl>
+<dl><dt><strong>vcdnId</strong></dt>
+</dl>
+<dl><dt><strong>volume</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d3c710; Demand&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('Demands', MetaData(bind=None), Column('id...tions.now at 0x7f1613d3c410; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'Demands'</dl>
+
+<dl><dt><strong>bwUnits</strong> = 'Mbps'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Flavor">class <strong>Flavor</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Flavor">Flavor</a>&nbsp;availabe&nbsp;in&nbsp;the&nbsp;OpenStack&nbsp;DC.&nbsp;This&nbsp;is&nbsp;not&nbsp;used&nbsp;for&nbsp;any&nbsp;operation,&nbsp;but&nbsp;is&nbsp;left&nbsp;for&nbsp;future&nbsp;extension&nbsp;as&nbsp;this&nbsp;could&nbsp;be&nbsp;used&nbsp;together&nbsp;with&nbsp;the&nbsp;available&nbsp;Images&nbsp;to&nbsp;determine&nbsp;what&nbsp;VMs&nbsp;can&nbsp;be&nbsp;launched.<br>
+&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(osId,popId).&nbsp;2&nbsp;<a href="#POP">POP</a>&nbsp;can&nbsp;have&nbsp;the&nbsp;same&nbsp;<a href="#Flavor">Flavor</a>&nbsp;ID&nbsp;in&nbsp;OpenStack,&nbsp;coincidence.&nbsp;1&nbsp;<a href="#POP">POP</a>&nbsp;has&nbsp;unique&nbsp;Flavors.&nbsp;This&nbsp;reflects&nbsp;OpenStack&nbsp;characteristics.<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;OpenStack&nbsp;Nova&nbsp;Python&nbsp;API<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#Flavor">Flavor</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Flavor-__init__"><strong>__init__</strong></a>(self, name, osId, popId)</dt><dd><tt>:param&nbsp;osId:&nbsp;OpenStack&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#Flavor">Flavor</a>,&nbsp;as&nbsp;name&nbsp;can&nbsp;change&nbsp;by&nbsp;the&nbsp;OpenStack&nbsp;ID&nbsp;remains<br>
+:type&nbsp;osId:&nbsp;String<br>
+:param&nbsp;popId:&nbsp;<a href="#POP">POP</a>&nbsp;where&nbsp;these&nbsp;flavors&nbsp;are&nbsp;seen<br>
+:type&nbsp;popId:&nbsp;int<br>
+&nbsp;<br>
+Touple&nbsp;(osId,popId)&nbsp;is&nbsp;UNIQUE</tt></dd></dl>
+
+<dl><dt><a name="Flavor-__unicode__"><strong>__unicode__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Flavor-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>(osId,popId)&nbsp;not&nbsp;null&nbsp;or&nbsp;empty</tt></dd></dl>
+
+<dl><dt><a name="Flavor-updateValues"><strong>updateValues</strong></a>(self, name, cpu, ram, disk, isPublic)</dt><dd><tt>:param&nbsp;name:&nbsp;name&nbsp;given&nbsp;in&nbsp;OpenStack&nbsp;to&nbsp;the&nbsp;flavor<br>
+:type&nbsp;name:&nbsp;String<br>
+:param&nbsp;cpu:&nbsp;CPU&nbsp;needed&nbsp;for&nbsp;this&nbsp;flavor<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;ram&nbsp;needed&nbsp;for&nbsp;this&nbsp;flavor<br>
+:param&nbsp;disk:&nbsp;GB&nbsp;of&nbsp;disk&nbsp;needed&nbsp;for&nbsp;this&nbsp;flavor<br>
+:type&nbsp;cpu,&nbsp;ram,&nbsp;disk&nbsp;:&nbsp;int<br>
+:param&nbsp;isPublic:&nbsp;True&nbsp;|&nbsp;False<br>
+:type&nbsp;isPublic:&nbsp;boolean</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>CPU</strong></dt>
+</dl>
+<dl><dt><strong>RAM</strong></dt>
+</dl>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>ephemeralDisk</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>isPublic</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<dl><dt><strong>osId</strong></dt>
+</dl>
+<dl><dt><strong>popId</strong></dt>
+</dl>
+<dl><dt><strong>rootDisk</strong></dt>
+</dl>
+<dl><dt><strong>swapDisk</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
+
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613de7dd0; Flavor&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('Flavors', MetaData(bind=None), Column('id...tions.now at 0x7f1613de7ad0; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'Flavors'</dl>
+
+<dl><dt><strong>diskUnits</strong> = 'GB'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HmacResult">class <strong>HmacResult</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;and&nbsp;table&nbsp;in&nbsp;DB&nbsp;is&nbsp;for&nbsp;the&nbsp;migrations&nbsp;triggered&nbsp;by&nbsp;HMAC&nbsp;algorithim&nbsp;in&nbsp;OptimzationModesl.HMAC.optimize()<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;Optimizer.py<br>
+&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(demandId)&nbsp;as&nbsp;a&nbsp;migration&nbsp;HMAC&nbsp;responds&nbsp;to&nbsp;a&nbsp;single&nbsp;<a href="#Demand">Demand</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#HmacResult">HmacResult</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HmacResult-__init__"><strong>__init__</strong></a>(self, dstPopId, instanceId, delay<font color="#909090">=0</font>, cost<font color="#909090">=0</font>, minBW<font color="#909090">=0</font>)</dt><dd><tt>:param&nbsp;dstPopId:&nbsp;id&nbsp;of&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;destination&nbsp;of&nbsp;the&nbsp;migration.<br>
+:param&nbsp;instanceId:&nbsp;id&nbsp;of&nbsp;the&nbsp;<a href="#Instance">Instance</a>&nbsp;to&nbsp;be&nbsp;migrated.<br>
+:type&nbsp;&nbsp;dstPopId,&nbsp;instanceId:&nbsp;int,&nbsp;being&nbsp;the&nbsp;foreing&nbsp;keys&nbsp;of&nbsp;the&nbsp;table.<br>
+&nbsp;<br>
+:param&nbsp;delay:&nbsp;Delay&nbsp;calculated&nbsp;for&nbsp;this&nbsp;migration;&nbsp;in&nbsp;seconds.<br>
+:type&nbsp;delay:&nbsp;int<br>
+:param&nbsp;cost:&nbsp;A&nbsp;relative&nbsp;cost&nbsp;for&nbsp;the&nbsp;Migration.&nbsp;This&nbsp;value&nbsp;could&nbsp;be&nbsp;multiplied&nbsp;by&nbsp;a&nbsp;<a href="#MigrationCostMultiplier">MigrationCostMultiplier</a>,&nbsp;if&nbsp;it&nbsp;exists.<br>
+:type:&nbsp;int<br>
+:param&nbsp;minBW:&nbsp;Minimum&nbsp;BW&nbsp;found&nbsp;on&nbsp;the&nbsp;migration&nbsp;path,&nbsp;in&nbsp;Mbps.<br>
+:type&nbsp;minBW:&nbsp;int<br>
+:param&nbsp;migrate:&nbsp;True&nbsp;if&nbsp;this&nbsp;is&nbsp;a&nbsp;real&nbsp;Migration,&nbsp;False&nbsp;if&nbsp;this&nbsp;is&nbsp;a&nbsp;Redirection.<br>
+:type&nbsp;migrate:&nbsp;boolean<br>
+&nbsp;<br>
+(instance.popId&nbsp;!=&nbsp;dstPopId)</tt></dd></dl>
+
+<dl><dt><a name="HmacResult-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;Result&nbsp;ID<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="HmacResult-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt><a href="#POP">POP</a>&nbsp;where&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>&nbsp;is&nbsp;located&nbsp;is&nbsp;NOT&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;where&nbsp;to&nbsp;move&nbsp;de&nbsp;<a href="#vCDN">vCDN</a></tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>cost</strong></dt>
+</dl>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>delay</strong></dt>
+</dl>
+<dl><dt><strong>demands</strong></dt>
+</dl>
+<dl><dt><strong>dstPopId</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>instanceId</strong></dt>
+</dl>
+<dl><dt><strong>minBW</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d47c50; HmacResult&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('HmacResults', MetaData(bind=None), Column...tions.now at 0x7f1613d47910; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'HmacResults'</dl>
+
+<dl><dt><strong>delayUnits</strong> = 'mins'</dl>
+
+<dl><dt><strong>demandsIds</strong> = []</dl>
+
+<dl><dt><strong>minBWUnits</strong> = 'Mbps'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Hypervisor">class <strong>Hypervisor</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;compute&nbsp;node&nbsp;from&nbsp;an&nbsp;OpenStack&nbsp;DC<br>
+&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(name,popId).&nbsp;<br>
+2&nbsp;Hypervisors&nbsp;can&nbsp;belong&nbsp;to&nbsp;a&nbsp;single&nbsp;<a href="#POP">POP</a>,&nbsp;as&nbsp;long&nbsp;as&nbsp;they&nbsp;have&nbsp;different&nbsp;names.&nbsp;<br>
+2&nbsp;Hpervisors&nbsp;can&nbsp;have&nbsp;the&nbsp;same&nbsp;name,&nbsp;but&nbsp;on&nbsp;different&nbsp;POPs.&nbsp;This&nbsp;reflects&nbsp;OpenStack&nbsp;characteristics<br>
+&nbsp;<br>
+max{Y}&nbsp;are&nbsp;values&nbsp;that&nbsp;the&nbsp;OpenStack&nbsp;Nova&nbsp;finds&nbsp;as&nbsp;available&nbsp;in&nbsp;the&nbsp;HW<br>
+cur{Y}&nbsp;are&nbsp;values&nbsp;that&nbsp;the&nbsp;OpenStack&nbsp;Nova&nbsp;is&nbsp;currently&nbsp;using&nbsp;from&nbsp;the&nbsp;HW<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;`maxNetBW`&nbsp;and&nbsp;`curNetBW`&nbsp;are&nbsp;not&nbsp;used<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;OpenStack&nbsp;Nova&nbsp;Python&nbsp;API<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#Hypervisor">Hypervisor</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Hypervisor-__init__"><strong>__init__</strong></a>(self, name, popId)</dt><dd><tt>:param&nbsp;name:&nbsp;name&nbsp;of&nbsp;the&nbsp;hypervisor,&nbsp;is&nbsp;not&nbsp;unique<br>
+:type&nbsp;name:&nbsp;String<br>
+:param&nbsp;popId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;where&nbsp;this&nbsp;hypervisor&nbsp;is<br>
+&nbsp;<br>
+Touple&nbsp;(name,popId)&nbsp;is&nbsp;UNIQUE</tt></dd></dl>
+
+<dl><dt><a name="Hypervisor-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>#enddef</tt></dd></dl>
+
+<dl><dt><a name="Hypervisor-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>(name,popId)&nbsp;not&nbsp;NULL</tt></dd></dl>
+
+<dl><dt><a name="Hypervisor-updateCurValues"><strong>updateCurValues</strong></a>(self, cpu, ram, disk, instances)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;in&nbsp;use<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;in&nbsp;use<br>
+:param&nbsp;disk:&nbsp;GB&nbsp;of&nbsp;Storage&nbsp;in&nbsp;use<br>
+:type&nbsp;cpu,ram,disk:&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="Hypervisor-updateMaxValues"><strong>updateMaxValues</strong></a>(self, cpu, ram, disk)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;available<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;available<br>
+:param&nbsp;disk:&nbsp;GB&nbsp;of&nbsp;Storage&nbsp;available<br>
+:type&nbsp;cpu,ram,disk:&nbsp;int</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>curCPU</strong></dt>
+</dl>
+<dl><dt><strong>curDisk</strong></dt>
+</dl>
+<dl><dt><strong>curInstances</strong></dt>
+</dl>
+<dl><dt><strong>curNetBW</strong></dt>
+</dl>
+<dl><dt><strong>curRAM</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>maxCPU</strong></dt>
+</dl>
+<dl><dt><strong>maxDisk</strong></dt>
+</dl>
+<dl><dt><strong>maxNetBW</strong></dt>
+</dl>
+<dl><dt><strong>maxRAM</strong></dt>
+</dl>
+<dl><dt><strong>model</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<dl><dt><strong>popId</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
+
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613de70d0; Hypervisor&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('Hypervisors', MetaData(bind=None), Column...tions.now at 0x7f1613dcfd90; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'Hypervisors'</dl>
+
+<dl><dt><strong>diskUnits</strong> = 'GB'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Instance">class <strong>Instance</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>An&nbsp;instance&nbsp;is&nbsp;a&nbsp;set&nbsp;of&nbsp;VMs&nbsp;and&nbsp;resources&nbsp;allocated&nbsp;in&nbsp;a&nbsp;<a href="#POP">POP</a>&nbsp;for&nbsp;a&nbsp;<a href="#vCDN">vCDN</a>.&nbsp;From&nbsp;here&nbsp;the&nbsp;clientGroups&nbsp;are&nbsp;served<br>
+&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(popId,vcdnId).&nbsp;1&nbsp;server&nbsp;that&nbsp;holds&nbsp;several&nbsp;vCDNs&nbsp;inside,&nbsp;and&nbsp;a&nbsp;<a href="#vCDN">vCDN</a>&nbsp;can&nbsp;be&nbsp;in&nbsp;many&nbsp;POPs,&nbsp;but&nbsp;the&nbsp;pair&nbsp;is&nbsp;unique.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#Instance">Instance</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Instance-__init__"><strong>__init__</strong></a>(self, vcdnId, popId)</dt><dd><tt>:param&nbsp;vcdnId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>.<br>
+:param&nbsp;popId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;where&nbsp;this&nbsp;<a href="#vCDN">vCDN</a>&nbsp;exists.<br>
+&nbsp;<br>
+This&nbsp;refers&nbsp;if&nbsp;the&nbsp;tenant&nbsp;of&nbsp;vcdnId&nbsp;has&nbsp;at&nbsp;least&nbsp;1&nbsp;VM&nbsp;in&nbsp;popId<br>
+&nbsp;<br>
+Touple&nbsp;(vcdnId,popId)&nbsp;is&nbsp;UNIQUE</tt></dd></dl>
+
+<dl><dt><a name="Instance-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;<a href="#vCDN">vCDN</a>@Pop<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="Instance-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>vcdn&nbsp;and&nbsp;pop&nbsp;are&nbsp;Valid</tt></dd></dl>
+
+<dl><dt><a name="Instance-updateCurValues"><strong>updateCurValues</strong></a>(self, cpu, ram, instances)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;used<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;used<br>
+:param&nbsp;instances:&nbsp;#&nbsp;of&nbsp;instances&nbsp;used<br>
+:type&nbsp;cpu,ram,instances:&nbsp;int<br>
+&nbsp;<br>
+This&nbsp;corresponds&nbsp;to&nbsp;the&nbsp;Quota&nbsp;limit&nbsp;of&nbsp;the&nbsp;tenant&nbsp;of&nbsp;the&nbsp;vcdnId&nbsp;in&nbsp;this&nbsp;popId<br>
+&gt;&nbsp;nova&nbsp;quota-show<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;There&nbsp;is&nbsp;no&nbsp;Disk&nbsp;in&nbsp;the&nbsp;Quota&nbsp;values</tt></dd></dl>
+
+<dl><dt><a name="Instance-updateMaxValues"><strong>updateMaxValues</strong></a>(self, cpu, ram, instances)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;available<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;available<br>
+:param&nbsp;instances:&nbsp;#&nbsp;of&nbsp;instances&nbsp;available<br>
+:type&nbsp;cpu,ram,instances:&nbsp;int<br>
+&nbsp;<br>
+This&nbsp;corresponds&nbsp;to&nbsp;the&nbsp;Quota&nbsp;limit&nbsp;of&nbsp;the&nbsp;tenant&nbsp;of&nbsp;the&nbsp;vcdnId&nbsp;in&nbsp;this&nbsp;popId<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;nova&nbsp;quota-defaults<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;There&nbsp;is&nbsp;no&nbsp;Disk&nbsp;in&nbsp;the&nbsp;Quota&nbsp;values</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>curCPU</strong></dt>
+</dl>
+<dl><dt><strong>curInstances</strong></dt>
+</dl>
+<dl><dt><strong>curRAM</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>maxCPU</strong></dt>
+</dl>
+<dl><dt><strong>maxInstances</strong></dt>
+</dl>
+<dl><dt><strong>maxRAM</strong></dt>
+</dl>
+<dl><dt><strong>metric</strong></dt>
+</dl>
+<dl><dt><strong>migrations</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>popId</strong></dt>
+</dl>
+<dl><dt><strong>vcdnId</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
+
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d95750; Instance&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('Instances', MetaData(bind=None), Column('...tions.now at 0x7f1613d953d0; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'Instances'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Location">class <strong>Location</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;indicates&nbsp;a&nbsp;node&nbsp;in&nbsp;the&nbsp;Operators&nbsp;Infrastructure&nbsp;Topologie.<br>
+A&nbsp;<a href="#Location">Location</a>&nbsp;connects&nbsp;to&nbsp;the&nbsp;ClientGroups&nbsp;and&nbsp;can&nbsp;have&nbsp;a&nbsp;<a href="#POP">POP</a>.<br>
+&nbsp;<br>
+UNIQUE&nbsp;(name):&nbsp;To&nbsp;avoid&nbsp;confusion&nbsp;on&nbsp;the&nbsp;related&nbsp;tables.&nbsp;A&nbsp;location&nbsp;name&nbsp;is&nbsp;unique&nbsp;in&nbsp;a&nbsp;certain&nbsp;area.<br>
+&nbsp;<br>
+..seealso::&nbsp;<a href="#ClientGroup">ClientGroup</a>.location,&nbsp;<a href="#POP">POP</a>.location<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#Location">Location</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Location-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">='Here'</font>)</dt><dd><tt>:param&nbsp;name:&nbsp;Unique&nbsp;name&nbsp;of&nbsp;the&nbsp;location<br>
+:type&nbsp;name:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="Location-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;<a href="#Location">Location</a>.name<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="Location-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>.name&nbsp;not&nbsp;empty</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>clientGroups</strong></dt>
+</dl>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>geo</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<dl><dt><strong>pop</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e6cf90; Location&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('Locations', MetaData(bind=None), Column('...tions.now at 0x7f1613e6cc10; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'Locations'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Metric">class <strong>Metric</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>These&nbsp;are&nbsp;the&nbsp;OpenStack&nbsp;Telemetry&nbsp;aggregated&nbsp;values&nbsp;for&nbsp;each&nbsp;<a href="#Instance">Instance</a>.<br>
+&nbsp;<br>
+The&nbsp;Metrics&nbsp;are&nbsp;the&nbsp;{min,&nbsp;max,&nbsp;avg}&nbsp;statistics&nbsp;of&nbsp;a&nbsp;set&nbsp;of&nbsp;Meters&nbsp;from&nbsp;the&nbsp;OpenStack&nbsp;Telemetry,&nbsp;aggregated&nbsp;by&nbsp;Tenant&nbsp;and&nbsp;linked&nbsp;to&nbsp;an&nbsp;<a href="#Instance">Instance</a>&nbsp;object.<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;OpenStack&nbsp;Telemetry&nbsp;Python&nbsp;API<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#Metric">Metric</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Metric-__init__"><strong>__init__</strong></a>(self, instanceId)</dt><dd><tt>:param&nbsp;instanceId:&nbsp;instance&nbsp;(<a href="#vCDN">vCDN</a>&nbsp;in&nbsp;<a href="#POP">POP</a>)&nbsp;that&nbsp;is&nbsp;being&nbsp;measured<br>
+:type&nbsp;instanceId:&nbsp;int&nbsp;&gt;&nbsp;0</tt></dd></dl>
+
+<dl><dt><a name="Metric-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;instace&nbsp;Id&nbsp;value<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="Metric-update"><strong>update</strong></a>(self, duration, sampletime, karg)</dt><dd><tt>:param&nbsp;duration:&nbsp;Hours&nbsp;that&nbsp;this&nbsp;metric&nbsp;contains.&nbsp;It&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;measured&nbsp;now(),&nbsp;taking&nbsp;the&nbsp;last&nbsp;samples&nbsp;for&nbsp;a&nbsp;duration&nbsp;X&nbsp;hours<br>
+:type&nbsp;duration:&nbsp;int<br>
+:param&nbsp;karg:&nbsp;Dictionary&nbsp;of&nbsp;values&nbsp;of&nbsp;the&nbsp;metric.&nbsp;ceilometer&nbsp;meter-list<br>
+:type&nbsp;karg:&nbsp;Dictionary<br>
+&nbsp;<br>
+This&nbsp;correspondonds&nbsp;to&nbsp;mapping&nbsp;the&nbsp;OpenStack&nbsp;objects<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;OpenStack.py<br>
+&nbsp;<br>
+..&nbsp;todo::&nbsp;networkInBytes/networkOutBytes&nbsp;to&nbsp;be&nbsp;discussed,&nbsp;as&nbsp;the&nbsp;value&nbsp;grouped&nbsp;by&nbsp;tenant/resource&nbsp;changes</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>cpuUtil_avg</strong></dt>
+</dl>
+<dl><dt><strong>cpuUtil_max</strong></dt>
+</dl>
+<dl><dt><strong>cpuUtil_min</strong></dt>
+</dl>
+<dl><dt><strong>diskrootsize_avg</strong></dt>
+</dl>
+<dl><dt><strong>diskrootsize_max</strong></dt>
+</dl>
+<dl><dt><strong>diskrootsize_min</strong></dt>
+</dl>
+<dl><dt><strong>durationHours</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>instanceId</strong></dt>
+</dl>
+<dl><dt><strong>instance_avg</strong></dt>
+</dl>
+<dl><dt><strong>instance_max</strong></dt>
+</dl>
+<dl><dt><strong>instance_min</strong></dt>
+</dl>
+<dl><dt><strong>memory_avg</strong></dt>
+</dl>
+<dl><dt><strong>memory_max</strong></dt>
+</dl>
+<dl><dt><strong>memory_min</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>networkInBps_avg</strong></dt>
+</dl>
+<dl><dt><strong>networkInBps_max</strong></dt>
+</dl>
+<dl><dt><strong>networkInBps_min</strong></dt>
+</dl>
+<dl><dt><strong>networkInBytes</strong></dt>
+</dl>
+<dl><dt><strong>networkOutBps_avg</strong></dt>
+</dl>
+<dl><dt><strong>networkOutBps_max</strong></dt>
+</dl>
+<dl><dt><strong>networkOutBps_min</strong></dt>
+</dl>
+<dl><dt><strong>networkOutBytes</strong></dt>
+</dl>
+<dl><dt><strong>sampletime</strong></dt>
+</dl>
+<dl><dt><strong>vcpu_avg</strong></dt>
+</dl>
+<dl><dt><strong>vcpu_max</strong></dt>
+</dl>
+<dl><dt><strong>vcpu_min</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613da5c10; Metric&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('Metrics', MetaData(bind=None), Column('id...tions.now at 0x7f1613da5910; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'Metrics'</dl>
+
+<dl><dt><strong>cpuUtilUnits</strong> = '%'</dl>
+
+<dl><dt><strong>diskrootsizeUnits</strong> = 'GB'</dl>
+
+<dl><dt><strong>memoryUnits</strong> = 'MB'</dl>
+
+<dl><dt><strong>networkBpsUnits</strong> = 'kbps'</dl>
+
+<dl><dt><strong>networkBytesUnits</strong> = 'kB'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MigrationCostMultiplier">class <strong>MigrationCostMultiplier</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;value&nbsp;is&nbsp;multiplied&nbsp;to&nbsp;the&nbsp;calculated&nbsp;cost&nbsp;to&nbsp;tune&nbsp;the&nbsp;Migration&nbsp;cost&nbsp;between&nbsp;2&nbsp;POPs.<br>
+The&nbsp;Cost&nbsp;Multiplier&nbsp;is&nbsp;considered&nbsp;birirectional,&nbsp;as&nbsp;the&nbsp;NetworkLinks<br>
+UNIQUE&nbsp;(popAId,popBId)&nbsp;as&nbsp;not&nbsp;to&nbsp;have&nbsp;2&nbsp;entries&nbsp;for&nbsp;the&nbsp;same&nbsp;migration.&nbsp;<br>
+At&nbsp;DB&nbsp;it&nbsp;is&nbsp;CHECKED&nbsp;that&nbsp;(popAId&nbsp;&lt;&gt;&nbsp;popBId)&nbsp;to&nbsp;avoid&nbsp;loops.<br>
+&nbsp;Birectionality&nbsp;is&nbsp;not&nbsp;checked&nbsp;in&nbsp;DB,&nbsp;so&nbsp;(popAId,popBId)&nbsp;and&nbsp;(popBId,popAId)&nbsp;can&nbsp;happen.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#MigrationCostMultiplier">MigrationCostMultiplier</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MigrationCostMultiplier-__init__"><strong>__init__</strong></a>(self, popAId<font color="#909090">=1</font>, popBId<font color="#909090">=2</font>, cost<font color="#909090">=1.0</font>)</dt><dd><tt>:param&nbsp;popA:&nbsp;<a href="#POP">POP</a>&nbsp;source&nbsp;Id<br>
+:param&nbsp;popB:&nbsp;<a href="#POP">POP</a>&nbsp;destination&nbsp;Id<br>
+:type&nbsp;popA:&nbsp;int&nbsp;<br>
+:type&nbsp;popB:&nbsp;int&nbsp;<br>
+:param&nbsp;cost:&nbsp;Value&nbsp;&gt;&nbsp;0&nbsp;that&nbsp;indicates&nbsp;the&nbsp;cost.&nbsp;This&nbsp;is&nbsp;a&nbsp;value&nbsp;given&nbsp;by&nbsp;the&nbsp;provider<br>
+:type&nbsp;cost:&nbsp;float<br>
+&nbsp;<br>
+(popA,popB)&nbsp;is&nbsp;UNIQUE<br>
+(popB,popA)&nbsp;=&nbsp;(popA,popB)&nbsp;bidirectional</tt></dd></dl>
+
+<dl><dt><a name="MigrationCostMultiplier-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>.popA&nbsp;&lt;&gt;&nbsp;.popB</tt></dd></dl>
+
+<dl><dt><a name="MigrationCostMultiplier-toString"><strong>toString</strong></a>(self)</dt><dd><tt>:returns:&nbsp;PopA&nbsp;&nbsp;--[CostX]--&gt;&nbsp;popB&nbsp;<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>costMultiplier</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>popA</strong></dt>
+</dl>
+<dl><dt><strong>popAId</strong></dt>
+</dl>
+<dl><dt><strong>popB</strong></dt>
+</dl>
+<dl><dt><strong>popBId</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e29310; MigrationCostMultiplier&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('MigrationCostMultipliers', MetaData(bind=...liers&gt;, default=ColumnDefault(1.0)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'MigrationCostMultipliers'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NetworkLink">class <strong>NetworkLink</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;Link&nbsp;between&nbsp;any&nbsp;2&nbsp;Locations<br>
+&nbsp;<br>
+UNIQUE&nbsp;(locationAId,locationBId)&nbsp;as&nbsp;not&nbsp;to&nbsp;have&nbsp;2&nbsp;entries&nbsp;for&nbsp;the&nbsp;same&nbsp;link.&nbsp;<br>
+At&nbsp;DB&nbsp;it&nbsp;is&nbsp;CHECKED&nbsp;that&nbsp;(locationAId&nbsp;&lt;&gt;&nbsp;locationBId)&nbsp;to&nbsp;avoid&nbsp;loops.<br>
+Birectionality&nbsp;is&nbsp;not&nbsp;checked&nbsp;in&nbsp;DB,&nbsp;so&nbsp;(locationAId,locationBId)&nbsp;and&nbsp;(locationBId,locationAId)&nbsp;can&nbsp;happen.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#NetworkLink">NetworkLink</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="NetworkLink-__init__"><strong>__init__</strong></a>(self, locationAId<font color="#909090">=2</font>, locationBId<font color="#909090">=1</font>, capacity<font color="#909090">=0</font>)</dt><dd><tt>:param&nbsp;locationA:&nbsp;<a href="#Location">Location</a>&nbsp;Id&nbsp;source<br>
+:param&nbsp;locationB:&nbsp;<a href="#Location">Location</a>&nbsp;Id&nbsp;destination<br>
+:type&nbsp;locationA:&nbsp;int<br>
+:type&nbsp;locationB:&nbsp;int<br>
+&nbsp;<br>
+:param&nbsp;cap:&nbsp;Capacity&nbsp;of&nbsp;the&nbsp;link&nbsp;in&nbsp;Mbps&nbsp;(Mega&nbsp;bits-per-second)<br>
+:type&nbsp;cap:&nbsp;int<br>
+&nbsp;<br>
+(locationA,locationB)&nbsp;is&nbsp;UNIQUE<br>
+(locationB,locationA)&nbsp;=&nbsp;(locationA,locationB)&nbsp;bidirectional</tt></dd></dl>
+
+<dl><dt><a name="NetworkLink-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>.locationA&nbsp;&lt;&gt;&nbsp;;locationB</tt></dd></dl>
+
+<dl><dt><a name="NetworkLink-toString"><strong>toString</strong></a>(self)</dt><dd><tt>:returns:&nbsp;LocationA&nbsp;&nbsp;&lt;-[X&nbsp;Mbps]-&gt;&nbsp;LocationB&nbsp;<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>capacity</strong></dt>
+</dl>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>locationA</strong></dt>
+</dl>
+<dl><dt><strong>locationAId</strong></dt>
+</dl>
+<dl><dt><strong>locationB</strong></dt>
+</dl>
+<dl><dt><strong>locationBId</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e13c10; NetworkLink&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('NetLinks', MetaData(bind=None), Column('i...tions.now at 0x7f1613e13810; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'NetLinks'</dl>
+
+<dl><dt><strong>capacityUnits</strong> = 'Mbps'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="POP">class <strong>POP</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;an&nbsp;OpenStack&nbsp;DC,&nbsp;located&nbsp;in&nbsp;a&nbsp;<a href="#Location">Location</a>&nbsp;node,&nbsp;and&nbsp;capable&nbsp;of&nbsp;hosting&nbsp;a&nbsp;<a href="#vCDN">vCDN</a>&nbsp;instance.&nbsp;<br>
+It&nbsp;is&nbsp;identified&nbsp;by&nbsp;its&nbsp;OpenStack&nbsp;KeyStone&nbsp;endpoint&nbsp;and&nbsp;the&nbsp;appropriate&nbsp;credentials<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(region,url,region,tenant,loginUser)&nbsp;as&nbsp;not&nbsp;to&nbsp;have&nbsp;2&nbsp;entries&nbsp;for&nbsp;the&nbsp;OpenStack&nbsp;controller.&nbsp;If&nbsp;the&nbsp;Same&nbsp;OpenStack&nbsp;server&nbsp;is&nbsp;used,&nbsp;either&nbsp;there&nbsp;must&nbsp;be&nbsp;a&nbsp;different&nbsp;user/tenant/region<br>
+UNIQUE&nbsp;=&nbsp;(name)&nbsp;as&nbsp;to&nbsp;have&nbsp;single&nbsp;identifiable&nbsp;names<br>
+UNIQUE&nbsp;=&nbsp;(locationId)&nbsp;as&nbsp;to&nbsp;keep&nbsp;a&nbsp;single&nbsp;<a href="#POP">POP</a>&nbsp;in&nbsp;each&nbsp;location.&nbsp;This&nbsp;assumtion&nbsp;might&nbsp;change,&nbsp;but&nbsp;it&nbsp;will&nbsp;impact&nbsp;most&nbsp;of&nbsp;the&nbsp;OMAC/HMAC&nbsp;implementation&nbsp;code&nbsp;(and&nbsp;break&nbsp;the&nbsp;foreing&nbsp;key)<br>
+&nbsp;<br>
+`url`&nbsp;to&nbsp;be&nbsp;the&nbsp;Public&nbsp;Keystone&nbsp;Endpoint,&nbsp;versioned<br>
+`region`&nbsp;can&nbsp;be&nbsp;NULL<br>
+`url`&nbsp;is&nbsp;expected&nbsp;to&nbsp;be&nbsp;the&nbsp;Public/Admin&nbsp;Keystone<br>
+`totalDisk`,`totalRAM`,`totalCPU`,&nbsp;`totalNetBW`&nbsp;are&nbsp;parameters&nbsp;set&nbsp;by&nbsp;the&nbsp;Optimizer,&nbsp;based&nbsp;on&nbsp;their&nbsp;installation&nbsp;and&nbsp;knowledge&nbsp;of&nbsp;the&nbsp;Infra<br>
+`maxDisk`,`maxRAM`,`maxCPU`&nbsp;are&nbsp;parameters&nbsp;calculated&nbsp;by&nbsp;OpenStack,&nbsp;by&nbsp;summing&nbsp;the&nbsp;capacities&nbsp;of&nbsp;the&nbsp;Hypervisors&nbsp;member&nbsp;of&nbsp;this&nbsp;<a href="#POP">POP</a><br>
+`curDisk`,`curRAM`,`curCPU`,,`curInstances`&nbsp;are&nbsp;parameters&nbsp;calculated&nbsp;by&nbsp;OpenStack,&nbsp;by&nbsp;summing&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;Hypervisors&nbsp;member&nbsp;of&nbsp;this&nbsp;<a href="#POP">POP</a><br>
+`curNetBW`&nbsp;is&nbsp;calculated&nbsp;by&nbsp;OpenStack,&nbsp;by&nbsp;summing&nbsp;the&nbsp;network&nbsp;statistics&nbsp;of&nbsp;all&nbsp;the&nbsp;Instances&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a><br>
+&nbsp;<br>
+`xDisk`&nbsp;in&nbsp;GB<br>
+`xRAM`&nbsp;in&nbsp;MB<br>
+`xCPU`&nbsp;in&nbsp;units<br>
+`xNetBW`&nbsp;in&nbsp;Mbps<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#POP">POP</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="POP-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, locationId<font color="#909090">=1</font>, url<font color="#909090">=''</font>, region<font color="#909090">=None</font>, tenant<font color="#909090">='admin'</font>, loginUser<font color="#909090">='admin'</font>, loginPass<font color="#909090">='ADMIN_PASS'</font>)</dt><dd><tt>:param&nbsp;name:&nbsp;Name&nbsp;of&nbsp;the&nbsp;<a href="#POP">POP</a>,&nbsp;set&nbsp;by&nbsp;operator<br>
+:type&nbsp;name:&nbsp;String<br>
+:param&nbsp;location:&nbsp;LocationId&nbsp;from&nbsp;the&nbsp;Locations&nbsp;table<br>
+:type&nbsp;location:&nbsp;int<br>
+:param&nbsp;tenant:&nbsp;Admin&nbsp;Tenant&nbsp;name,&nbsp;not&nbsp;tenant&nbsp;Id<br>
+:type&nbsp;tenant:&nbsp;String<br>
+:param&nbsp;loginUser:&nbsp;Admin&nbsp;user,&nbsp;user&nbsp;with&nbsp;Admin&nbsp;rights<br>
+:type&nbsp;loginUser:&nbsp;String<br>
+:param&nbsp;loginPass:<br>
+:type&nbsp;loginPass:&nbsp;String<br>
+&nbsp;<br>
+:returns:&nbsp;A&nbsp;<a href="#POP">POP</a><br>
+:rtype:&nbsp;<a href="#POP">POP</a></tt></dd></dl>
+
+<dl><dt><a name="POP-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;<a href="#POP">POP</a>.name<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="POP-canHostVCDN"><strong>canHostVCDN</strong></a>(self, AvCDN)</dt><dd><tt>Used&nbsp;by&nbsp;OptimizationModels.HMAC.optimize()<br>
+&nbsp;<br>
+Returns&nbsp;True&nbsp;if&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>&nbsp;fits&nbsp;in&nbsp;the&nbsp;POPs;&nbsp;cheking&nbsp;vDisk,&nbsp;vRAM&nbsp;et&nbsp;vCPUs.<br>
+&nbsp;<br>
+The&nbsp;<a href="#POP">POP</a>'s&nbsp;available&nbsp;resources&nbsp;are&nbsp;calculated&nbsp;as&nbsp;(.TotalX&nbsp;-&nbsp;.curX)<br>
+&nbsp;<br>
+The&nbsp;<a href="#vCDN">vCDN</a>'s&nbsp;size&nbsp;is&nbsp;taken&nbsp;from&nbsp;the&nbsp;attribues&nbsp;vDisk&nbsp;vRAM&nbsp;vCPU&nbsp;and&nbsp;vNetBW<br>
+&nbsp;<br>
+Comparison&nbsp;is&nbsp;"greater&nbsp;than"&nbsp;only.&nbsp;On&nbsp;"=="&nbsp;condition,&nbsp;it&nbsp;is&nbsp;considered&nbsp;that&nbsp;it&nbsp;does&nbsp;not&nbsp;fit<br>
+&nbsp;<br>
+:param&nbsp;AvCDN:&nbsp;A&nbsp;<a href="#vCDN">vCDN</a>&nbsp;to&nbsp;test&nbsp;if&nbsp;it&nbsp;fits&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a>&nbsp;resources.<br>
+:type&nbsp;AvCDN:&nbsp;<a href="#vCDN">vCDN</a>&nbsp;object<br>
+&nbsp;<br>
+:returns:s&nbsp;True&nbsp;if&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>&nbsp;fits&nbsp;in&nbsp;the&nbsp;POPs,&nbsp;cheking&nbsp;vDisk,&nbsp;vRAM,&nbsp;vCPU&nbsp;and&nbsp;vNetBW</tt></dd></dl>
+
+<dl><dt><a name="POP-canHostVCDN_String"><strong>canHostVCDN_String</strong></a>(self, AvCDN)</dt><dd><tt>Used&nbsp;for&nbsp;logging&nbsp;the&nbsp;hosting&nbsp;condition<br>
+&nbsp;<br>
+..seealso::&nbsp;<a href="#POP-canHostVCDN">canHostVCDN</a>()<br>
+&nbsp;<br>
+:param&nbsp;AvCDN:&nbsp;a&nbsp;<a href="#vCDN">vCDN</a>&nbsp;to&nbsp;be&nbsp;instantiated&nbsp;in&nbsp;a&nbsp;<a href="#POP">POP</a><br>
+:type&nbsp;AvCDN:&nbsp;<a href="#vCDN">vCDN</a>&nbsp;object<br>
+&nbsp;<br>
+:returns:&nbsp;a&nbsp;String&nbsp;with&nbsp;the&nbsp;compared&nbsp;values<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="POP-dashboardUrl"><strong>dashboardUrl</strong></a>(self)</dt><dd><tt>From&nbsp;the&nbsp;Keystone&nbsp;URL,&nbsp;the&nbsp;Horizon&nbsp;Dashboard&nbsp;URL&nbsp;is&nbsp;built<br>
+This&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;offer&nbsp;a&nbsp;HTML&nbsp;link&nbsp;to&nbsp;the&nbsp;Dashboard<br>
+&nbsp;<br>
+:param&nbsp;url:&nbsp;The&nbsp;Keystone&nbsp;Auth&nbsp;URL&nbsp;for&nbsp;the&nbsp;OpenStack&nbsp;Data&nbsp;Center<br>
+:type&nbsp;url:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="POP-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>.url&nbsp;and&nbsp;.location&nbsp;NOT&nbsp;Empty</tt></dd></dl>
+
+<dl><dt><a name="POP-setTotalValues"><strong>setTotalValues</strong></a>(self, cpu, ram, disk, instances, netBW)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;in&nbsp;total&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a><br>
+:type&nbsp;cpu:&nbsp;int<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;&nbsp;in&nbsp;total&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a><br>
+:type&nbsp;ram:&nbsp;int<br>
+:param&nbsp;disk:&nbsp;GB&nbsp;of&nbsp;disk&nbsp;&nbsp;in&nbsp;total&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a><br>
+:type&nbsp;disk:&nbsp;int<br>
+:param&nbsp;instances:&nbsp;#&nbsp;of&nbsp;instances&nbsp;supported&nbsp;in&nbsp;total&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a><br>
+:type&nbsp;instances:&nbsp;int<br>
+:param&nbsp;netBW:&nbsp;Mbps&nbsp;of&nbsp;total&nbsp;network&nbsp;BW&nbsp;capacity&nbsp;in&nbsp;total&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a><br>
+:type&nbsp;netBW:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+This&nbsp;corresponds&nbsp;to&nbsp;the&nbsp;installed&nbsp;infrastructure,&nbsp;these&nbsp;parameters&nbsp;are&nbsp;set&nbsp;by&nbsp;the&nbsp;operator</tt></dd></dl>
+
+<dl><dt><a name="POP-updateCurValues"><strong>updateCurValues</strong></a>(self, cpu, ram, disk, instances, netBW)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;used<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;used<br>
+:param&nbsp;disk:&nbsp;GB&nbsp;of&nbsp;disk&nbsp;used<br>
+:param&nbsp;instances:&nbsp;#&nbsp;of&nbsp;instances&nbsp;used<br>
+&nbsp;<br>
+This&nbsp;corresponds&nbsp;to&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;the&nbsp;hypervisors&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a></tt></dd></dl>
+
+<dl><dt><a name="POP-updateMaxValues"><strong>updateMaxValues</strong></a>(self, cpu, ram, disk, netBW)</dt><dd><tt>:param&nbsp;cpu:&nbsp;count&nbsp;of&nbsp;vCPUs&nbsp;available<br>
+:param&nbsp;ram:&nbsp;MB&nbsp;of&nbsp;RAM&nbsp;available<br>
+:param&nbsp;disk:&nbsp;GB&nbsp;of&nbsp;disk&nbsp;available<br>
+&nbsp;<br>
+&nbsp;<br>
+This&nbsp;corresponds&nbsp;to&nbsp;the&nbsp;sum&nbsp;of&nbsp;all&nbsp;the&nbsp;hypervisors&nbsp;capacity&nbsp;in&nbsp;the&nbsp;<a href="#POP">POP</a>:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;nova&nbsp;hypervisor-list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;nova&nbsp;hypervisor-show</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>created_at</strong></dt>
+</dl>
+<dl><dt><strong>curCPU</strong></dt>
+</dl>
+<dl><dt><strong>curDisk</strong></dt>
+</dl>
+<dl><dt><strong>curInstances</strong></dt>
+</dl>
+<dl><dt><strong>curNetBW</strong></dt>
+</dl>
+<dl><dt><strong>curRAM</strong></dt>
+</dl>
+<dl><dt><strong>demands</strong></dt>
+</dl>
+<dl><dt><strong>flavors</strong></dt>
+</dl>
+<dl><dt><strong>hypervisors</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>instances</strong></dt>
+</dl>
+<dl><dt><strong>locationId</strong></dt>
+</dl>
+<dl><dt><strong>loginPass</strong></dt>
+</dl>
+<dl><dt><strong>loginUser</strong></dt>
+</dl>
+<dl><dt><strong>maxCPU</strong></dt>
+</dl>
+<dl><dt><strong>maxDisk</strong></dt>
+</dl>
+<dl><dt><strong>maxNetBW</strong></dt>
+</dl>
+<dl><dt><strong>maxRAM</strong></dt>
+</dl>
+<dl><dt><strong>migrations</strong></dt>
+</dl>
+<dl><dt><strong>modified_at</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<dl><dt><strong>redirects</strong></dt>
+</dl>
+<dl><dt><strong>region</strong></dt>
+</dl>
+<dl><dt><strong>tenant</strong></dt>
+</dl>
+<dl><dt><strong>totalCPU</strong></dt>
+</dl>
+<dl><dt><strong>totalDisk</strong></dt>
+</dl>
+<dl><dt><strong>totalNetBW</strong></dt>
+</dl>
+<dl><dt><strong>totalRAM</strong></dt>
+</dl>
+<dl><dt><strong>url</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
+
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613dcf250; POP&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('POPs', MetaData(bind=None), Column('id', ...tions.now at 0x7f1613dc5d90; now&gt;)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'POPs'</dl>
+
+<dl><dt><strong>diskUnits</strong> = 'GB'</dl>
+
+<dl><dt><strong>netBWUnits</strong> = 'Mbps'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="vCDN">class <strong>vCDN</strong></a>(sqlalchemy.ext.declarative.api.Base)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;<a href="#vCDN">vCDN</a>&nbsp;is&nbsp;identified&nbsp;by&nbsp;a&nbsp;single&nbsp;OpenStack&nbsp;Tenant.&nbsp;This&nbsp;Tenant&nbsp;would&nbsp;login&nbsp;in&nbsp;all&nbsp;the&nbsp;OpenStack&nbsp;POPs&nbsp;of&nbsp;the&nbsp;Infrastructure&nbsp;where&nbsp;resources&nbsp;can&nbsp;be&nbsp;allocated&nbsp;for&nbsp;it.<br>
+&nbsp;<br>
+UNIQUE&nbsp;=&nbsp;(name).&nbsp;Because&nbsp;each&nbsp;<a href="#vCDN">vCDN</a>&nbsp;is&nbsp;identified&nbsp;by&nbsp;a&nbsp;single&nbsp;name.<br>
+&nbsp;<br>
+`url`,`loginUser`,`loginPass`,`tenant`&nbsp;&nbsp;are&nbsp;the&nbsp;same&nbsp;credentials&nbsp;used&nbsp;by&nbsp;the&nbsp;Nova&nbsp;CLI&nbsp;client,&nbsp;ussually&nbsp;put&nbsp;in&nbsp;Enviroment&nbsp;Variables.<br>
+&nbsp;<br>
+The&nbsp;capacity&nbsp;values&nbsp;(RAM,&nbsp;disk,&nbsp;CPU,&nbsp;netBW)&nbsp;are&nbsp;values&nbsp;that&nbsp;are&nbsp;compared&nbsp;to&nbsp;the&nbsp;available&nbsp;resources&nbsp;of&nbsp;a&nbsp;<a href="#POP">POP</a>&nbsp;to&nbsp;determine&nbsp;if&nbsp;the&nbsp;<a href="#vCDN">vCDN</a>&nbsp;can&nbsp;be&nbsp;instantiated&nbsp;or&nbsp;not.<br>
+..&nbsp;seealso::&nbsp;<a href="#POP">POP</a>.canHostVCDN()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="vIOSLib.DataModels.html#vCDN">vCDN</a></dd>
+<dd>sqlalchemy.ext.declarative.api.Base</dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="vCDN-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, tenant<font color="#909090">=''</font>, loginUser<font color="#909090">=''</font>, loginPass<font color="#909090">=''</font>)</dt><dd><tt>:param&nbsp;tenant:&nbsp;Tenant&nbsp;name,&nbsp;not&nbsp;tenant&nbsp;Id<br>
+:type&nbsp;tenant:&nbsp;String<br>
+:param&nbsp;loginUser:<br>
+:type&nbsp;loginUser:&nbsp;String<br>
+:param&nbsp;loginPass:<br>
+:type&nbsp;loginPass:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="vCDN-__unicode__"><strong>__unicode__</strong></a>(self)</dt><dd><tt>:returns:&nbsp;<a href="#vCDN">vCDN</a>&nbsp;name</tt></dd></dl>
+
+<dl><dt><a name="vCDN-invariant"><strong>invariant</strong></a>(self)</dt><dd><tt>Tenant&nbsp;NOT&nbsp;empty&nbsp;and&nbsp;LoginUser&nbsp;NOT&nbsp;empty</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>defaultQosBW</strong></dt>
+</dl>
+<dl><dt><strong>demands</strong></dt>
+</dl>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>instances</strong></dt>
+</dl>
+<dl><dt><strong>loginPass</strong></dt>
+</dl>
+<dl><dt><strong>loginUser</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+</dl>
+<dl><dt><strong>tenant</strong></dt>
+</dl>
+<dl><dt><strong>vCPU</strong></dt>
+</dl>
+<dl><dt><strong>vDisk</strong></dt>
+</dl>
+<dl><dt><strong>vInstances</strong></dt>
+</dl>
+<dl><dt><strong>vNetBW</strong></dt>
+</dl>
+<dl><dt><strong>vRAM</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
+
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d7ba90; vCDN&gt;</dl>
+
+<dl><dt><strong>__table__</strong> = Table('vCDNs', MetaData(bind=None), Column('id',...=&lt;vCDNs&gt;, default=ColumnDefault(0)), schema=None)</dl>
+
+<dl><dt><strong>__tablename__</strong> = 'vCDNs'</dl>
+
+<dl><dt><strong>diskUnits</strong> = 'GB'</dl>
+
+<dl><dt><strong>netBWUnits</strong> = 'Mbps'</dl>
+
+<dl><dt><strong>qosBWUnits</strong> = 'kbps'</dl>
+
+<hr>
+Data descriptors inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br>
+<dl><dt><strong>metadata</strong> = MetaData(bind=None)</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>func</strong> = &lt;sqlalchemy.sql.functions._FunctionGenerator object&gt;</td></tr></table>
+</body></html>

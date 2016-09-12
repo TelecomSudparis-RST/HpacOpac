@@ -1,0 +1,104 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: package vIOSLib</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>vIOSLib</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/__init__.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/__init__.py</a></font></td></tr></table>
+    <p><tt>vIOSLib<br>
+===========<br>
+&nbsp;<br>
+Package&nbsp;containing&nbsp;all&nbsp;the&nbsp;modules&nbsp;and&nbsp;elements&nbsp;for&nbsp;the&nbsp;OMAC/HMAC&nbsp;Demo&nbsp;on&nbsp;OpenStack&nbsp;cloud<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.4<br>
+&gt;&nbsp;Date:&nbsp;Sept&nbsp;2016<br>
+&nbsp;<br>
+###Folders:<br>
+&nbsp;<br>
+&nbsp;*&nbsp;/static/&nbsp;is&nbsp;used&nbsp;for&nbsp;Flask&nbsp;HTTP&nbsp;Server&nbsp;to&nbsp;serve&nbsp;static&nbsp;files&nbsp;(the&nbsp;.PNG&nbsp;file&nbsp;of&nbsp;the&nbsp;Topologie)<br>
+&nbsp;*&nbsp;/templates/&nbsp;is&nbsp;used&nbsp;for&nbsp;Flask&nbsp;HTTP&nbsp;Server&nbsp;to&nbsp;have&nbsp;the&nbsp;Web&nbsp;pages&nbsp;to&nbsp;parse&nbsp;and&nbsp;dynamically&nbsp;serve<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vIOSLib.SettingsFile.read(INI_file)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vIOSLib.<a href="#-readSettingsFile">readSettingsFile</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vIOSLib.<a href="#-setDebug">setDebug</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vIOSLib.initialize()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+With&nbsp;this,&nbsp;any&nbsp;module&nbsp;can&nbsp;inherit&nbsp;the&nbsp;logger&nbsp;by&nbsp;doing<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;logging<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logger&nbsp;=&nbsp;logging.getLogger(__name__)</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Package Contents</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="vIOSLib.DBConnection.html">DBConnection</a><br>
+<a href="vIOSLib.DataModels.html">DataModels</a><br>
+<a href="vIOSLib.Messages.html">Messages</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.OMAC_Problem.html">OMAC_Problem</a><br>
+<a href="vIOSLib.OPAC_Problem.html">OPAC_Problem</a><br>
+<a href="vIOSLib.OpenStackConnection.html">OpenStackConnection</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.OptimizationModels.html">OptimizationModels</a><br>
+<a href="vIOSLib.Optimizer.html">Optimizer</a><br>
+<a href="vIOSLib.SettingsFile.html">SettingsFile</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.WebAdmin.html">WebAdmin</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-initializeLogging"><strong>initializeLogging</strong></a>()</dt><dd><tt>This&nbsp;initialize&nbsp;the&nbsp;logging&nbsp;service,&nbsp;by&nbsp;default&nbsp;on&nbsp;INFO&nbsp;level.&nbsp;This&nbsp;configures&nbsp;the&nbsp;logger&nbsp;object&nbsp;used&nbsp;by&nbsp;all&nbsp;the&nbsp;modules&nbsp;in&nbsp;the&nbsp;package.<br>
+&nbsp;<br>
+If&nbsp;there&nbsp;is&nbsp;a&nbsp;filename&nbsp;set,&nbsp;the&nbsp;logger2file&nbsp;handler&nbsp;is&nbsp;configured.<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;Internal&nbsp;Exceptions<br>
+&nbsp;<br>
+..Example::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vIOSLib.<a href="#-readSettingsFile">readSettingsFile</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vIOSLib.initialize()</tt></dd></dl>
+ <dl><dt><a name="-readSettingsFile"><strong>readSettingsFile</strong></a>()</dt><dd><tt>This&nbsp;function&nbsp;asks&nbsp;the&nbsp;INI&nbsp;file&nbsp;parser&nbsp;module,&nbsp;that&nbsp;must&nbsp;have&nbsp;read&nbsp;the&nbsp;INI&nbsp;file,&nbsp;to&nbsp;look&nbsp;for&nbsp;the&nbsp;options&nbsp;in&nbsp;the&nbsp;sections&nbsp;and&nbsp;variables&nbsp;that&nbsp;are&nbsp;of&nbsp;interest&nbsp;for&nbsp;this&nbsp;module.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;options&nbsp;are&nbsp;not&nbsp;present&nbsp;in&nbsp;the&nbsp;INI&nbsp;file,&nbsp;the&nbsp;existing&nbsp;values&nbsp;are&nbsp;not&nbsp;modified<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;so&nbsp;that&nbsp;we&nbsp;add&nbsp;or&nbsp;remove&nbsp;options&nbsp;from&nbsp;the&nbsp;INI&nbsp;file&nbsp;just&nbsp;by&nbsp;mofiying&nbsp;this&nbsp;functions.&nbsp;Also,&nbsp;the&nbsp;same&nbsp;INI&nbsp;entry&nbsp;can&nbsp;be&nbsp;read&nbsp;by&nbsp;many&nbsp;modules<br>
+&nbsp;<br>
+Options&nbsp;set:&nbsp;logfile,&nbsp;backupCount,&nbsp;maxBytes,&nbsp;debug<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Make&nbsp;sure&nbsp;that&nbsp;the&nbsp;SettingsFile&nbsp;module&nbsp;has&nbsp;been&nbsp;initialized&nbsp;and&nbsp;read&nbsp;a&nbsp;valid&nbsp;file<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SettingsFile.read(INI_file)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Messages.<a href="#-readSettingsFile">readSettingsFile</a>()</tt></dd></dl>
+ <dl><dt><a name="-setDebug"><strong>setDebug</strong></a>()</dt><dd><tt>Sets&nbsp;the&nbsp;logging&nbsp;level&nbsp;to&nbsp;DEBUG.&nbsp;This&nbsp;overrides&nbsp;or&nbsp;can&nbsp;be&nbsp;overriden&nbsp;by&nbsp;<a href="#-readSettingsFile">readSettingsFile</a>()</tt></dd></dl>
+ <dl><dt><a name="-setLogFile"><strong>setLogFile</strong></a>(filename)</dt><dd><tt>Sets&nbsp;the&nbsp;Filename&nbsp;where&nbsp;to&nbsp;write&nbsp;the&nbsp;logs.&nbsp;This&nbsp;overrides&nbsp;or&nbsp;can&nbsp;be&nbsp;overriden&nbsp;by&nbsp;<a href="#-readSettingsFile">readSettingsFile</a>()<br>
+&nbsp;<br>
+:param&nbsp;filename:&nbsp;A&nbsp;valid&nbsp;filename&nbsp;where&nbsp;to&nbsp;write&nbsp;the&nbsp;logs<br>
+:type&nbsp;filename:&nbsp;String</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>INI_Section</strong> = 'log'<br>
+<strong>backupCount</strong> = 2<br>
+<strong>debug</strong> = False<br>
+<strong>logfile</strong> = None<br>
+<strong>logger</strong> = &lt;logging.Logger object&gt;<br>
+<strong>maxBytes</strong> = 1024000</td></tr></table>
+</body></html>

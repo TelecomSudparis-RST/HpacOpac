@@ -1,0 +1,194 @@
+<!--
+
+	Ignacio Tamayo, TSP, 2016
+	Version 1.4
+	Date: July 2016
+
+	Web Page showing the calculated Migrations in the Infrastructure, based on the Demand
+	
+	There is a Button to run the Optimization Algorithm, based on the demand
+	
+	:param migrationsList: List of Migrations to show in a nice table
+	:type migrationsList: DataModels.Migration[]
+	:param redirectsList: List of Redirections to show in a nice table
+	:type redirectsList: DataModels.Redirection[]
+	:param instantiationList: List of Instantiations to show in a nice table
+	:type instantiationList: DataModels.Instantiation[]
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+<form method="POST" action="{{ url_for('simulationTable') }}">
+	
+<h2>List of Optimal Migrations</h2>
+<p> 
+	Values taken from HMAC algorithm running on the Infrastructure data, OpenStack state and Demands.
+</p>
+
+<br/> 
+
+
+	
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+					<a href="{{ url_for('migrationsTable',sort='demand') }}" title="Sort by Demand">Demand</a> <br> Clients@Location[BW Mbps]
+                </th>
+				<th class="column-header">
+                    <a href="{{ url_for('migrationsTable',sort='vcdn') }}" title="Sort by vCDN">vCDN</a>
+                </th>
+                <th class="column-header">
+					<a href="{{ url_for('migrationsTable',sort='fromPOP') }}" title="Sort by POP">From POP</a>
+                </th>
+                <th class="column-header">
+                    <a href="{{ url_for('migrationsTable',sort='toPOP') }}" title="Sort by POP">To POP</a>
+                </th>
+                <th class="column-header">
+					  <a href="{{ url_for('migrationsTable',sort='cost') }}" title="Sort by Cost">Cost</a> * [units]
+                </th>
+                <th class="column-header">
+					<a href="{{ url_for('migrationsTable',sort='delay') }}" title="Sort by Delay">Delay</a> ** [mins]
+                </th>
+                
+                 <th class="column-header">
+					Minimum Link BW [Mbps]
+                </th>
+                <th class="column-header">
+					Created At
+                </th>
+                 <th class="column-header">
+					Migrate ***
+                </th>
+            </tr>
+        </thead>
+        {% for mig in migrationsList %}
+			<tr>
+				<td class="col-name"> 
+					{% for d in mig.demands %}
+
+						{{ d.clientGroup.name }} @ {{  d.clientGroup.location.name }} [{{ d.bw|round(2) }}] <br>
+
+					{% endfor %} 
+				</td>
+				<td class="col-name" >  {{ mig.instance.vcdn.name }}  </td>
+				<td class="col-name">   {{ mig.instance.pop.name }} @ {{ mig.instance.pop.location.name }} </td>
+				<td class="col-name">   {{ mig.dstPop.name }} @ {{ mig.dstPop.location.name }}  </td>
+				<td class="col-name">   {{ mig.cost }}   </td>
+				<td class="col-name">   {{ mig.delay|round(0,'ceil') }}   </td>
+				
+				<td class="col-name">   {{ mig.minBW }}   </td>
+				<td class="col-name">   {{ mig.created_at }}   </td>
+				<td class="col-name">  <input type="checkbox" name="migrations" id="{{ mig.id }}" value="{{ mig.id }}">   </td>
+			</tr>
+        {% endfor %}
+	</table>
+	<br>
+	
+<small> 
+	(*)The <b> Cost </b> is calculated as (vCDN Disk size) * (migration path hops ) * (Migration Cost Multiplier).
+	<br>
+	(**) The <b> Delay </b> is calculated as (vCDN Disk size) * (migration path hops ) / (minimum BW link in path). This is an estimative value and a real Migration time would differ from this value.
+	<br>
+	(***) The <b> Migrate </b> option is possible only if there is no Instance of the vCDN in the Destination POP. If there is already an Instance of the vCDN, then the operation is a Scale-out, where the capacity at the Source POP could be adjusted and the Demands redirected to the optimal POP.
+</small>
+
+<h2>List of Optimal Demands Redirections</h2>
+<p> Values taken from HMAC algorithm running on the Infrastructure data and OpenStack state </p>
+<br/> 
+
+
+	<table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+					<a href="{{ url_for('migrationsTable',sort='demand') }}" title="Sort by Demand">Demand</a> <br> Clients@Location[BW Mbps]
+                </th>
+				<th class="column-header">
+                    <a href="{{ url_for('migrationsTable',sort='vcdn') }}" title="Sort by vCDN">vCDN</a>
+                </th>
+                <th class="column-header">
+					<a href="{{ url_for('migrationsTable',sort='fromPOP') }}" title="Sort by POP">From POP</a>
+                </th>
+                <th class="column-header">
+                    <a href="{{ url_for('migrationsTable',sort='toPOP') }}" title="Sort by POP">To POP</a>
+                </th>
+                <th class="column-header">
+                    Created At
+                </th>
+               </th>
+                 <th class="column-header">
+					Redirect *
+                </th>
+            </tr>
+        </thead>
+	{% for red in redirectsList %}
+		<tr>
+			
+			<td class="col-name">   {{ red.demand.clientGroup.name }} @ {{ red.demand.clientGroup.location.name }} [{{ red.demand.bw|round(2) }}] </td>
+			<td class="col-name" >  {{ red.demand.vcdn.name }}  </td>
+			<td class="col-name">   {{ red.demand.pop.name }} @ {{ red.demand.pop.location.name }} </td>
+			<td class="col-name">   {{ red.dstPop.name }} @ {{ red.dstPop.location.name }}  </td>
+			
+			<td class="col-name">   {{ red.created_at }}   </td>
+			<td class="col-name">    <input type="checkbox" name="redirections" id="{{ red.id }}" value="{{ red.id }}">   </td>
+		</tr>
+	{% endfor %}
+			
+        
+	</table>
+	<br>
+	
+<small> 
+	(*) The <b> Redirect </b> option is possible only if there is an Instance of the vCDN in the Destination POP.
+</small>
+
+<h2>List of Instantiations </h2>
+<p> Values taken from HMAC algorithm running on the Infrastructure data and OpenStack state </p>
+<br/> 
+
+
+	<table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+					<a href="{{ url_for('migrationsTable',sort='demand') }}" title="Sort by Demand">Demand</a> <br> Clients@Location[BW Mbps]
+                </th>
+				<th class="column-header">
+                    <a href="{{ url_for('migrationsTable',sort='vcdn') }}" title="Sort by vCDN">vCDN</a>
+                </th>
+                <th class="column-header">
+					POP
+                </th>
+                <th class="column-header">
+                    Created At
+                </th>
+               
+            </tr>
+        </thead>
+    {% for d in invalidDemandList %}
+		<tr>
+			<td class="col-name">   {{ d.clientGroup.name }} @ {{ d.clientGroup.location.name }} [{{ d.bw|round(2) }}] </td>
+			<td class="col-name" >  {{ d.vcdn.name }}  </td>
+			<td class="col-name">   {{ d.pop.name }} @ {{ d.pop.location.name }} </td>
+			
+			<td class="col-name">   {{ d.created_at }}   </td>
+			<td class="col-name">  {% if d.invalidInstance == True %}  <input type="checkbox" name="invalidDemands" id="{{ d.id }}" value="{{ d.id }}"> {% endif %} </td>
+		</tr>
+	{% endfor %}
+	</table>
+	<br>
+	
+
+	<p>
+		<input type="submit" value="Simulate" name="simulate"  id="simulate" onclick="this.style.display='none';">
+	</p>
+</form>
+
+	<br>
+       
+
+{% endblock %}

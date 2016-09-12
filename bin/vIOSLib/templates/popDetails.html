@@ -1,0 +1,149 @@
+<!--
+
+Ignacio Tamayo, TSP, 2016
+Version 1.4
+Date: Sept 2016
+
+	Web Page showing the details of a POP in the Infrastructure
+	
+	Links to the details page of a vCDN
+
+	:param pop: A POP to show in a nice table
+	:type pop: DataModels.POP
+	:param POPUrl: URL for the Dashboard of this POP
+	:type POPUrl: String
+
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+
+
+<h2>Details of POP {{ pop.name }}</h2>
+<p> Values taken from the OpenStack Controller via API calls</p>
+<p> Open <a href="{{pop.dashboardUrl()}}" target="_blank"> OpenStack DashBoard </a></p>
+
+<h3>vCDN running on this POP</h3>
+
+<br>
+
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    vCDN
+                </th>
+                <!--th class="column-header">
+					RAM (Quota/Used)* [MB]
+                </th>
+                <th class="column-header">
+                    VCPUs (Quota/Used)*
+                </th-->
+                <th class="column-header">
+					VMs (Quota/Used)*
+                </th>
+                <th class="column-header">
+                    Metrics: CPU Utilization (min/avg/max) [%]
+                </th>
+                <th class="column-header">
+                    Metrics: Disk Usage (min/avg/max) [GB]
+                </th>
+                <th class="column-header">
+                    Metrics: RAM Usage (min/avg/max) [MB]
+                </th>
+                <th class="column-header">
+                    Metrics: VCPU Usage (min/avg/max)
+                </th>
+                <th class="column-header">
+                    Metrics: Network In BW (min/avg/max) [kbps]
+                </th>
+                <th class="column-header">
+                    Metrics: Network Out BW (min/avg/max) [kbps]
+                </th>
+                <th class="column-header">
+                    Sample hours**
+                </th>
+                 <th class="column-header">
+                    Sampled At
+                </th>                
+            </tr>
+        </thead>
+        {% for i in pop.instances %}
+			<tr>
+				<td class="col-name"> <a href="{{ url_for('vCDNDetails',vcdnId = i.vcdn.id ) }}"> {{ i.vcdn.name }} </a></td>
+				<!--td class="col-name"> {{ i.maxRAM }}/{{ i.curRAM }}</td>
+				<td class="col-name"> {{ i.maxCPU }}/{{ i.curCPU }}</td-->
+				<td class="col-name"> {{ i.maxInstances }}/{{ i.curInstances }}</td>
+				{% if i.metric %}
+				<td class="col-name"> {{ i.metric.cpuUtil_min|round(2) }} / {{ i.metric.cpuUtil_avg|round(2) }} / {{ i.metric.cpuUtil_max|round(2) }}  </td>
+				<td class="col-name"> {{ i.metric.diskrootsize_min }} / {{ i.metric.diskrootsize_avg }} / {{ i.metric.diskrootsize_max }} </td>
+				<td class="col-name"> {{ i.metric.memory_min }} / {{ i.metric.memory_avg }} / {{ i.metric.memory_max }}  </td>
+				<td class="col-name"> {{ i.metric.vcpu_min }} / {{ i.metric.vcpu_avg }} / {{ i.metric.vcpu_max }} </td>
+				<td class="col-name"> {{ i.metric.networkInBps_min|round(2) }} / {{ i.metric.networkInBps_avg|round(2) }} / {{ i.metric.networkInBps_max|round(2) }}   </td>
+				<td class="col-name"> {{ i.metric.networkOutBps_min|round(2) }} / {{ i.metric.networkOutBps_avg|round(2) }} / {{ i.metric.networkOutBps_max|round(2) }}  </td>
+				<td class="col-name"> {{ i.metric.durationHours }}  </td>
+				<td class="col-name"> {{ i.metric.sampletime }} </td>
+				{% else %}
+				<td class="col-name" colspan=8> N/A </td>				
+				{% endif %}
+			</tr>
+        {% endfor %}
+	
+	</table>
+	
+	
+<small> 
+	(*) The <b> Quota </b> value is obtained from the OpenStack Quota set for the <i>vCDN</i> Tenant. The <b> Used </b> value is obtained from OpenStack Controller as the sum of all resources taken by the <i>vCDN</i> Tenant.
+	<br>
+	(**) The <b> Metrics </b> values are obtained from OpenStack Telemetry, as the average value of the resource statistics for the <i>vCDN</i> Tenant. The average value is calculated from all the data samples available for the last <b>Sample hours</b>. Check OpenStack Telemetry Service for details.
+	
+</small>
+
+<br>       
+<h3>Hypervisors on this POP</h3>
+<p>These values are regardeless of the Tenants, it is total OpenStack Compute resources usage.</p>
+<br>
+
+	
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    Name
+                </th>
+                <th class="column-header">
+                    Model
+                </th>
+                <th class="column-header">
+					RAM (Available/Used) [MB]
+                </th>
+                <th class="column-header">
+                    VCPUs (Available/Used)
+                </th>
+                <th class="column-header">
+					Disk (Available/Used) [GB]
+                </th>
+                 <th class="column-header">
+                    Modified At
+                </th>                
+            </tr>
+        </thead>
+        {% for h in pop.hypervisors %}
+			<tr>
+				<td class="col-name">  {{ h.name }} </td>
+				<td class="col-name">  {{ h.model }} </td>
+				<td class="col-name"> {{ h.maxRAM }}/{{ h.curRAM }}</td>
+				<td class="col-name"> {{ h.maxCPU }}/{{ h.curCPU }}</td>
+				<td class="col-name"> {{ h.maxDisk }}/{{ h.curDisk }}</td>
+				<td class="col-name"> {{ h.modified_at }} </td>				
+			</tr>
+        {% endfor %}
+	
+	</table>
+	<br>
+       
+
+{% endblock %}

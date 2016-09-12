@@ -1,0 +1,116 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module vIOSLib.SettingsFile</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="vIOSLib.html"><font color="#ffffff">vIOSLib</font></a>.SettingsFile</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/SettingsFile.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/SettingsFile.py</a></font></td></tr></table>
+    <p><tt>INI&nbsp;config&nbsp;file&nbsp;parser<br>
+======================<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.4<br>
+&gt;&nbsp;Date:&nbsp;Sept&nbsp;2016<br>
+&nbsp;<br>
+Some&nbsp;modules&nbsp;use&nbsp;default&nbsp;values&nbsp;or&nbsp;requiere&nbsp;config&nbsp;parameters&nbsp;set&nbsp;in&nbsp;the&nbsp;INI-format&nbsp;file.&nbsp;This&nbsp;module&nbsp;gets&nbsp;those&nbsp;values&nbsp;from&nbsp;the&nbsp;file<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SettingsParser.<a href="#-read">read</a>(arg)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;SettingsParser.<a href="#-getDBString">getDBString</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;db_url&nbsp;=&nbsp;SettingsParser.<a href="#-getDBString">getDBString</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Module.readSettingsFile()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Another&nbsp;module,&nbsp;trusting&nbsp;SettingsFile&nbsp;has&nbsp;read&nbsp;a&nbsp;valid&nbsp;INI&nbsp;file,&nbsp;can&nbsp;implement&nbsp;their&nbsp;own&nbsp;funtion&nbsp;to&nbsp;read&nbsp;their&nbsp;options&nbsp;on&nbsp;their&nbsp;own<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;Module.readSettingsFile():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;SettingsParser.getInt(MySection,MyOption):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;=&nbsp;SettingsParser.getInt(MySection,MyOption)<br>
+&nbsp;<br>
+This&nbsp;can&nbsp;then&nbsp;be&nbsp;changed&nbsp;to&nbsp;JSON&nbsp;or&nbsp;XML&nbsp;file,&nbsp;without&nbsp;altering&nbsp;the&nbsp;receving&nbsp;modules.<br>
+&nbsp;<br>
+Also,&nbsp;the&nbsp;other&nbsp;modules&nbsp;are&nbsp;not&nbsp;aware&nbsp;of&nbsp;the&nbsp;Settings&nbsp;File&nbsp;mechanisms,&nbsp;they&nbsp;just&nbsp;ask&nbsp;for&nbsp;an&nbsp;optionName&nbsp;to&nbsp;be&nbsp;searched&nbsp;in&nbsp;a&nbsp;sectionName<br>
+&nbsp;<br>
+------------------------------------<br>
+The&nbsp;config&nbsp;file&nbsp;is&nbsp;INI&nbsp;structure<br>
+&nbsp;<br>
+[Section]<br>
+Option&nbsp;=&nbsp;Value<br>
+&nbsp;<br>
+[database]<br>
+url&nbsp;=&nbsp;Value<br>
+&nbsp;<br>
+[DEFAULT]<br>
+Option&nbsp;=&nbsp;Value<br>
+------------------------------------</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="ConfigParser.html">ConfigParser</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-getDBString"><strong>getDBString</strong></a>()</dt><dd><tt>Gets&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;option&nbsp;URL_Option&nbsp;in&nbsp;the&nbsp;config&nbsp;file.&nbsp;<br>
+If&nbsp;the&nbsp;option&nbsp;is&nbsp;not&nbsp;found,&nbsp;None&nbsp;is&nbsp;returned<br>
+&nbsp;<br>
+..&nbsp;warning::&nbsp;Call&nbsp;after&nbsp;<a href="#-read">read</a>()<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;the&nbsp;String&nbsp;of&nbsp;the&nbsp;DB&nbsp;URL&nbsp;or&nbsp;None<br>
+:rtype:&nbsp;String&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-getOptionBoolean"><strong>getOptionBoolean</strong></a>(sectionName, optionName)</dt><dd><tt>..&nbsp;seealso::&nbsp;<a href="#-getOptionString">getOptionString</a>()<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;optionName&nbsp;boolean&nbsp;value,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;boolean&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-getOptionFloat"><strong>getOptionFloat</strong></a>(sectionName, optionName)</dt><dd><tt>..&nbsp;seealso::&nbsp;<a href="#-getOptionString">getOptionString</a>()<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;optionName&nbsp;float&nbsp;value,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;float&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-getOptionInt"><strong>getOptionInt</strong></a>(sectionName, optionName)</dt><dd><tt>..&nbsp;seealso::&nbsp;<a href="#-getOptionString">getOptionString</a>()<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;optionName&nbsp;integer&nbsp;value,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;int&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-getOptionString"><strong>getOptionString</strong></a>(sectionName, optionName)</dt><dd><tt>Looks&nbsp;for&nbsp;the&nbsp;optionName&nbsp;in&nbsp;the&nbsp;sectionName&nbsp;or&nbsp;the&nbsp;DEFAULT&nbsp;section.&nbsp;<br>
+If&nbsp;found,&nbsp;the&nbsp;value&nbsp;is&nbsp;returned.&nbsp;If&nbsp;not&nbsp;found,&nbsp;None&nbsp;is&nbsp;returned<br>
+&nbsp;<br>
+..&nbsp;warning::&nbsp;Call&nbsp;after&nbsp;<a href="#-read">read</a>()<br>
+&nbsp;<br>
+:param&nbsp;sectionName:&nbsp;Name&nbsp;of&nbsp;the&nbsp;section&nbsp;in&nbsp;the&nbsp;INI&nbsp;file&nbsp;where&nbsp;the&nbsp;option&nbsp;is&nbsp;searched.&nbsp;The&nbsp;DEFAULT&nbsp;section&nbsp;is&nbsp;also&nbsp;checked<br>
+:type&nbsp;sectionName:&nbsp;String<br>
+:param&nbsp;optionName:&nbsp;name&nbsp;of&nbsp;the&nbsp;option&nbsp;to&nbsp;search<br>
+:type&nbsp;optionName:&nbsp;String<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;optionName&nbsp;String&nbsp;value,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;String&nbsp;or&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-read"><strong>read</strong></a>(filename)</dt><dd><tt>Reads&nbsp;the&nbsp;INI&nbsp;file&nbsp;passed&nbsp;as&nbsp;parameter.&nbsp;It&nbsp;is&nbsp;assumed&nbsp;that&nbsp;the&nbsp;file&nbsp;does&nbsp;exist&nbsp;and&nbsp;is&nbsp;readable<br>
+&nbsp;<br>
+:param&nbsp;filename:&nbsp;Filename&nbsp;to&nbsp;read<br>
+:type&nbsp;filename:&nbsp;String<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;LookupError&nbsp;if&nbsp;unable&nbsp;to&nbsp;read&nbsp;the&nbsp;file</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>Config</strong> = &lt;ConfigParser.ConfigParser instance&gt;<br>
+<strong>Database_Section</strong> = 'database'<br>
+<strong>URL_Option</strong> = 'url'</td></tr></table>
+</body></html>

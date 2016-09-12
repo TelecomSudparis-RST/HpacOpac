@@ -1,0 +1,94 @@
+<!--
+
+	Ignacio Tamayo, TSP, 2016
+	Version 1.4
+	Date: Sept 2016
+
+	Web Page showing the executed Migrations and Instantiations
+	
+	This mentions the executions triggered and offers a link to the OpenStack POPs to check the migration process
+	
+	:param migrationsList: List of Migrations to execute
+	:type migrationsList: DataModels.HmacResult[]
+	:param instantiationList: List of Demands to satisfy
+	:type instantiationList: DataModels.Demands[]
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+
+<h2>List of Executed Migrations</h2>
+<p> 
+	Selected operations from HMAC simulation page.
+	<br>
+	This operations have been triggered internally, its status would have to be monitored in the OpenStack Controllers or via the messages left by vIOS in the logs.
+</p>
+<br/> 
+	
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    vCDN
+                </th>
+                <th class="column-header">
+					From POP
+                </th>
+                <th class="column-header">
+                    To POP
+                </th>
+            </tr>
+        </thead>
+        {% for mig in migrationsList %}
+			<tr>
+				
+				<td class="col-name" >  {{ mig.instance.vcdn.name }}  </td>
+				<td class="col-name">   <a href=" {{mig.instance.pop.dashboardUrl() }} " target="_blank" >{{ mig.instance.pop.name }}</a> @ {{ mig.instance.pop.location.name }} </td>
+				<td class="col-name">   <a href=" {{mig.dstPop.dashboardUrl() }} " target="_blank" >{{ mig.dstPop.name }}</a> @ {{ mig.dstPop.location.name }}  </td>
+			</tr>
+        {% endfor %}
+       </table>
+	<br>
+	
+	
+<h2>List of Executed Instantiations </h2>
+<p> 
+	Selected operations from HMAC simulation page.
+	<br>
+	This operations have been triggered internally, its status would have to be monitored in the OpenStack Controllers or via the messages left by vIOS in the logs.
+</p>
+<br>
+
+
+	<table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				
+				<th class="column-header">
+                    vCDN
+                </th>
+                <th class="column-header">
+					POP
+                </th>
+            </tr>
+        </thead>
+    {% for d in instantiationList %}
+		<tr>
+			
+			<td class="col-name" >  {{ d.vcdn.name }}  </td>
+			<td class="col-name">   <a href=" {{d.pop.dashboardUrl() }} " target="_blank">{{ d.pop.name }}</a> @ {{ d.pop.location.name }}  </td>
+			
+		</tr>
+	{% endfor %}
+	</table>
+	<br>
+
+
+	<h3><i> Once the operations are finished, remember to UPDATE the POP information from the 'POPs' tab  </i></h3>
+	
+<br>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+<!--
+
+Ignacio Tamayo, TSP, 2016
+Version 1.4
+Date: Sept 2016
+
+	Web Page showing the list of POPs in the Infrastructure
+	
+	Links to the details page of a POP
+
+	:param popList: List of POPs to show in a nice table
+	:type popList: DataModels.POP[]
+
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+<h2>List of POPs in the Operator's Infrastructure</h2>
+<p> Values taken from the OpenStack Controllers via API calls</p>
+<br>
+<p>
+	<form method="POST" action="{{ url_for('popsTable') }}">
+		<input type="submit" value="Update Infrastructure State" name="updatePOPs"  id="updatePOPs" onclick="this.style.display='none';">
+	</form>
+</p>
+<br>
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    Name
+                </th>
+                <th class="column-header">
+					Location
+                </th>
+                <th class="column-header">
+                    Installed Storage* [GB]
+                </th>
+                <th class="column-header">
+                    OpenStack Storage (Total/Used)** [GB]
+                </th>
+                <th class="column-header">
+                    Installed RAM* [MB]
+                </th>
+                <th class="column-header">
+                    OpenStack RAM (Total/Used)** [MB]
+                </th>
+                <th class="column-header">
+                    Installed CPUs*
+                </th>
+                <th class="column-header">
+                    OpenStack CPUs (Total/Used)**
+                </th>
+                <th class="column-header">
+                    Installed NetBW*  [Mbps]
+                </th>
+                <th class="column-header">
+                    OpenStack NetBW (Used)*** [Mbps]
+                </th>
+                <th class="column-header">
+                    Running VMs*
+                </th>
+                 <th class="column-header">
+                    Updated At
+                </th>                
+            </tr>
+        </thead>
+        {% for pop in popList %}
+			<tr>
+				<!--td class="col-name" onclick="doPostPopId({{ pop.id }});"> {{ pop.name }} </td-->
+				<td class="col-name" > <a href="{{ url_for('popDetails',popId=pop.id ) }}"> {{ pop.name }} </td>
+				<td class="col-name"> {{ pop.location.name }}</td>
+				<td class="col-name"> {{ pop.totalDisk }} </td>
+				<td class="col-name"> {{ pop.maxDisk }}/{{ pop.curDisk }} </td>
+				<td class="col-name"> {{ pop.totalRAM }}  </td>
+				<td class="col-name"> {{ pop.maxRAM }}/{{ pop.curRAM }} </td>
+				<td class="col-name"> {{ pop.totalCPU }}</td>
+				<td class="col-name"> {{ pop.maxCPU }}/{{ pop.curCPU }}</td>
+				<td class="col-name"> {{ pop.totalNetBW }}  </td>
+				<td class="col-name"> {{ pop.curNetBW }}  </td>
+				<td class="col-name"> {{ pop.curInstances }} </td>
+				<td class="col-name"> {{ pop.modified_at }} </td>
+			</tr>
+        {% endfor %}
+	
+	</table>
+	<br>
+  <small> 
+	(*) The <b>Installed</b> values are input by the Operator, indicating what is supposed to be physically installed in the POP. 
+	<br>
+	(**) The <b>OpenStack (Total/Used)</b> are the actual capacity values as taken from the OpenStack Controllers, might differ from the <i>Installed</i> values.
+	<br>
+	(***)The <b>Used OpenStack NetBW </b> is calculated as the sum of all the average network input+output rates from all the <i>vCDNs</i> in the <i>POP</i>.
+	
+</small>
+<br>     
+
+{% endblock %}

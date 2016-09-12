@@ -1,0 +1,104 @@
+<!--
+
+Ignacio Tamayo, TSP, 2016
+Version 1.4
+Date: Sept 2016
+
+	Web Page showing the details of a vCDN in the Infrastructure
+	
+	Links to the details page of a POP
+
+	:param vcdn: a single vcdn to show in a nice table
+	:type vcdn: DataModels.vCDN
+
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+
+<h2>Details of vCDN {{ vcdn.name }}</h2>
+<p> Values taken from the OpenStack Controller via API calls</p>
+
+<h3>POPs where this vCDN is present</h3>
+
+
+<br>
+       
+       
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    POP
+                </th>
+                <th class="column-header">
+                    Location
+                </th>
+                <th class="column-header">
+					RAM (Quota/Used) [MB]
+                </th>
+                <th class="column-header">
+                    VCPUs (Quota/Used)
+                </th>
+                <th class="column-header">
+					VMs (Quota/Used)
+                </th>             
+            </tr>
+        </thead>
+        {% for i in vcdn.instances %}
+			<tr>
+				<td class="col-name"> <a href="{{ url_for('popDetails',popId = i.pop.id ) }}"> {{ i.pop.name }} </a></td>
+				<td class="col-name"> {{ i.pop.location.name }}</td>
+				<td class="col-name"> {{ i.maxRAM }}/{{ i.curRAM }}</td>
+				<td class="col-name"> {{ i.maxCPU }}/{{ i.curCPU }}</td>
+				<td class="col-name"> {{ i.maxInstances }}/{{ i.curInstances }}</td>
+				
+			</tr>
+        {% endfor %}
+	
+	</table>
+	<br>
+
+      
+<!--h3>QOS Map for this vCDN</h3>
+
+<p> This maps is used as exceptions to the use of the <b>Default target QOS BW for clients</b>.
+<br> 
+If a client is not present in the Map, the <b>Default target QOS BW for clients</b> is used for <i>Demand Total BW</i> calculations 
+</p>
+
+<hr>
+	
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+                    Client Group
+                </th>
+                <th class="column-header">
+                    Location
+                </th>
+                <th class="column-header">
+					QoS BW *  [kbps]
+                </th>
+            </tr>
+        </thead>
+        {% for q in vcdn.qosMaps %}
+			<tr>
+				<td class="col-name">  {{ q.clientGroup.name }} </td>
+				<td class="col-name">  {{ q.clientGroup.location.name }} </td>
+				<td class="col-name"> {{ q.bw }}</td>
+			</tr>
+        {% endfor %}
+	
+	</table>
+	<br>
+       
+  <small> 
+	(*) The <b>QoS BW</b> value is for a single <i>Demand</i> request. This is an informational value.
+</small-->
+
+{% endblock %}

@@ -1,0 +1,203 @@
+<!--
+
+	Ignacio Tamayo, TSP, 2016
+	Version 1.4
+	Date: Sept 2016
+
+	Web Page showing the simulation results of applying the selected Migrations in the Infrastructure, based on the Demands
+	
+	There is a Button to run the execute the Simulation in the /Migrations page
+	
+	:param migrationsList: List of Migrations to execute
+	:type migrationsList: DataModels.HmacResult[]
+	:param alteredDemandsList: List of Redirections to execute
+	:type alteredDemandsList: OptimizationModels.fakeRedirects[]
+	:param instantiationList: List of Demands to satisfy
+	:type instantiationList: DataModels.Demands[]
+-->
+
+{% extends 'layout.html' %}
+
+      
+{% block body %}
+
+
+<h2>List of Simulated Migrations</h2>
+<p> 
+	Values taken from HMAC algorithm result page, based on the selected items in the list.
+</p>
+<br/> 
+	<form method="POST" action="{{ url_for('executionTable') }}">
+		
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				
+				<th class="column-header">
+                    vCDN
+                </th>
+                <th class="column-header">
+					From POP
+                </th>
+                <th class="column-header">
+                    To POP
+                </th>
+                <th class="column-header">
+					Execute*
+                </th>
+            </tr>
+        </thead>
+        {% for mig in migrationsList %}
+			<tr>
+				
+				<td class="col-name" >  {{ mig.instance.vcdn.name }}  </td>
+				<td class="col-name">   {{ mig.instance.pop.name }} @ {{ mig.instance.pop.location.name }} </td>
+				<td class="col-name">   {{ mig.dstPop.name }} @ {{ mig.dstPop.location.name }}  </td>
+				<td class="col-name">  <input type="checkbox" name="migrations" id="{{ mig.id }}" value="{{ mig.id }}">  </td>
+			</tr>
+        {% endfor %}
+       </table>
+	<br>
+	
+		
+<small> 
+	(*)The <b> Migrations </b> can be triggered on the OpenStack Infrasctructure, however its status would have to be monitored in the OpenStack Controllers and via the messages left by vIOS in the logs.
+	<br>
+</small>
+
+	<br>
+
+<h2>List of Simulated Instantiations </h2>
+<p> Values taken from HMAC algorithm result page, based on the selected items in the list. </p>
+<br/> 
+
+
+	<table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				
+				<th class="column-header">
+                    vCDN
+                </th>
+                <th class="column-header">
+					POP
+                </th>
+                <th class="column-header">
+					POP
+                </th>
+            </tr>
+        </thead>
+    {% for d in instantiationList %}
+		<tr>
+			
+			<td class="col-name" >  {{ d.vcdn.name }}  </td>
+			<td class="col-name">   {{ d.pop.name }} @ {{ d.pop.location.name }} </td>
+			<td class="col-name">   <input type="checkbox" name="instantiations" id="{{ d.id }}" value="{{ d.id }}">  </td>
+		</tr>
+	{% endfor %}
+	</table>
+	<br>
+<small> 
+	(*)The <b> Migrations </b> can be triggered on the OpenStack Infrasctructure, however its status would have to be monitored in the OpenStack Controllers and via the messages left by vIOS in the logs.
+	<br>
+</small>
+	<br>
+	
+	<p>
+		<input type="submit" value="Execute" name="execute"  id="execute" onclick="this.style.display='none';">
+	</p>
+</form>
+
+
+<h2>Topologie Capacity Gomory-Hu Trees </h2>
+<p> The Topology Capacity Graph changes according to the Demands and the selected Optimizations. In order to fit the optimized infrastructure, some Demands would have been altered in the Simulation.</p>
+<br/> 
+
+<table class="table table-bordered" >
+	<thead>
+<tr>
+	<th> 
+		Topologie Capacity Gomory-Hu Tree
+	</th>
+	<th> 
+		Remaining Capacity Gomory-Hu Tree 
+		<br>
+		after Demands
+	</th>
+	<th> 
+		Optimized Capacity Gomory-Hu Tree 
+		<br>
+		after Migrations
+	</th>
+</tr>
+</thead>
+<tr>
+	<td>
+		<a href="{{ url_for('image', imageFilename=Topologie_Gomuri_filename, imageTitle="Capacity")  }}" target="_blank" >
+			<img src="{{ url_for('static', filename=Topologie_Gomuri_filename)  }}" alt="Gomuri" class="topologieImg">
+		</a>
+	</td>
+	<td>
+		<a href="{{ url_for('image', imageFilename=Topologie_Gomuri_Demanded_filename, imageTitle="Capacity before Optimization")  }}" target="_blank" >
+			<img src="{{ url_for('static', filename=Topologie_Gomuri_Demanded_filename)  }}" alt="Gomuri" class="topologieImg">
+		</a>
+	</td>
+	<td>
+		<a href="{{ url_for('image', imageFilename=Topologie_Gomuri_Simulated_filename, imageTitle="Capacity after Optimization")  }}" target="_blank" >
+			<img src="{{ url_for('static', filename=Topologie_Gomuri_Simulated_filename)  }}" alt="Gomuri" class="topologieImg">
+		</a>
+	</td>
+</tr>
+</table>
+
+<small>Click to open in a separate window. Take care of refreshing the page to update the browser's cache.</small>
+<br>
+<small>The edges values are given in [Mbps]. The radius of the POP node is proportional to the amount of Instances it contains</small>
+
+	<br>
+      
+    
+	</p>
+	</form>
+	<h2>Changes in the Demands</h2>
+	<p> 
+		There are the alterations to the Demands caused by the optimization changes. 
+		<br>
+		When a <i>Migration</i> is simulated, the <i>Demands</i> that consumed that <i>Instance</i> are altered to now use the optimal <i>POP</i> where the <i>vCDN</i> was migrated.
+		<br>
+		When a <i>Redirection</i> is simulated, the <i>Demand</i> is altered to use the optimal <i>POP</i> where the <i>Demand</i> has been redirected.
+	</p>
+	<br/> 
+    <table class="table table-striped table-bordered table-hover model-list">
+        <thead>
+            <tr>
+				<th class="column-header">
+					Clients@Location
+                </th>
+				<th class="column-header">
+                    vCDN
+                </th>
+                <th class="column-header">
+					From POP
+                </th>
+                <th class="column-header">
+                    To POP
+                </th>
+                <th class="column-header">
+					BW [Mbps] (Volume)
+                </th>
+            </tr>
+        </thead>
+        {% for red in alteredDemandsList %}
+			<tr>
+				<td class="col-name">   {{ red.clientGroupName }} @ {{ red.clientGroupLocationName }} </td>
+				<td class="col-name" >  {{ red.vcdnName }}  </td>
+				<td class="col-name">   {{ red.popName }} </td>
+				<td class="col-name">   {{ red.dstPopName }}  </td>
+				<td class="col-name">  {{ red.bw }} ({{ red.volume }})  </td>
+			</tr>
+        {% endfor %}
+	</table>
+	<br>
+
+{% endblock %}
