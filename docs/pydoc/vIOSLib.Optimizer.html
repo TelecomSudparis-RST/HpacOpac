@@ -58,8 +58,10 @@ For&nbsp;&nbsp;DB&nbsp;modifications,&nbsp;update/add/deletes&nbsp;queries,&nbsp
 </td><td width="25%" valign=top><a href="vIOSLib.OpenStackConnection.html">vIOSLib.OpenStackConnection</a><br>
 <a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
 </td><td width="25%" valign=top><a href="logging.html">logging</a><br>
-<a href="thread.html">thread</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="thread.html">thread</a><br>
+<a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -183,11 +185,7 @@ All&nbsp;simulated&nbsp;objects&nbsp;and&nbsp;elements&nbsp;are&nbsp;deleted,&nb
 :returns:&nbsp;&nbsp;FakeRedirect[]&nbsp;or&nbsp;None<br>
 &nbsp;<br>
 ..note::&nbsp;This&nbsp;function&nbsp;updates/Changes&nbsp;the&nbsp;Model's&nbsp;Gomory-Hu&nbsp;Tree.</tt></dd></dl>
- <dl><dt><a name="-time"><strong>time</strong></a>(...)</dt><dd><tt><a href="#-time">time</a>()&nbsp;-&gt;&nbsp;floating&nbsp;point&nbsp;number<br>
-&nbsp;<br>
-Return&nbsp;the&nbsp;current&nbsp;time&nbsp;in&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch.<br>
-Fractions&nbsp;of&nbsp;a&nbsp;second&nbsp;may&nbsp;be&nbsp;present&nbsp;if&nbsp;the&nbsp;system&nbsp;clock&nbsp;provides&nbsp;them.</tt></dd></dl>
- <dl><dt><a name="-triggerInstantiations"><strong>triggerInstantiations</strong></a>(instantiationIds)</dt><dd><tt>Does&nbsp;perform&nbsp;a&nbsp;set&nbsp;of&nbsp;Instantiations&nbsp;on&nbsp;the&nbsp;OpenStack&nbsp;Data&nbsp;Centers.<br>
+ <dl><dt><a name="-triggerInstantiations"><strong>triggerInstantiations</strong></a>(instantiations)</dt><dd><tt>Does&nbsp;perform&nbsp;a&nbsp;set&nbsp;of&nbsp;Instantiations&nbsp;on&nbsp;the&nbsp;OpenStack&nbsp;Data&nbsp;Centers.<br>
 This&nbsp;triggers&nbsp;several&nbsp;Threads&nbsp;for&nbsp;the&nbsp;completion&nbsp;of&nbsp;the&nbsp;instantation&nbsp;but&nbsp;does&nbsp;not&nbsp;wait&nbsp;for&nbsp;them.<br>
 The&nbsp;Instantation&nbsp;operations&nbsp;are&nbsp;not&nbsp;controlled,&nbsp;they&nbsp;have&nbsp;to&nbsp;be&nbsp;followed&nbsp;in&nbsp;the&nbsp;OpenStack&nbsp;controllers&nbsp;or&nbsp;the&nbsp;log&nbsp;files&nbsp;left&nbsp;by&nbsp;vIOS<br>
 &nbsp;<br>
@@ -200,7 +198,7 @@ The&nbsp;instantiaton&nbsp;is&nbsp;a&nbsp;copy&nbsp;because&nbsp;when&nbsp;descr
 :type&nbsp;instantiationIds:&nbsp;int[]<br>
 &nbsp;<br>
 ..note::&nbsp;Needed&nbsp;another&nbsp;DB&nbsp;session</tt></dd></dl>
- <dl><dt><a name="-triggerMigrations"><strong>triggerMigrations</strong></a>(migrationIds)</dt><dd><tt>Does&nbsp;perform&nbsp;a&nbsp;set&nbsp;of&nbsp;Migrations&nbsp;on&nbsp;the&nbsp;OpenStack&nbsp;Data&nbsp;Centers.<br>
+ <dl><dt><a name="-triggerMigrations"><strong>triggerMigrations</strong></a>(migrations)</dt><dd><tt>Does&nbsp;perform&nbsp;a&nbsp;set&nbsp;of&nbsp;Migrations&nbsp;on&nbsp;the&nbsp;OpenStack&nbsp;Data&nbsp;Centers.<br>
 This&nbsp;triggers&nbsp;several&nbsp;Threads&nbsp;for&nbsp;the&nbsp;completion&nbsp;of&nbsp;the&nbsp;migration&nbsp;but&nbsp;does&nbsp;not&nbsp;wait&nbsp;for&nbsp;them.<br>
 The&nbsp;Migrations&nbsp;operations&nbsp;are&nbsp;not&nbsp;controlled,&nbsp;they&nbsp;have&nbsp;to&nbsp;be&nbsp;followed&nbsp;in&nbsp;the&nbsp;OpenStack&nbsp;controllers&nbsp;or&nbsp;the&nbsp;log&nbsp;files&nbsp;left&nbsp;by&nbsp;vIOS<br>
 &nbsp;<br>

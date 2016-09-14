@@ -70,11 +70,13 @@ from keystoneclient.auth.identity import v2
 from keystoneclient import session
 from ceilometerclient import client as CielClient
 import glanceclient.v2.client as GlanceClient
-import glanceclient.exc as HTTPNotFound
+import glanceclient.exc as GlanceExceptions
+import novaclient.exceptions as NovaExceptions
 from datetime import datetime, timedelta			### Needed for time formating and time calculations
 import logging
 
 import time
+
 
 import Messages
 import SettingsFile
@@ -187,6 +189,8 @@ class APIConnection(object):
 								region_name = self.region
 								)
 								
+			# Nova = NovaApiClient.Client("2", session = Session)
+								
 			logger.debug( Messages.AuthOS_region_S % self.region)
 			
 			self.Nova.servers.list()
@@ -265,14 +269,17 @@ class APIConnection(object):
 			## auth = v2.Password(username="admin", password="ADMIN_PASS", tenant_name="admin", auth_url="http://controller-saclay:35357/v2.0")
 			
 			self.Session = session.Session(auth=auth)
-			self.Glance = GlanceClient.get_client(
+			self.Glance = GlanceClient.Client(
 								self.GLANCE_VERSION,
 								session = self.Session,
 								region_name = self.region
 								)
 			logger.debug( Messages.AuthOS_region_S % self.region)
-			list(self.Glance.images)
+			list(self.Glance.images.list())
 			logger.debug( Messages.Authenticated)
+			
+			#Glance = GlanceClient.Client("2", session = Session)
+			
 		except Exception,e :
 			logger.error( Messages.Exception_Glance_url_S_region_S_user_S_tenant_S % (self.auth_url,self.region ,self.user ,self.tenant))
 			logger.error(repr(e))
@@ -363,10 +370,9 @@ class APIConnection(object):
 		
 		try:
 			aImage = self.Glance.images.get(imageId)
-			
 			try:
-				image_file = open(os.path.join(TMP_FOLDER,filename), 'w+')
-				for chunk in aGlance.images.data(imageId):
+				image_file = open(filename, 'w+')
+				for chunk in self.Glance.images.data(imageId):
 					image_file.write(chunk)
 				image_file.close()
 				return True
@@ -374,7 +380,7 @@ class APIConnection(object):
 				#Not able to open file
 				return False
 			
-		except HTTPNotFound:
+		except GlanceExceptions.HTTPNotFound:
 			#Unable to retreive the Image
 			return False
 	#enddef
@@ -394,10 +400,10 @@ class APIConnection(object):
 		"""
 		
 		try:
-			aImage = self.Glance.images.create(name = imageName)
+			aImage = self.Glance.images.create(name = imageName, container_format = "bare", visibility = "private", disk_format="qcow2" )
 			self.Glance.images.upload(aImage.id, open(filename, 'rb'))			
 			return aImage.id
-		except HTTPNotFound, IOError:
+		except GlanceExceptions.HTTPNotFound, IOError:
 			#Unable to upload the Image
 			return False
 	#enddef
@@ -422,13 +428,19 @@ class APIConnection(object):
 			
 			server = self.Nova.servers.find(id = serverId)
 			serverMeta = ServerMetadata(name = server.name)
-			serverMeta.imageName = self.Nova.images.find(id = server.image.id).name
-			serverMeta.flavorName = self.Nova.flavors.find(id = server.flavor.id).name
-			serverMeta.NetworkNames = server.addresses.keys()
-			serverMeta.SecurityGroupNames = [ s['name'] for s in server.SecurityGroups]
+			serverMeta.imageName = self.Nova.images.find(id = server.image['id']).name
+			serverMeta.flavorName = self.Nova.flavors.find(id = server.flavor['id']).name
+			serverMeta.NetworkNames =  server.addresses.keys()
+			serverMeta.SecurityGroups = [ s.name for s in server.list_security_group()]
+			
+			
+			for address in server.addresses.values():
+				for ip in address:
+					if ip['OS-EXT-IPS:type'] == "floating":
+						serverMeta.floating_ip = True
+			
 			return serverMeta
 		except:
-			raise
 			return None
 	
 	def createServer(self, serverMetadata):
@@ -443,31 +455,107 @@ class APIConnection(object):
 		
 		"""
 		try:
-			imageObj = self.Nova.images.find(name = serverMetadata.imageName)
-			FlavorObj = self.Nova.flavors.find(name = serverMetadata.flavorName)
+			try:
+				imageObj = self.Nova.images.find(name = serverMetadata.imageName)
+				FlavorObj = self.Nova.flavors.find(name = serverMetadata.flavorName)
+			except NovaExceptions.NoUniqueMatch:
+				logger.error(Messages.Duplicated_element_S,serverMetadata.imageName )
+				return None
 			
-			networks = []
+			networksDict = []
 			for netName  in  serverMetadata.NetworkNames:
-				networks.append ( { 'net-id' : self.Nova.networks.find(label = netName).id } )
+				try:
+					networksDict.append ( { 'net-id' : self.Nova.networks.find(label = netName).id } )
+				except (NovaExceptions.NotFound, NovaExceptions.BadRequest):
+					pass
 			
 			secGroups = []
-			for secg  in  serverMetadata.SecurityGroupNames:
-				secGroups.append( self.Nova.security_groups.find(name=secg) )
-				
-			server = self.Nova.create( serverMetadata.name, imageObj, FlavorObj, nics=networks, security_groups = serverMetadata.SecurityGroupNames )	
+			for secg  in  serverMetadata.SecurityGroups:
+				try:
+					if self.Nova.security_groups.find(name=secg) is not None:
+						secGroups.append(secg)
+				except (NovaExceptions.BadRequest, NovaExceptions.NotFound):
+					pass
 			
+			try:
+				server = self.Nova.servers.create( serverMetadata.name, 
+													imageObj, 
+													FlavorObj, 
+													nics=networksDict, 
+													security_groups = secGroups )	
+			except NovaExceptions.BadRequest:
+				logger.error(Messages.Invalid_Server_Parameters_S,serverMetadata.to_dict() )
+				return None
+			except NovaExceptions.OverLimit:
+				logger.error(Messages.QuotaLimit )
+				return None
 						
 			time.sleep(5)
 			
-			floating_ip = self.Nova.floating_ips.create(self.Nova.floating_ip_pools.list()[0].name)
-			
-			server.add_floating_ip(floating_ip)
+			if serverMetadata.floating_ip:
+				floating_ip = self.Nova.floating_ips.create(self.Nova.floating_ip_pools.list()[0].name)
+				server.add_floating_ip(floating_ip)
 			
 			return server.id
 			
-		except:
-			raise
+		except (NovaExceptions.BadRequest, NovaExceptions.NotFound):
+			
 			return None
+	#enddef	
+	
+	def deleteServer(self, serverId):
+		"""
+		
+		Given a ServerId, it is deleted and its Floating IP returned to the Pool
+		
+		:param serverId: the server Id to be deleted
+		:type serverId: String as in Nova Server Id
+		
+		:returns: True if the VM was deleted OK; False else
+		
+		"""
+		try:
+			
+			server = self.Nova.servers.find(id = serverId)
+			
+			for address in server.addresses.values():
+				for ip in address:
+					if ip['OS-EXT-IPS:type'] == "floating":
+						pass
+						server.remove_floating_ip(ip['addr'])
+						self.Nova.floating_ips.delete(ip['addr'])
+			
+			server.pause()
+			
+			return True
+						
+		except NovaExceptions.NotFound:
+			logger.error(Messages.ServerId_S_NotFound % serverId )
+			return False
+	#enddef	
+	
+	def deleteImage(self, imageId):
+		"""
+		
+		Given an imageId, it is deleted
+		
+		:param imageId: the image Id to be deleted
+		:type imageId: String as in Glance Server Id
+		
+		:returns: True if the VM was deleted OK; False else
+		
+		"""
+		try:
+			
+			aImage = self.Glance.images.get(imageId)
+			
+			aImage = self.Glance.images.delete(imageId)
+			
+			return True
+						
+		except GlanceExceptions.HTTPNotFound:
+			logger.error(Messages.ImageId_S_NotFound % imageId )
+			return False
 	#enddef	
 	
 		
@@ -483,12 +571,11 @@ class APIConnection(object):
 		
 		"""
 		try:
-			aServer = self.Glance.servers.find(id = serverId)
+			aServer = self.Nova.servers.find(id = serverId)
 			return aServer.status.lower() == "active"
-		except :
-			raise
-			#Unable to retreive the Image
-			return None	
+		except NovaExceptions.NotFound:
+			#Unable to retreive the Server
+			return False
 	
 	def isImageReady(self,imageId):
 		"""
@@ -504,9 +591,9 @@ class APIConnection(object):
 		try:
 			aImage = self.Glance.images.get(imageId)
 			return aImage.status.lower() == "active"
-		except HTTPNotFound:
+		except GlanceExceptions.HTTPNotFound:
 			#Unable to retreive the Image
-			return None
+			return False
 	
 	def waitImageReady(self,imageId):
 		""" 
@@ -519,11 +606,14 @@ class APIConnection(object):
 			:returns: True if the image has 'ACTIVE' status, False else
 		"""
 		retries = 0
-		while( self.Glance.images.get(imageId).status != 'active') and retries < IMG_RETRIES:
-			time.sleep(IMG_TIMEOUT)
-			retries = retries + 1
-		
-		if retries >= GLANCE_RETRIES:
+		try:
+			while( self.Glance.images.get(imageId).status.lower() != 'active') and retries < IMG_RETRIES:
+				time.sleep(IMG_TIMEOUT)
+				retries = retries + 1
+		except GlanceExceptions.HTTPNotFound:
+			logger.error(Messages.ServerId_S_NotFound % serverId )
+			retries = SERVER_RETRIES
+		if retries >= IMG_RETRIES:
 			### The image is not ready ###
 			return False
 		else:
@@ -540,10 +630,16 @@ class APIConnection(object):
 			:returns: True if the image has 'ACTIVE' status, False else
 		"""
 		retries = 0
-		while( self.Nova.servers.find(id = serverId).status != 'active') and retries < SERVER_RETRIES:
-			time.sleep(SERVER_TIMEOUT)
-			retries = retries + 1
-		
+		try:
+			
+			while( self.Nova.servers.find(id = serverId).status.lower() != 'active') and retries < SERVER_RETRIES:
+				time.sleep(SERVER_TIMEOUT)
+				retries = retries + 1
+				
+		except NovaExceptions.NotFound:
+			logger.error(Messages.ServerId_S_NotFound % serverId )
+			retries = SERVER_RETRIES
+			 
 		if retries >= SERVER_RETRIES:
 			### The server is not ready ###
 			return False
@@ -850,6 +946,8 @@ class ServerMetadata(object):
 		
 		This metadata is used for cloning VMs
 		
+		This assumes that all OpenStack controllers are uniform, having the same Flavors, Images, NetworkNames and SecurityGroups
+		
 	"""
 	
 	name = ""
@@ -857,12 +955,25 @@ class ServerMetadata(object):
 	flavorName = ""
 	NetworkName = [""]
 	SecurityGroups = [""]
+	floating_ip = False
 	
-	
-	def __init__(self,name="",imageName = "", flavorName="",NetworkName=[],SecurityGroups=[]):
+	def __init__(self,name="",imageName = "", flavorName="",NetworkNames=[],SecurityGroups=[], floating_ip = False):
 		self.name = name
 		self.imageName = imageName
 		self.flavorName = flavorName
-		self.NetworkName = NetworkName
+		self.NetworkNames = NetworkNames
 		self.SecurityGroups = SecurityGroups
+		self.floating_ip = floating_ip
 	
+	def to_dict(self):
+		
+		d = dict()
+		d['name'] = self.name
+		d['imageName'] = self.imageName
+		d['flavorName'] = self.flavorName
+		d['nets'] = [ s for s in self.NetworkNames]
+		d['secGroups'] = [ s for s in self.SecurityGroups ]
+		d['floatingIp'] =  self.floating_ip
+		
+		
+		return d

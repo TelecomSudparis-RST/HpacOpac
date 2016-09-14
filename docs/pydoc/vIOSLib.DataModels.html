@@ -159,9 +159,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d47210; AlteredDemand&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465bc32d0; AlteredDemand&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('AlteredDemands', MetaData(bind=None), Col...tions.now at 0x7f1613d3ced0; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('AlteredDemands', MetaData(bind=None), Col...tions.now at 0x7f0465bb8f90; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'AlteredDemands'</dl>
 
@@ -227,9 +227,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e29e10; ClientGroup&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465caced0; ClientGroup&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('ClientGroups', MetaData(bind=None), Colum...tions.now at 0x7f1613e29ad0; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('ClientGroups', MetaData(bind=None), Colum...tions.now at 0x7f0465cacb90; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'ClientGroups'</dl>
 
@@ -309,9 +309,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d3c710; Demand&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465bb87d0; Demand&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('Demands', MetaData(bind=None), Column('id...tions.now at 0x7f1613d3c410; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('Demands', MetaData(bind=None), Column('id...tions.now at 0x7f0465bb84d0; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'Demands'</dl>
 
@@ -399,9 +399,9 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
 
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613de7dd0; Flavor&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c60e90; Flavor&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('Flavors', MetaData(bind=None), Column('id...tions.now at 0x7f1613de7ad0; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('Flavors', MetaData(bind=None), Column('id...tions.now at 0x7f0465c60b90; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'Flavors'</dl>
 
@@ -430,7 +430,7 @@ Data and other attributes inherited from sqlalchemy.ext.declarative.api.Base:<br
 &nbsp;<br>
 ..&nbsp;seealso::&nbsp;Optimizer.py<br>
 &nbsp;<br>
-UNIQUE&nbsp;=&nbsp;(demandId)&nbsp;as&nbsp;a&nbsp;migration&nbsp;HMAC&nbsp;responds&nbsp;to&nbsp;a&nbsp;single&nbsp;<a href="#Demand">Demand</a>.<br>&nbsp;</tt></td></tr>
+unique&nbsp;(instanceId,dstPopId)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="vIOSLib.DataModels.html#HmacResult">HmacResult</a></dd>
@@ -479,9 +479,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d47c50; HmacResult&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465bc3d10; HmacResult&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('HmacResults', MetaData(bind=None), Column...tions.now at 0x7f1613d47910; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('HmacResults', MetaData(bind=None), Column...tions.now at 0x7f0465bc39d0; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'HmacResults'</dl>
 
@@ -586,9 +586,9 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
 
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613de70d0; Hypervisor&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c60190; Hypervisor&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('Hypervisors', MetaData(bind=None), Column...tions.now at 0x7f1613dcfd90; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('Hypervisors', MetaData(bind=None), Column...tions.now at 0x7f0465c49e50; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'Hypervisors'</dl>
 
@@ -688,9 +688,9 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
 
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d95750; Instance&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c13810; Instance&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('Instances', MetaData(bind=None), Column('...tions.now at 0x7f1613d953d0; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('Instances', MetaData(bind=None), Column('...tions.now at 0x7f0465c13490; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'Instances'</dl>
 
@@ -753,9 +753,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e6cf90; Location&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c7f090; Location&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('Locations', MetaData(bind=None), Column('...tions.now at 0x7f1613e6cc10; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('Locations', MetaData(bind=None), Column('...tions.now at 0x7f0465ce7cd0; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'Locations'</dl>
 
@@ -868,9 +868,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613da5c10; Metric&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c20cd0; Metric&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('Metrics', MetaData(bind=None), Column('id...tions.now at 0x7f1613da5910; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('Metrics', MetaData(bind=None), Column('id...tions.now at 0x7f0465c209d0; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'Metrics'</dl>
 
@@ -947,7 +947,7 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e29310; MigrationCostMultiplier&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465cac3d0; MigrationCostMultiplier&gt;</dl>
 
 <dl><dt><strong>__table__</strong> = Table('MigrationCostMultipliers', MetaData(bind=...liers&gt;, default=ColumnDefault(1.0)), schema=None)</dl>
 
@@ -1021,9 +1021,9 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613e13c10; NetworkLink&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c7fcd0; NetworkLink&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('NetLinks', MetaData(bind=None), Column('i...tions.now at 0x7f1613e13810; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('NetLinks', MetaData(bind=None), Column('i...tions.now at 0x7f0465c7f8d0; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'NetLinks'</dl>
 
@@ -1219,9 +1219,9 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
 
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613dcf250; POP&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465c49310; POP&gt;</dl>
 
-<dl><dt><strong>__table__</strong> = Table('POPs', MetaData(bind=None), Column('id', ...tions.now at 0x7f1613dc5d90; now&gt;)), schema=None)</dl>
+<dl><dt><strong>__table__</strong> = Table('POPs', MetaData(bind=None), Column('id', ...tions.now at 0x7f0465c40e50; now&gt;)), schema=None)</dl>
 
 <dl><dt><strong>__tablename__</strong> = 'POPs'</dl>
 
@@ -1307,7 +1307,7 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>RAMUnits</strong> = 'MB'</dl>
 
-<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f1613d7ba90; vCDN&gt;</dl>
+<dl><dt><strong>__mapper__</strong> = &lt;Mapper at 0x7f0465bf6b50; vCDN&gt;</dl>
 
 <dl><dt><strong>__table__</strong> = Table('vCDNs', MetaData(bind=None), Column('id',...=&lt;vCDNs&gt;, default=ColumnDefault(0)), schema=None)</dl>
 

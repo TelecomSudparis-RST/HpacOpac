@@ -181,13 +181,24 @@ Executing_D_Instantiations = "Executing %d Instantiations"
 
 Migrating_vCDN_S_fromPOP_S_toPOP_S = "Migrating vCDN '%s' from POP '%s' to POP '%s'"
 
+Migrating_Server_S_vCDN_S_POP_S = "Migrating Server '%s' of vCDN '%s 'from POP '%s'"
+
 Unable_Thread = "Unable to create Thread for the operation"
 NoInstanceForvCDN = "There are no Instances of the vCDN to clone"
 
+NoInstanceForvCDN_S =   "There are no Instances of vCDN '%s' to clone from"
+
 Created_Snapshot_Server_S_POP_S = "Created an Snapshot of Server '%s' in POP '%s'"
 
-Created_Server_S_POP_S = "Created server '%s' in POP '%s' "
-Deleted_Server_S_POP_S = "Deletec server '%s' in POP '%s' "
+Created_Server_S_vCDN_S_POP_S = "Created server '%s' of vCDN '%s' in POP '%s' "
+
+
+Deleted_Server_S_vCDN_S_POP_S = "Deleted server '%s' of vCDN '%s' in POP '%s' "
+
+QuotaLimit = "Servers quota full, not allowed to start more servers."
+
+NotDeleted_Server_S_vCDN_S_POP_S = "Server '%s' of vCDN '%s' in POP '%s' was not deleted after Migration "
+NotResumed_Server_S_POP_S =  "Server '%s' in POP '%s' was not resumed after snapshpt "
 
 downloadedImageFile_S = "Downloaded the IMG file in '%s' "
 uploadedImageFile_S = "Uploaded the IMG file in '%s' "
@@ -276,7 +287,8 @@ OMAC_DAT_S = "OMAC .dat file was created in '%s'"
 AuthOS_url_S_user_s_tenant_S = "Authenticating to URL %s as User '%s' of Tenant '%s'"
 AuthOS_region_S = "Authenticating to Region '%s'"
 Exception_Nova_url_S_region_S_user_S_tenant_S = "Unable to authenticate to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
-Exception_Ceilometer_url_S_region_S_user_S_tenant_S = "Unable to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
+Exception_Ceilometer_url_S_region_S_user_S_tenant_S = "Unable to authenticate to Ceilometer Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
+Exception_Glance_url_S_region_S_user_S_tenant_S = "Unable to authenticate to Glance Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
 
 LastSample_S_at_S = "Last sample of meter '%s' at '%s' "
 CollectSamples_S_since_S = "Collecting stats of meter '%s' since '%s' "
@@ -284,11 +296,17 @@ Meter_Stats_minD_maxD_avgD = "Values collected are: Min=%d Max=%d Avg=%d "
 NoMetrics_Meter_S = "No Metric collected for meter '%s' "
 Authenticated = "Authenticated"
 
-Migrating_Instance_vCDN_S_POP_S_POP_S_ = "Migrating Instance of vCDN %s from POP %s to POP %s"
+Migrating_Instance_vCDN_S_POP_S_POP_S = "Migrating Instance of vCDN %s from POP %s to POP %s"
+Instantiating_Instance_vCDN_S_POP_S = "Instantiating vCDN %s on POP %s"
+Instantiation_ended_Instance_vCDN_S_POP_S = "Instantiation of vCDN %s on POP %s has finished"
+Migration_ended_Instance_vCDN_S_POP_S_POP_S = "Migration of vCDN %s from POP %s to POP %s has finished"
 Exception_Migrating_Server_S_POP_S_POP_S = "Exception occured while migrating a Server Id %s from POP %s to POP %s"
 NoConnect_Pops = "Unable to connect to the POPs to perform the Migration"
 NoDownload_ImgFile_S = "Unable to download the image file %s"
 NoUpload_ImgFile_S = "Unable to upload the image file %s"
 NoWritable_S = "The location %s is not writable"
-NoServerCreated = "Unable to start a new Server"
+NoServerCreated_vCDN_S_POP_S = "Unable to start a new Server in POP '%s' for vCDN '%s'"
 
+Invalid_Server_Parameters_S = "Invalid parameters for creating a Server: %s"
+ServerId_S_NotFound = "Unable to find a server with id = '%s'"
+ImageId_S_NotFound = "Unable to find an image with id = '%s'"

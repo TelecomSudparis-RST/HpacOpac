@@ -9,8 +9,10 @@
   Refer to the Admin site for manual alteration of Infrastructure parameters and values
   </p>
 	
-	<p>
-		<b>About</b><br>
+	
+		<h3>About</h3>
+		<p>
+		<br>
 		This is a demo implementation of HMAC algorithm for Optimal vCDN Migration on an OpenStack environment. 
 		<br>
 		HMAC is an Optimal VM migration algorithm that uses topologie information, live OpenStack statistics and metrics and the demands for a vCDN service as inputs. 
@@ -25,7 +27,8 @@
 		Additionally, this simulator uses an exponential algorithm that relates the QualityOfExperience metric perceived by the users (in MOS values) with the BW available at the Infrastructure.
 		This way, it can simulate a reduction in the vCDN traffic BW able to sustain a desired QoE metric for the clients in the infrastructure. This would mean that the Infrastructure operator can simulate a BW reduction that still respects the QoE SLA agreed.
 		<br>
-		<b>References</b>
+		
+		<h3>References</h3>
 		<ul>
 		<li>
 			<a href="http://ieeexplore.ieee.org/document/7500390/?reload=true&arnumber=7500390" > OMAC IEEE Paper</a>
@@ -40,8 +43,9 @@
 	</p>
 	
 	
-	<p>
-		<b>Concepts</b>
+	
+		<h3>Concepts</h3>
+		<p>
 		<ul>
 			
 			<li> <b>Topologie:</b> The network topologie is described by the <i>Locations</i> where the infrastructure has an installation, and by the <i>Network Links</i> that connect those locations, having a certain link BW capacity.
@@ -97,8 +101,9 @@
 			</li>
 		</ul>
 	</p>
-	<p>
-		<b>Optimization Decision</b>
+	
+		<h3>Optimization Decision</h3>
+		<p>
 		<br>
 		The Decision to Migrate or not takes the following logic:
 		<br>
@@ -129,8 +134,9 @@
 			</li>
 		</ol>
 	</p>
-	<p>
-		<b>Simulation</b>
+	
+		<h3>Simulation</h3>
+		<p>
 		<br>
 		The Simulation show how the Topologie Capacity is consumed as if the selected changes were applied, affecting the <i>Instances</i> and adjusting the <i>Demands</i> to reflect the changes.
 		<br>
@@ -150,8 +156,9 @@
 		<br>
 		A list of the simulated operations is shown and could be selected for actual execution in the OpenStack Controllers. Also a list of changes in the <i>Demands</i> is shown, needed for the <i>Demands</i> to adjust to the new optimized infrastructure (the <i>Demand</i> CDN direction mechanism is assumed external to vIOS and OpenStack systems).
 	</p>
-	<p>
-		<b>Operations in the OpenStack Data Centers </b>
+	
+		<h3>Operations in the OpenStack Data Centers </h3>
+		<p>
 		<br>
 		After the <b>Simulation</b> stage, a set of operations could be selected for implementation in the OpenStack Data Centers. These can be either <b>Migrations</b> or <b>Instantiations</b>.
 		<br>
@@ -167,8 +174,9 @@
 		This is because the operations are executed by independent Threads that do not report to the Web interface.
 		
 	</p>
-	<p>
-		<b>QoE BW coefficient </b>
+	
+		<h3>QoE BW coefficient </h3>
+		<p>
 		<br>
 		The <i>Demands</i> BW can be adjusted to satisfy a certain <b>QoE</b> value that the Infrastructure would be able to provide, in total average, to the <i>Clients</i>.
 		<br>
@@ -178,8 +186,9 @@
 		The model NCUPM provides a BW coefficient based on the <i>QoE</i> parameter (measured in MOS values). This is an exponential model, whose parameters can be set in the INI config files of <b>vIOS</b>.
 		
 	</p>
-	<p>
-		<b>Optimization Frequency</b>
+	
+		<h3>Optimization Frequency</h3>
+		<p>
 		<br>
 		The Migration is an expensive operation, so the migration frequency requieres attention.
 		<br>

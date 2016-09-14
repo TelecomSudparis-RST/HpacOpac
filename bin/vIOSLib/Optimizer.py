@@ -57,9 +57,11 @@ For  DB modifications, update/add/deletes queries, end the Transaction with DBCo
 
 from random import random, seed			
 #Used to randomize the Demands and the Infrastructure
-from time import time								
+import time								
 #Used to calculate the time of decision making
 import logging
+
+import os
 
 import thread
 # Use to have the OpenStack operations on separate Threads
@@ -71,6 +73,7 @@ import OpenStackConnection as OpenStack
 from OpenStackConnection import ServerMetadata
 from OptimizationModels import Model, FakeDemand, FakeInstance, FakeRedirect, Random, NCUPM
 import SettingsFile
+
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +91,9 @@ IMG_FOLDER = "/tmp"
 """ Local folder used for Snapshot Migration """
 
 _MAX_QoE = 5
-"""
-Maximum MOS for the Quality of Experience
-"""
+""" Maximum MOS value for the Quality of Experience """
+_MIN_QoE = 1
+""" Maximum MOS value for the Quality of Experience """
 
 operatorQoE = _MAX_QoE
 """	Global value used for the Operator to reduce the BW for all demands according to an Exponential law """
@@ -1122,154 +1125,188 @@ def buildModel():
 #enddef
 
 
-def _migrateInstance(instance, dstPop):
+def _migrateInstance(instanceId, dstPopId):
 	"""
 		Migrates all the VMs from an instance into the Destination POP
 		
-		:param instance: a Valid instance to be migrated
-		:type instance: Instance
-		:param dstPop: Pop where to deploy the VMs
-		:type dstPop: POP
+		:param instanceId: an instance Id to be migrated
+		:type instanceId: int
+		:param dstPopId: Pop Id where to deploy the VMs
+		:type dstPopId: int
 	
 		The instance and dstPop parameters cannot be None
 			
+		The Parameter is an Id because this function brings up its own connection to the DB
 	"""
+	
+	
+	aDBConn = DBConnection.DBConnection(DBConn.DBString)
+	
 	
 	OSMan = OpenStack.APIConnection()
 	DstOSMan = OpenStack.APIConnection()
 	
 	_errors = False 
 	
-	#First test if the img file can be writen in the destination folder 
-	if _testWritableDir(IMG_FOLDER):
-		
-		vCDN_Name = instance.vcdn.name
-		srcPOP_Name = instance.pop.name
-		dstPOP_Name = dstPop.name
-		
-		logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S_ % (vCDN_Name,srcPOP_Name ,dstPOP_Name))
+	aDBConn.start()
 	
-		OSMan.setURL(instance.pop.url,instance.pop.region)
-		OSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-		DstOSMan.setURL(dstPop.url,dstPop.region)
-		DstOSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-						
-		if OSMan.connect() and  OSMan.connectImages() and DstOSMan.connect() and DstOSMan.connectImages():
+	instance = aDBConn.getInstanceById(instanceId) 
+	dstPop = aDBConn.getPOPbyId(dstPopId) 
 			
-			for server in OSMan.getServers():
-				try:
+	vCDN_Name = instance.vcdn.name
+	srcPOP_Name = instance.pop.name
+	dstPOP_Name = dstPop.name
+		
+	OSMan.setURL(instance.pop.url,instance.pop.region)
+	OSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
+	DstOSMan.setURL(dstPop.url,dstPop.region)
+	DstOSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
 					
-					originalServerData = OSMan.serverMetadata(server.id)
-					
+	logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
+	
+	del instance
+	del dstPop
+	aDBConn.cancelChanges()
+	aDBConn.end()
+	
+	if OSMan.connect() and OSMan.connectImages() and DstOSMan.connect() and DstOSMan.connectImages():
+		
+		for server in OSMan.getServers():
+			
+			try:
+				
+				originalServerData = OSMan.serverMetadata(server.id)
+				
+				if OSMan.isServerReady(server.id):
 					server.pause()
-					imageId = server.create_image(s.id + "_migration")
-					OSMan.waitImageReady(imageId)
-					server.resume()
-					
-					logger.debug(Messages.Created_Snapshot_Server_S_POP_S % (server.id,srcPOP_Name) )
-					
-					if OSMan.isImageReady(imageId):
-									
-						### Download the image ###	
-						fullpath = os.path.join(IMG_FOLDER,"%s.tmp" % (s.id + "_migration"))
-						if OSMan.getSnapshotImage(imageId,fullpath):
-							
-							logger.debug(Messages.downloadedImageFile_S % (fullpath) )
-							
-							dstImageId = DstOSMan.putSnapshotImage(s.id + "_migration", fullpath)
-						
-							if DstOSMan.waitImageReady(dstImageId):
-								
-								logger.debug(Messages.uploadedImageFile_S % (fullpath) )
-								
-								originalServerData.imageName = s.id + "_migration"
-								ServerId = DstOSMan.createServer(dstImageId)
-								
-								
-								
-								if DstOSMan.waitServerReady(ServerId):
-									
-									logger.debug(Messages.Created_Server_S_POP_S % (ServerId, dstPOP_Name) )
-									
-									for address in s.addresses.values():
-										if address.type == "floating":
-											s.remove_floating_ip(address)
-											address.delete()
-									s.delete()
-									
-									logger.debug(Messages.Deleted_Server_S_POP_S % (server.id,srcPOP_Name) )
-									
-								else:
-									#Not able to start the server from the image
-									logger.error(Messages.NoServerCreated)
-								
-								DstOSMan.deleteImage(dstImageId)
-								
-							else:
-								#Not able to upload the image
-								logger.error(Messages.NoUpload_ImgFile_S % (fullpath))
-						else:
-							### problem while downloading the img file ##
-							logger.error(Messages.NoDownload_ImgFile_S % (fullpath))
-						
-						### Delete the local the img file ###
-						try:
-							os.remove(fullpath)	
-						except:
-							pass
-					#endif
-					
-					OSMan.deleteImage(ImageId)
-									
+					time.sleep(2)
+				
+				imageId = server.create_image(server.id + "_migration")
+				
+				logger.debug(Messages.Created_Snapshot_Server_S_POP_S % (server.id,srcPOP_Name) )
+				
+				OSMan.waitImageReady(imageId)
+				
+				try:
+					server.unpause()
 				except:
-					logger.exception(Messages.Exception_Migrating_Server_S_POP_S_POP_S % (s.id,instance.pop.name, dstPop.name) )
-					continue
-			#endfor	
-		else:
-			logger.error(Messages.NoConnect_Pops)
-			return False
+					logger.error(Messages.NotResumed_Server_S_POP_S % (server.id,srcPOP_Name) )
+					pass
+					# Not .resume() but unpause()
+					
+					
+				if OSMan.isImageReady(imageId):
+					
+					
+				
+					### Download the image ###	
+					fullpath = os.path.join(IMG_FOLDER,"%s.tmp" % (server.id + "_migration"))
+					if OSMan.getSnapshotImage(imageId,fullpath):
+					
+						
+						logger.debug(Messages.downloadedImageFile_S % (fullpath) )
+						
+						dstImageId = DstOSMan.putSnapshotImage(server.id + "_migration", fullpath)
+						
+						if DstOSMan.waitImageReady(dstImageId):
+							
+							logger.debug(Messages.uploadedImageFile_S % (fullpath) )
+								
+							originalServerData.imageName = server.id + "_migration"
+							
+							ServerId = DstOSMan.createServer(originalServerData)
+							
+							if DstOSMan.waitServerReady(ServerId):
+									
+								logger.debug(Messages.Created_Server_S_vCDN_S_POP_S % (ServerId,vCDN_Name, dstPOP_Name) )
+								
+								### Delete original Instance in the src POP
+					
+								if OSMan.deleteServer(server.id):
+									logger.debug(Messages.Deleted_Server_S_POP_S % (server.id,srcPOP_Name) )
+								else:
+									logger.error(Messages.NotDeleted_Server_S_POP_S % (server.id,srcPOP_Name) )
+									
+							else:
+								#Not able to start the server from the image
+								logger.error(Messages.NoServerCreated_vCDN_S_POP_S % (vCDN_Name, dstPOP_Name))
+								
+							DstOSMan.deleteImage(dstImageId)
+								
+						else:
+							#Not able to upload the image
+							logger.error(Messages.NoUpload_ImgFile_S % (fullpath))
+					else:
+						### problem while downloading the img file ##
+						logger.error(Messages.NoDownload_ImgFile_S % (fullpath))
+						
+					### Delete the local the img file ###
+					try:
+						os.remove(fullpath)	
+					except:
+						pass
+				
+				
+				#endif	
+				OSMan.deleteImage(imageId)
+									
+			except:
+				logger.exception(Messages.Exception_Migrating_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
+				continue
+		#endfor	
 	else:
-		logger.error(Messages.NoWritable_S % TMP_FOLDER)
+		logger.error(Messages.NoConnect_Pops)
 		return False
+	
 #enddef
 
 
-def _cloneInstance(instance, dstPop):
+def _cloneInstance(instanceId, dstPopId):
 	"""
 		Clones all the VMs from an instance into the Destination POP
 		
 		There is no actual migration or copy, a exact copy of the current VMs is built (if possible) on the destination POP
 		
 		:param instance: a Valid instance to be migrated
-		:type instance: Instance
+		:type instance: int
 		:param dstPop: Pop where to deploy the VMs
-		:type dstPop: POP
+		:type dstPop: int
 	
 		The instance and dstPop parameters cannot be None
+		
+		The Parameter is an Id because this function brings up its own connection to the DB
 			
 	"""
+	
+	aDBConn = DBConnection.DBConnection(DBConn.DBString)
+	
 	
 	OSMan = OpenStack.APIConnection()
 	DstOSMan = OpenStack.APIConnection()
 	
 	_errors = False 
 	
+	aDBConn.start()
+	
+	instance = aDBConn.getInstanceById(instanceId) 
+	dstPop = aDBConn.getPOPbyId(dstPopId) 
+			
 	vCDN_Name = instance.vcdn.name
 	srcPOP_Name = instance.pop.name
 	dstPOP_Name = dstPop.name
 		
-	
-
 	OSMan.setURL(instance.pop.url,instance.pop.region)
 	OSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
 	DstOSMan.setURL(dstPop.url,dstPop.region)
 	DstOSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
 					
-	logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S_ % (vCDN_Name,srcPOP_Name,dstPOP_Name))
+	logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
 	
 	del instance
 	del dstPop
-					
+	aDBConn.cancelChanges()
+	aDBConn.end()
+	
 	if OSMan.connect() and DstOSMan.connect() :
 		
 		for server in OSMan.getServers():
@@ -1278,38 +1315,35 @@ def _cloneInstance(instance, dstPop):
 				
 				originalServerData = OSMan.serverMetadata(server.id)
 				
-				
-				print originalServerData.to_dict()
+				logger.info(Messages.Migrating_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name))
 				
 				ServerId = DstOSMan.createServer(originalServerData)
 				
-				if DstOSMan.waitServerReady(ServerId):
+				if ServerId and DstOSMan.waitServerReady(ServerId):
 					
-					logger.debug(Messages.Created_Server_S_POP_S % (server.id,dstPOP_Name) )
+					logger.info(Messages.Created_Server_S_vCDN_S_POP_S % (ServerId,vCDN_Name,dstPOP_Name) )
 					
 					### Delete original Instance in the src POP
 					
-					for address in s.addresses:
-						if address.type == "floating":
-							s.remove_floating_ip(address)
-							address.delete()
-					s.delete()
-					
-					logger.debug(Messages.Deleted_Server_S_POP_S % (server.id,srcPOP_Name) )
+					if OSMan.deleteServer(server.id):
+						logger.info(Messages.Deleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+					else:
+						logger.error(Messages.NotDeleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
 					
 				else:
 					#Not able to start the server from the image
-					logger.error(Messages.NoServerCreated)
+					logger.error(Messages.NoServerCreated_vCDN_S_POP_S % (vCDN_Name,dstPOP_Name))
 					
 			except:
 				logger.exception(Messages.Exception_Cloning_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
 				continue
 		#endfor	
+		logger.info(Messages.Migration_ended_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
 	else:
 		logger.error(Messages.NoConnect_Pops)
 #enddef
 
-def _createInstance(demand):
+def _createInstance(demandId):
 	"""
 		Creates all the VMs from an Demand into the POP, by cloning it from another Instance of the same vCDN
 		
@@ -1317,60 +1351,42 @@ def _createInstance(demand):
 		
 		This is because it is assumed that the vCDN have a single size deployed in all the DataCenters and the Data Centers are configured similarly
 		
-		:param demand: a Demand to be instantiated
-		:type demand: Demand
+		:param demand: a Demand  id to be instantiated
+		:type demand: int
 
 		The instance and dstPop parameters cannot be None
-			
+		The Parameter is an Id because this function brings up its own connection to the DB
 	"""
 	
-	OSMan = OpenStack.APIConnection()
-	#DstOSMan = OpenStack.APIConnection()
 	
-	#_errors = False 
+	aDBConn = DBConnection.DBConnection(DBConn.DBString)
 	
-		
-	#logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S_ % (instance.vcdn.name,instance.pop.name,dstPop.name))
+	
+	aDBConn.start()
+	
+	demand = aDBConn.getDemandById(demandId) 
+	modelInstance = aDBConn.getInstanceforDemand(demand)
+	
+	vCDN_Name = demand.vcdn.name
+	POP_Name = demand.pop.name
 
-	#OSMan.setURL(instance.pop.url,instance.pop.region)
-	#OSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-	#DstOSMan.setURL(dstPop.url,dstPop.region)
-	#DstOSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-					
-	#if OSMan.connect() and DstOSMan.connect() :
+	if modelInstance:
 		
-		#for server in OSMan.getServers():
-			
-																	##thread.start_new_thread()
-			#try:
-				
-				#originalServerData = OSMan.serverMetadata(server)
-				
-				#ServerId = DstOSMan.createServer(originalServerData)
-								
-				#if DstOSMan.waitServerReady(ServerId):
-					
-					#for address in s.addresses:
-						#if address.type == "floating":
-							#s.remove_floating_ip(address)
-							#address.delete()
-					#s.delete()
-				#else:
-					##Not able to start the server from the image
-					#logger.error(Messages.NoServerCreated)
-							
-						
-								
-			#except:
-				#logger.exception(Messages.Exception_Cloning_Server_S_POP_S_POP_S % (s.id,instance.pop.name, dstPop.name) )
-				#continue
-		##endfor	
-	#else:
-		#logger.error(Messages.NoConnect_Pops)
-		#return False
+		logger.info(Messages.Instantiating_Instance_vCDN_S_POP_S % (vCDN_Name,POP_Name))
+	
+		_cloneInstance(modelInstance.id , demand.popId)
+		
+	else:
+		logger.error(Messages.NoInstanceForvCDN_S % vCDN_Name )
+
+	aDBConn.cancelChanges()
+	aDBConn.end()
+	
+	logger.info(Messages.Instantiation_ended_Instance_vCDN_S_POP_S   % (vCDN_Name,POP_Name))
+	
 #enddef
 
-def triggerMigrations(migrationIds):
+def triggerMigrations(migrations):
 	"""
 		Does perform a set of Migrations on the OpenStack Data Centers.
 		This triggers several Threads for the completion of the migration but does not wait for them.
@@ -1381,37 +1397,29 @@ def triggerMigrations(migrationIds):
 		
 	"""
 	
-	aDBConn = DBConnection.DBConnection(DBConn.DBString)
-	
-	
-	if aDBConn.connect() :	# and migrationIds:
-		
-		migrationsList = []
-		
-		aDBConn.start()
-		
-		for mig in migrationIds:
-			migrationsList.append( aDBConn.getMigrationById(mig) )
-		
-		logger.info(Messages.Executing_D_Migrations % len(migrationsList) )
-		
-		#for mig in migrationsList:
-			#try:
-				##thread.start_new_thread ( cloneInstance, (mig.instance, mig.dstPop) )
-			#except:
-				#logger.exception(Messages.Unable_Thread)
-				#continue
-		#endfor
-		
-		return True
-	else:
-		logger.error(Messages.Error_migrating)
+	if not _testWritableDir(IMG_FOLDER):
+		logger.error(Messages.NoWritable_S % IMG_FOLDER)
 		return False
+	
+	logger.info(Messages.Executing_D_Migrations % len(migrations) )
+
+	for mig in migrations:
+		try:
+			thread.start_new_thread ( _migrateInstance, (mig.instanceId, mig.dstPopId) )
+		except:
+			logger.exception(Messages.Unable_Thread)
+			continue
+	#endfor
+	
+	return True
+	#else:
+		#logger.error(Messages.Error_migrating)
+		#return False
 	
 #enddef
 
 
-def triggerInstantiations(instantiationIds):
+def triggerInstantiations(instantiations):
 	"""
 		Does perform a set of Instantiations on the OpenStack Data Centers.
 		This triggers several Threads for the completion of the instantation but does not wait for them.
@@ -1429,42 +1437,31 @@ def triggerInstantiations(instantiationIds):
 		
 	"""
 	
-	aDBConn = DBConnection.DBConnection(DBConn.DBString)
-	
-	if aDBConn.connect() : #and instantiationIds:
+	for i in instantiations:
 		
-		instantiationList = []
+		logger.info(Messages.Executing_Instantiation_vCDN_S_POP_S % (i.vcdn.name, i.pop.name) )
 		
-		aDBConn.start()
-		
-		for d in instantiationIds:
-			instantiationList.append( aDBConn.getDemandById(d) )
-		
-		for i in instantiationList:
-			
-			logger.info(Messages.Executing_Instantiation_vCDN_S_POP_S % (i.vcdn.name, i.pop.name) )
-			
-			if i.vcdn.instances:
-				try:
-					
-					modelInstance = i.vcdn.instances[0]
+		if i.vcdn.instances:
+			try:
 				
-					#thread.start_new_thread ( cloneInstance, (modelInstance, i.pop) )
-				except:
-					logger.exception(Messages.Unable_Thread)
-					continue
-				
-			else:
-				logger.exception(Messages.NoInstance)
+				modelInstance = i.vcdn.instances[0]
+			
+				thread.start_new_thread ( _cloneInstance, (modelInstance.id, i.popId) )
+			except:
+				logger.exception(Messages.Unable_Thread)
 				continue
 			
-		#endfor
+		else:
+			logger.exception(Messages.NoInstance)
+			continue
 		
-		logger.info(Messages.Executing_D_Instantiations % len(instantiationList) )
-		return True
-	else:
-		logger.error(Messages.Error_instantiating)
-		return False
+	#endfor
+	
+	logger.info(Messages.Executing_D_Instantiations % len(instantiations) )
+	return True
+	#else:
+		#logger.error(Messages.Error_instantiating)
+		#return False
 	
 #enddef
 
@@ -1496,7 +1493,7 @@ def updateDemandsQoE(qoe):
 	qoe = float(qoe)
 	
 	
-	if qoe is not None and  qoe <= maxQoE or qoe >= minQoE:
+	if qoe is not None and  qoe <= _MAX_QoE or qoe >= _MIN_QoE:
 		
 		
 		logger.info(Messages.Updating_Demand_BW_QoE_F % qoe)
@@ -1555,7 +1552,7 @@ def _testWritableDir(folder):
 		:returns: True if the folder is valid and a test file was written and deleted. False else
 		
 	"""
-	if os.path_isdir(folder):
+	if os.path.isdir(folder):
 		try:
 			testfile = open(os.path.join(folder,"test.tmp"),"w+")
 			testfile.close()

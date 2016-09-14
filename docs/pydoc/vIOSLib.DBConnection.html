@@ -120,25 +120,6 @@ DBString&nbsp;=&nbsp;""<br>&nbsp;</tt></td></tr>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;AlteredDemand&nbsp;class,&nbsp;or&nbsp;None<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;AlteredDemand[]&nbsp;or&nbsp;None</tt></dd></dl>
 
-<dl><dt><a name="DBConnection-getArray"><strong>getArray</strong></a>(self, ModelClass)</dt><dd><tt>Gets&nbsp;all&nbsp;the&nbsp;values&nbsp;in&nbsp;the&nbsp;DB&nbsp;of&nbsp;a&nbsp;model&nbsp;class<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;ModelClass:&nbsp;is&nbsp;the&nbsp;Table/Class&nbsp;to&nbsp;lookup&nbsp;and&nbsp;get&nbsp;the&nbsp;values<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;elemenst&nbsp;of&nbsp;the&nbsp;ModelClass&nbsp;class<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;ModelClass[]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:raises:&nbsp;&nbsp;LookupError</tt></dd></dl>
-
-<dl><dt><a name="DBConnection-getArraySorted"><strong>getArraySorted</strong></a>(self, ModelClass, ModelField)</dt><dd><tt>Gets&nbsp;all&nbsp;the&nbsp;values&nbsp;in&nbsp;the&nbsp;DB&nbsp;of&nbsp;a&nbsp;model&nbsp;class<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;ModelClass:&nbsp;is&nbsp;the&nbsp;Table/Class&nbsp;to&nbsp;lookup&nbsp;and&nbsp;get&nbsp;the&nbsp;values<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;ModelField:&nbsp;is&nbsp;the&nbsp;Table/Class&nbsp;field&nbsp;to&nbsp;sort&nbsp;this.&nbsp;'Must&nbsp;be&nbsp;ModelClass.x'<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;elemenst&nbsp;of&nbsp;the&nbsp;ModelClass&nbsp;class<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;ModelClass[]<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:raises:&nbsp;&nbsp;LookupError</tt></dd></dl>
-
 <dl><dt><a name="DBConnection-getClientGroups"><strong>getClientGroups</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;ClientGroups.&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;ClientGroup&nbsp;class<br>
@@ -162,6 +143,11 @@ DBString&nbsp;=&nbsp;""<br>&nbsp;</tt></td></tr>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;HmacResult&nbsp;class<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;HmacResult[]&nbsp;or&nbsp;None</tt></dd></dl>
 
+<dl><dt><a name="DBConnection-getInstanceById"><strong>getInstanceById</strong></a>(self, id)</dt><dd><tt>Get&nbsp;a&nbsp;certain&nbsp;Instance&nbsp;based&nbsp;on&nbsp;the&nbsp;ID.<br>
+&nbsp;<br>
+:returns:&nbsp;an&nbsp;Instance&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;Instance&nbsp;or&nbsp;None&nbsp;if&nbsp;error</tt></dd></dl>
+
 <dl><dt><a name="DBConnection-getInstanceList"><strong>getInstanceList</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;Instances.<br>
 &nbsp;<br>
 :returns:&nbsp;list&nbsp;of&nbsp;Instances&nbsp;class<br>
@@ -184,16 +170,6 @@ DBString&nbsp;=&nbsp;""<br>&nbsp;</tt></td></tr>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;Demand&nbsp;class,&nbsp;or&nbsp;None<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;Demand[]&nbsp;or&nbsp;None</tt></dd></dl>
-
-<dl><dt><a name="DBConnection-getItemById"><strong>getItemById</strong></a>(self, ModelClass, id)</dt><dd><tt>Gets&nbsp;the&nbsp;value&nbsp;in&nbsp;the&nbsp;DB&nbsp;of&nbsp;a&nbsp;model&nbsp;class&nbsp;that&nbsp;matches&nbsp;the&nbsp;id<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;ModelClass:&nbsp;is&nbsp;the&nbsp;Table/Class&nbsp;to&nbsp;lookup&nbsp;and&nbsp;get&nbsp;the&nbsp;values<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;id:&nbsp;the&nbsp;ID<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;ModelClass&nbsp;class<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;ModelClass<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:raises:&nbsp;&nbsp;&nbsp;LookupError</tt></dd></dl>
 
 <dl><dt><a name="DBConnection-getLocations"><strong>getLocations</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;available&nbsp;Locations.<br>
 &nbsp;<br>
@@ -292,50 +268,7 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>DBSession</strong> = &lt;sqlalchemy.orm.session.Session object&gt;</dl>
-
-<dl><dt><strong>SessionClass</strong> = sessionmaker(class_='Session',autoflush=True, bind=None, autocommit=False, expire_on_commit=True)<dd><tt>A&nbsp;configurable&nbsp;:class:`.Session`&nbsp;factory.<br>
-&nbsp;<br>
-The&nbsp;:class:`.sessionmaker`&nbsp;factory&nbsp;generates&nbsp;new<br>
-:class:`.Session`&nbsp;objects&nbsp;when&nbsp;called,&nbsp;creating&nbsp;them&nbsp;given<br>
-the&nbsp;configurational&nbsp;arguments&nbsp;established&nbsp;here.<br>
-&nbsp;<br>
-e.g.::<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;global&nbsp;scope<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Session&nbsp;=&nbsp;sessionmaker(autoflush=False)<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;later,&nbsp;in&nbsp;a&nbsp;local&nbsp;scope,&nbsp;create&nbsp;and&nbsp;use&nbsp;a&nbsp;session:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sess&nbsp;=&nbsp;Session()<br>
-&nbsp;<br>
-Any&nbsp;keyword&nbsp;arguments&nbsp;sent&nbsp;to&nbsp;the&nbsp;constructor&nbsp;itself&nbsp;will&nbsp;override&nbsp;the<br>
-"configured"&nbsp;keywords::<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Session&nbsp;=&nbsp;sessionmaker()<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;bind&nbsp;an&nbsp;individual&nbsp;session&nbsp;to&nbsp;a&nbsp;connection<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sess&nbsp;=&nbsp;Session(bind=connection)<br>
-&nbsp;<br>
-The&nbsp;class&nbsp;also&nbsp;includes&nbsp;a&nbsp;method&nbsp;:meth:`.configure`,&nbsp;which&nbsp;can<br>
-be&nbsp;used&nbsp;to&nbsp;specify&nbsp;additional&nbsp;keyword&nbsp;arguments&nbsp;to&nbsp;the&nbsp;factory,&nbsp;which<br>
-will&nbsp;take&nbsp;effect&nbsp;for&nbsp;subsequent&nbsp;:class:`.Session`&nbsp;objects&nbsp;generated.<br>
-This&nbsp;is&nbsp;usually&nbsp;used&nbsp;to&nbsp;associate&nbsp;one&nbsp;or&nbsp;more&nbsp;:class:`.Engine`&nbsp;objects<br>
-with&nbsp;an&nbsp;existing&nbsp;:class:`.sessionmaker`&nbsp;factory&nbsp;before&nbsp;it&nbsp;is&nbsp;first<br>
-used::<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;application&nbsp;starts<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Session&nbsp;=&nbsp;sessionmaker()<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;...&nbsp;later<br>
-&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;=&nbsp;create_engine('sqlite:///foo.db')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Session.configure(bind=engine)<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sess&nbsp;=&nbsp;Session()<br>
-&nbsp;<br>
-..&nbsp;seealso:<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;:ref:`session_getting`&nbsp;-&nbsp;introductory&nbsp;text&nbsp;on&nbsp;creating<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sessions&nbsp;using&nbsp;:class:`.sessionmaker`.</tt></dl>
+<dl><dt><strong>DBString</strong> = ''</dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">

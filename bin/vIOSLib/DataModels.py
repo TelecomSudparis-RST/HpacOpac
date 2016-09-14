@@ -1175,8 +1175,8 @@ class HmacResult(Base):
 		
 		.. seealso:: Optimizer.py
 		
-		UNIQUE = (demandId) as a migration HMAC responds to a single Demand.
-	
+		unique (instanceId,dstPopId)
+		
 		"""
 	
 	__tablename__ = 'HmacResults'

@@ -1,7 +1,9 @@
 # vCDN Infrastructure Optimization Simulator
 
 > Ignacio Tamayo, TSP, 2016
+>
 > Version 1.4
+>
 > Date: Sept 2016
 
 This is a demo implementation of HMAC algorithm for Optimal vCDN Migration on an OpenStack environment. 
@@ -22,7 +24,7 @@ This version of vIOSimulator is designed and adjusted for the DVD2C project, on 
 
 ### References:
 
- * http://ieeexplore.ieee.org/document/7500390/?reload=true&arnumber=7500390
+ *  http://ieeexplore.ieee.org/document/7500390/?reload=true&arnumber=7500390
  
  * http://arxiv.org/pdf/1608.08365.pdf 
  
@@ -158,14 +160,10 @@ Restart the Service Daemon
 
 ## Version Changelog
 
- * Call the actual migration of VMs on OpenStack, via snapshots.
+ * Call the actual migration of VMs on OpenStack, via snapshot-copy or VM-cloning.
  * Demand BW adjustment by QoE, for the Operator to consider this.
  * All options possible are in the INI file
- 
-### TODO
 
- * Document the OpenStack Migration
-  
 ### Feature Pipeline
 
  * Deployer les Types de vCDNs

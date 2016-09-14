@@ -84,9 +84,8 @@ class DBConnection(object):
 		
 	DBString = ""
 	"""
-	
-	SessionClass = sessionmaker()
-	DBSession = SessionClass()
+		
+	DBString = ""
 	
 	def __init__(self, connString):
 		""" 
@@ -96,6 +95,7 @@ class DBConnection(object):
 			:type connString: String
 		"""
 		self.DBString = connString
+		self.SessionClass = sessionmaker()
 		self.engine = create_engine(self.DBString)
 		self.SessionClass.configure(bind=self.engine)
 		
@@ -140,7 +140,7 @@ class DBConnection(object):
 			:rtype: Location[] or None
 		"""
 		try:
-			return self.getArray(Location)
+			return self._getArray(Location)
 		except LookupError:
 			return None
 	#enddef
@@ -154,7 +154,7 @@ class DBConnection(object):
 		
 		"""
 		try:
-			return self.getArray(NetworkLink)
+			return self._getArray(NetworkLink)
 		except LookupError:
 			return None
 	#enddef	
@@ -167,7 +167,7 @@ class DBConnection(object):
 			:rtype: MigrationCostMultiplier[] or None
 		"""
 		try:
-			return self.getArray(MigrationCostMultiplier)
+			return self._getArray(MigrationCostMultiplier)
 		except LookupError:
 			return None
 	#enddef	
@@ -180,7 +180,7 @@ class DBConnection(object):
 			:rtype: HmacResult[] or None
 		"""
 		try:
-			return self.getArray(HmacResult)
+			return self._getArray(HmacResult)
 		except LookupError:
 			return None
 	#enddef	
@@ -292,7 +292,7 @@ class DBConnection(object):
 			
 		"""
 		try:
-			return self.getArray(POP)
+			return self._getArray(POP)
 		except LookupError:
 			return None
 	#enddef	
@@ -306,7 +306,7 @@ class DBConnection(object):
 			
 		"""
 		try:
-			return self.getItemById(POP,id)
+			return self._getItemById(POP,id)
 		except LookupError:
 			return None
 	#enddef	
@@ -320,7 +320,7 @@ class DBConnection(object):
 			
 		"""
 		try:
-			return self.getItemById(vCDN,id)
+			return self._getItemById(vCDN,id)
 		except LookupError:
 			return None
 	#enddef	
@@ -333,7 +333,7 @@ class DBConnection(object):
 		:rtype: Metric[] or None
 		"""
 		try:
-			return self.getArray(Metric)
+			return self._getArray(Metric)
 		except LookupError:
 			return None
 	#enddef	
@@ -346,11 +346,23 @@ class DBConnection(object):
 		:rtype: Instance[] or None
 		"""
 		try:
-			return self.getArray(Instance)
+			return self._getArray(Instance)
 		except LookupError:
 			return None
 	#enddef	
 	
+	def getInstanceById(self,id):
+		"""  
+		Get a certain Instance based on the ID.
+		
+		:returns: an Instance object, or None if not found
+		:rtype: Instance or None if error
+			
+		"""
+		try:
+			return self._getItemById(Instance,id)
+		except LookupError:
+			return None
 	
 	def getInstanceOf(self,vcdnId ,popId ):
 		"""
@@ -411,7 +423,7 @@ class DBConnection(object):
 			:rtype: Demand[] or None
 		"""
 		try:
-			return self.getArray(Demand)
+			return self._getArray(Demand)
 		except LookupError:
 			return None
 	#enddef	
@@ -424,7 +436,7 @@ class DBConnection(object):
 			:rtype: AlteredDemand[] or None
 		"""
 		try:
-			return self.getArray(AlteredDemand)
+			return self._getArray(AlteredDemand)
 		except LookupError:
 			return None
 	#enddef	
@@ -440,7 +452,7 @@ class DBConnection(object):
 			:rtype: Demand or None
 		"""
 		try:
-			return self.getItemById(Demand, id)
+			return self._getItemById(Demand, id)
 		except LookupError:
 			return None
 	#enddef
@@ -458,7 +470,7 @@ class DBConnection(object):
 		"""
 		
 		try:
-			return self.getItemById(HmacResult, id)
+			return self._getItemById(HmacResult, id)
 		except LookupError:
 			return None
 
@@ -478,7 +490,7 @@ class DBConnection(object):
 		"""
 		
 		try:
-			return self.getItemById(AlteredDemand, id)
+			return self._getItemById(AlteredDemand, id)
 		except LookupError:
 			return None
 	
@@ -522,7 +534,7 @@ class DBConnection(object):
 			:rtype: vCDN[] or None
 		"""
 		try:
-			return self.getArray(vCDN)
+			return self._getArray(vCDN)
 		except LookupError:
 			return None
 	#enddef	
@@ -535,7 +547,7 @@ class DBConnection(object):
 			:rtype: ClientGroup[] or None
 		"""
 		try:
-			return self.getArray(ClientGroup)
+			return self._getArray(ClientGroup)
 		except LookupError:
 			return None
 	#enddef	
@@ -543,7 +555,7 @@ class DBConnection(object):
 
 	### Internal Functions ###
 
-	def getArray(self,ModelClass):
+	def _getArray(self,ModelClass):
 		"""  
 		Gets all the values in the DB of a model class
 		
@@ -563,7 +575,7 @@ class DBConnection(object):
 		return Array
 	#enddef
 	
-	def getArraySorted(self,ModelClass,ModelField):
+	def _getArraySorted(self,ModelClass,ModelField):
 		"""  
 		Gets all the values in the DB of a model class
 		
@@ -584,7 +596,7 @@ class DBConnection(object):
 		return Array
 	#enddef			
 
-	def getItemById(self,ModelClass,id):
+	def _getItemById(self,ModelClass,id):
 		"""  
 		Gets the value in the DB of a model class that matches the id
 		

@@ -277,30 +277,32 @@ def build():
 				#Used this way as; when submitting; either 'createRandomLinks' or 'drawTopologie' will be present in the POST message
 					
 					if Optimizer.createRandomInfrastructure():
-						draw = True
+						
 						flash(Messages.Updated_Topo_Random)
 					else:
 						flash(Messages.Errors_random_links,Flash_msg_error)
 				#endif
 				
-				if ('drawTopologie' in request.form)  or draw:  
-					
-					try:
-						os.remove(os.path.join(app.static_folder,Topologie_Graph_filename ))
-						os.remove(os.path.join(app.static_folder,Topologie_Gomuri_filename ))
-					except OSError:
-						pass
-					
-					if Optimizer.buildModel():
-						
-						if Optimizer.OptimizationModel.drawTopologie( filename= app.static_folder + "/" + Topologie_Graph_filename ) and \
-									Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_filename ) :
-							flash(Messages.Updated_Graph)
-						else:
-							flash(Messages.Exception_drawing_Topologie,Flash_msg_error)
-					else:
-						flash(Messages.Error_building_Topologie,Flash_msg_error)
-			#endif
+				#if ('drawTopologie' in request.form)  or draw:  
+			
+			#endif	
+			
+			try:
+				os.remove(os.path.join(app.static_folder,Topologie_Graph_filename ))
+				os.remove(os.path.join(app.static_folder,Topologie_Gomuri_filename ))
+			except OSError:
+				pass
+			
+			if Optimizer.buildModel():
+				
+				if Optimizer.OptimizationModel.drawTopologie( filename= app.static_folder + "/" + Topologie_Graph_filename ) and \
+							Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_filename ) :
+					flash(Messages.Updated_Graph)
+				else:
+					flash(Messages.Exception_drawing_Topologie,Flash_msg_error)
+			else:
+				flash(Messages.Error_building_Topologie,Flash_msg_error)
+		
 
 			DBConn.start()
 			
@@ -326,7 +328,7 @@ def build():
 				if  'createRandomDemands' in request.form : 
 					if Optimizer.createRandomDemands():
 						flash(Messages.Created_Demands)
-						draw = True
+						
 						
 					else:
 						flash(Messages.ERROR_creating_Demands,Flash_msg_error)
@@ -335,6 +337,7 @@ def build():
 				if "updateDemandsBW" in request.form : 
 					if Optimizer.updateDemandsQoE(request.form.get('operatorQoE')):
 						flash(Messages.Adjusted_Demands)
+						
 					else:
 						flash(Messages.ERROR_adjusting_Demands,Flash_msg_error)
 				
@@ -343,28 +346,30 @@ def build():
 					Optimizer.resetQoE()
 					flash(Messages.QoE_reset)
 				
-				if  ('drawTopologieDemands' in request.form) or draw:
-					 
-					try:
-						os.remove(os.path.join(app.static_folder,Topologie_Gomuri_filename ))
-						os.remove(os.path.join(app.static_folder,Topologie_Gomuri_Demanded_filename ))
-					except OSError:
-						pass
+				#if  ('drawTopologieDemands' in request.form) or draw:
+			
+			#endif		 
+			
+			try:
+				os.remove(os.path.join(app.static_folder,Topologie_Gomuri_filename ))
+				os.remove(os.path.join(app.static_folder,Topologie_Gomuri_Demanded_filename ))
+			except OSError:
+				pass
+			
+			if Optimizer.buildModel():
+				
+				Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_filename )
+				
+				if Optimizer.consumeDemands():
 					
-					if Optimizer.buildModel():
+					if Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_Demanded_filename ) :
+						flash(Messages.Updated_Graph)
 						
-						Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_filename )
-						
-						if Optimizer.consumeDemands():
-							
-							if Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_Demanded_filename ) :
-								flash(Messages.Updated_Graph)
-								
-						else:
-							flash(Messages.ERROR_consuming_Demands,Flash_msg_error)
-					else:
-						flash(Messages.Exception_Building_Model,Flash_msg_error)
-			#endif
+				else:
+					flash(Messages.ERROR_consuming_Demands,Flash_msg_error)
+			else:
+				flash(Messages.Exception_Building_Model,Flash_msg_error)
+			
 			
 			DBConn.start()
 			demandsList = DBConn.getDemands()
@@ -530,7 +535,7 @@ def build():
 						
 					# Call the Execution routine that will trigger the Threads for the Migrations/Instantiations to run
 					
-					if Optimizer.triggerMigrations(selectMigrations) and Optimizer.triggerInstantiations(selectInstantiations):
+					if Optimizer.triggerMigrations(migrationsList) and Optimizer.triggerInstantiations(instantiationList):
 						flash(Messages.Executing)
 					else:
 						flash(Messages.Error_executing,Flash_msg_error)

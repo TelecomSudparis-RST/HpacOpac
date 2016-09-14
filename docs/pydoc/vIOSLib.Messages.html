@@ -59,7 +59,7 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>Created_Demands</strong> = 'Demands generated randomly'<br>
 <strong>Created_Flavor_S_POP_S</strong> = " Created flavor '%s' for POP '%s' "<br>
 <strong>Created_Hypervisor_S_POP_S</strong> = " Created hypervisor '%s' for POP '%s' "<br>
-<strong>Created_Server_S_POP_S</strong> = "Created server '%s' in POP '%s' "<br>
+<strong>Created_Server_S_vCDN_S_POP_S</strong> = "Created server '%s' of vCDN '%s' in POP '%s' "<br>
 <strong>Created_Snapshot_Server_S_POP_S</strong> = "Created an Snapshot of Server '%s' in POP '%s'"<br>
 <strong>CreatingRandomDemands_D_probaF_amplitudeD</strong> = 'Creating random %d Demands, p=%f, amplitude=%d '<br>
 <strong>Deleted_Demands</strong> = 'Demands deleted from the DB'<br>
@@ -67,7 +67,7 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>Deleted_Instance_S_at_POP_S</strong> = 'Deleted instance of %s at Pop %s '<br>
 <strong>Deleted_Migrations</strong> = 'Migrations deleted from the DB'<br>
 <strong>Deleted_Redirections</strong> = 'Deleted the previous Redirections'<br>
-<strong>Deleted_Server_S_POP_S</strong> = "Deletec server '%s' in POP '%s' "<br>
+<strong>Deleted_Server_S_vCDN_S_POP_S</strong> = "Deleted server '%s' of vCDN '%s' in POP '%s' "<br>
 <strong>Demand_id_D_isValid</strong> = 'Demand %d has a valid Instace, unable to simulate an Instantiation'<br>
 <strong>Draw_File_S</strong> = 'Graph drawn to file %s'<br>
 <strong>ERROR_adjusting_Demands</strong> = "Unable to adjust the Demands' BW for the QoE value"<br>
@@ -83,10 +83,11 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>Errors_updating_Metrics</strong> = 'There were some errors while updating the Metrics from the POPs'<br>
 <strong>Errors_updating_POPs</strong> = 'There were some errors while updating the POPs'<br>
 <strong>Exception_Building_Model</strong> = 'Exception ocurred while building the OMAC/HMAC Model'<br>
-<strong>Exception_Ceilometer_url_S_region_S_user_S_tenant_S</strong> = "Unable to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"<br>
+<strong>Exception_Ceilometer_url_S_region_S_user_S_tenant_S</strong> = "Unable to authenticate to Ceilometer Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"<br>
 <strong>Exception_Cloning_Server_S_POP_S_POP_S</strong> = "Exception occured when cloning server '%s' from POP '%s' to POP '%s'"<br>
 <strong>Exception_Consuming_Demand_D_Graph</strong> = 'Exception while consuming Demand %d on a Topologie Graph'<br>
 <strong>Exception_Consuming_Fake_Demand</strong> = 'Exception occured while Consuming a simulated Demand'<br>
+<strong>Exception_Glance_url_S_region_S_user_S_tenant_S</strong> = "Unable to authenticate to Glance Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"<br>
 <strong>Exception_Metrics_Tenant_S_POP_S</strong> = 'Unable to get Metrics for Tenant %s in POP %s '<br>
 <strong>Exception_Migrating_Server_S_POP_S_POP_S</strong> = 'Exception occured while migrating a Server Id %s from POP %s to POP %s'<br>
 <strong>Exception_Migrating_vCDN_S_PopSrc_S_PopDts_S</strong> = "Exception occured while calculating migration of vCDN '%s' from POP '%s' to POP '%s'"<br>
@@ -113,18 +114,24 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>Graph_Topologie_Consume_Demands</strong> = 'Consuming a Topologie Graph with a set of demands'<br>
 <strong>HMAC_optimized</strong> = 'Finished running HMAC'<br>
 <strong>HMAC_optimized_D_migrations_D_invalidDemands</strong> = 'HMAC optimization determined %d migrations and %d invalid demands'<br>
+<strong>ImageId_S_NotFound</strong> = "Unable to find an image with id = '%s'"<br>
+<strong>Instantiating_Instance_vCDN_S_POP_S</strong> = 'Instantiating vCDN %s on POP %s'<br>
+<strong>Instantiation_ended_Instance_vCDN_S_POP_S</strong> = 'Instantiation of vCDN %s on POP %s has finished'<br>
 <strong>Invalid_Demand_Client_S_vCDN_S_POP_S</strong> = "Invalid demand from ClientGroup '%s' for vCDN '%s' at POP '%s' "<br>
 <strong>Invalid_QoE_Model</strong> = 'Invalid QoE model'<br>
 <strong>Invalid_QoE_Value</strong> = 'Invalid QoE value'<br>
+<strong>Invalid_Server_Parameters_S</strong> = 'Invalid parameters for creating a Server: %s'<br>
 <strong>LastSample_S_at_S</strong> = "Last sample of meter '%s' at '%s' "<br>
 <strong>Meter_Stats_minD_maxD_avgD</strong> = 'Values collected are: Min=%d Max=%d Avg=%d '<br>
 <strong>Migrate_vCDN_S_srcPOP_S_dstPOP_S</strong> = "Migrate vCDN '%s' from POP '%s' to POP '%s' "<br>
 <strong>Migrate_vCDN_S_srcPOP_S_dstPOP_S_RedirectionBW</strong> = "Migrating vCDN '%s' from POP '%s' to POP '%s' would cause Redirections that saturate the link "<br>
-<strong>Migrating_Instance_vCDN_S_POP_S_POP_S_</strong> = 'Migrating Instance of vCDN %s from POP %s to POP %s'<br>
+<strong>Migrating_Instance_vCDN_S_POP_S_POP_S</strong> = 'Migrating Instance of vCDN %s from POP %s to POP %s'<br>
+<strong>Migrating_Server_S_vCDN_S_POP_S</strong> = "Migrating Server '%s' of vCDN '%s 'from POP '%s'"<br>
 <strong>Migrating_vCDN_S_fromPOP_S_toPOP_S</strong> = "Migrating vCDN '%s' from POP '%s' to POP '%s'"<br>
 <strong>Migration_Condition_Hold_B_NetCapacity_D_Mbps</strong> = 'The Migration was rejected because HoldvCDN = %s and Remaining BW in POP is %d Mbps'<br>
 <strong>Migration_check_PopSrc_S_PopDts_S</strong> = "Checking possible migration from POP '%s' to POP '%s'"<br>
 <strong>Migration_condition_BWNeeded_D_GomuriCap_D_PopCap_PopCanHost_S</strong> = 'Migration condition: DemandedBW=%d LinkBW=%d PopBW=%d PopCanHost=%s'<br>
+<strong>Migration_ended_Instance_vCDN_S_POP_S_POP_S</strong> = 'Migration of vCDN %s from POP %s to POP %s has finished'<br>
 <strong>Migration_path_D_Hops_F_BW</strong> = 'Migration path of %d hops and %.2f Mbps minimal BW'<br>
 <strong>Migration_to_POP_S</strong> = 'Migration to Pop %s'<br>
 <strong>Missing_Elements_to_Build_Model</strong> = 'Missing elements to build an OMAC/HMAC Model (Locations and Network Links)'<br>
@@ -135,6 +142,7 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>NoDemands</strong> = 'There are no demands registered in the DB'<br>
 <strong>NoDownload_ImgFile_S</strong> = 'Unable to download the image file %s'<br>
 <strong>NoInstanceForvCDN</strong> = 'There are no Instances of the vCDN to clone'<br>
+<strong>NoInstanceForvCDN_S</strong> = "There are no Instances of vCDN '%s' to clone from"<br>
 <strong>NoInstances</strong> = 'No Instances were found'<br>
 <strong>NoInstantiationsSelected</strong> = 'No Instantiations selected'<br>
 <strong>NoMetrics_Meter_S</strong> = "No Metric collected for meter '%s' "<br>
@@ -144,10 +152,12 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>NoNetworkLinks</strong> = 'There are no Network Links registered in the DB'<br>
 <strong>NoPOPs</strong> = 'There are no POPs found in the DB'<br>
 <strong>NoRedirectsSelected</strong> = 'No Redirections selected'<br>
-<strong>NoServerCreated</strong> = 'Unable to start a new Server'<br>
+<strong>NoServerCreated_vCDN_S_POP_S</strong> = "Unable to start a new Server in POP '%s' for vCDN '%s'"<br>
 <strong>NoUpload_ImgFile_S</strong> = 'Unable to upload the image file %s'<br>
 <strong>NoWritable_S</strong> = 'The location %s is not writable'<br>
 <strong>No_OMAC_Optimize</strong> = 'Unable to perform OMAC optimization'<br>
+<strong>NotDeleted_Server_S_vCDN_S_POP_S</strong> = "Server '%s' of vCDN '%s' in POP '%s' was not deleted after Migration "<br>
+<strong>NotResumed_Server_S_POP_S</strong> = "Server '%s' in POP '%s' was not resumed after snapshpt "<br>
 <strong>NovCDNs</strong> = 'There are no vCDNs found in the DB'<br>
 <strong>OMAC_DAT_S</strong> = "OMAC .dat file was created in '%s'"<br>
 <strong>OMAC_optimized</strong> = 'Created OMAC CPLEX data file'<br>
@@ -157,6 +167,7 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>POP_not_found</strong> = 'POP not found in DB'<br>
 <strong>QoE_outOfModel</strong> = 'The QoE value is out of the Model boundaries'<br>
 <strong>QoE_reset</strong> = 'QoE Value was reset, no change was done to the Demands'<br>
+<strong>QuotaLimit</strong> = 'Servers quota full, not allowed to start more servers.'<br>
 <strong>RandomGraph_locationsD</strong> = 'Created random Graph of %d nodes'<br>
 <strong>RandomGraph_locationsD_maxCapaD</strong> = 'Creating random Graph for %d locations with maxCapacity=%d '<br>
 <strong>Random_Graph_Created</strong> = 'A Random Topologie Graph has been created'<br>
@@ -165,6 +176,7 @@ This&nbsp;is&nbsp;to&nbsp;make&nbsp;it&nbsp;easier&nbsp;to&nbsp;translate&nbsp;t
 <strong>Removing_Simulated_Redirects</strong> = 'Removing the Demands from the previous path before redirection'<br>
 <strong>Running_Demands</strong> = 'Running the simulated Demands'<br>
 <strong>Scale_Condition_NetCapacity_D_Mbps</strong> = 'The Scaling was rejected because Remaining BW in POP is %d Mbps'<br>
+<strong>ServerId_S_NotFound</strong> = "Unable to find a server with id = '%s'"<br>
 <strong>ShortestPath_S</strong> = "The SPT for this demand is '%s' "<br>
 <strong>Simulate_Instantiation_vCDN_S_on_POP_S</strong> = "Simulate Instantiation of vcdn '%s' on POP '%s' "<br>
 <strong>Simulate_Migration_vCDN_S_from_POP_S_to_POP_S</strong> = "Simulate Migration of vcdn '%s' from POP '%s' to POP '%s'"<br>

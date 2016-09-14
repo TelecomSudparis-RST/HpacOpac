@@ -59,11 +59,12 @@
 <a href="glanceclient.exc.html">glanceclient.exc</a><br>
 </td><td width="25%" valign=top><a href="vIOSLib.Messages.html">vIOSLib.Messages</a><br>
 <a href="novaclient.client.html">novaclient.client</a><br>
-<a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
-</td><td width="25%" valign=top><a href="logging.html">logging</a><br>
+<a href="novaclient.exceptions.html">novaclient.exceptions</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
+<a href="logging.html">logging</a><br>
 <a href="keystoneclient.session.html">keystoneclient.session</a><br>
-<a href="time.html">time</a><br>
-</td><td width="25%" valign=top><a href="keystoneclient.auth.identity.v2.html">keystoneclient.auth.identity.v2</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+<a href="keystoneclient.auth.identity.v2.html">keystoneclient.auth.identity.v2</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -125,6 +126,20 @@ Could&nbsp;return&nbsp;False&nbsp;in&nbsp;case&nbsp;of&nbsp;error..&nbsp;for&nbs
 :type&nbsp;serverMetadata:&nbsp;<a href="#ServerMetadata">ServerMetadata</a><br>
 &nbsp;<br>
 :returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;created&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
+
+<dl><dt><a name="APIConnection-deleteImage"><strong>deleteImage</strong></a>(self, imageId)</dt><dd><tt>Given&nbsp;an&nbsp;imageId,&nbsp;it&nbsp;is&nbsp;deleted<br>
+&nbsp;<br>
+:param&nbsp;imageId:&nbsp;the&nbsp;image&nbsp;Id&nbsp;to&nbsp;be&nbsp;deleted<br>
+:type&nbsp;imageId:&nbsp;String&nbsp;as&nbsp;in&nbsp;Glance&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;deleted&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
+
+<dl><dt><a name="APIConnection-deleteServer"><strong>deleteServer</strong></a>(self, serverId)</dt><dd><tt>Given&nbsp;a&nbsp;ServerId,&nbsp;it&nbsp;is&nbsp;deleted&nbsp;and&nbsp;its&nbsp;Floating&nbsp;IP&nbsp;returned&nbsp;to&nbsp;the&nbsp;Pool<br>
+&nbsp;<br>
+:param&nbsp;serverId:&nbsp;the&nbsp;server&nbsp;Id&nbsp;to&nbsp;be&nbsp;deleted<br>
+:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;in&nbsp;Nova&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;deleted&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
 
 <dl><dt><a name="APIConnection-disconnect"><strong>disconnect</strong></a>(self)</dt><dd><tt>Disconnects&nbsp;from&nbsp;the&nbsp;Nova,&nbsp;Ceilometer&nbsp;and&nbsp;Keystone&nbsp;API&nbsp;Server</tt></dd></dl>
 
@@ -350,10 +365,14 @@ Data descriptors defined here:<br>
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>These&nbsp;are&nbsp;the&nbsp;common&nbsp;parameters&nbsp;of&nbsp;a&nbsp;Server&nbsp;in&nbsp;the&nbsp;infrastructure<br>
 &nbsp;<br>
-This&nbsp;metadata&nbsp;is&nbsp;used&nbsp;for&nbsp;cloning&nbsp;VMs<br>&nbsp;</tt></td></tr>
+This&nbsp;metadata&nbsp;is&nbsp;used&nbsp;for&nbsp;cloning&nbsp;VMs<br>
+&nbsp;<br>
+This&nbsp;assumes&nbsp;that&nbsp;all&nbsp;OpenStack&nbsp;controllers&nbsp;are&nbsp;uniform,&nbsp;having&nbsp;the&nbsp;same&nbsp;Flavors,&nbsp;Images,&nbsp;NetworkNames&nbsp;and&nbsp;SecurityGroups<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="ServerMetadata-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, imageName<font color="#909090">=''</font>, flavorName<font color="#909090">=''</font>, NetworkName<font color="#909090">=[]</font>, SecurityGroups<font color="#909090">=[]</font>)</dt></dl>
+<dl><dt><a name="ServerMetadata-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, imageName<font color="#909090">=''</font>, flavorName<font color="#909090">=''</font>, NetworkNames<font color="#909090">=[]</font>, SecurityGroups<font color="#909090">=[]</font>, floating_ip<font color="#909090">=False</font>)</dt></dl>
+
+<dl><dt><a name="ServerMetadata-to_dict"><strong>to_dict</strong></a>(self)</dt></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -370,6 +389,8 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>SecurityGroups</strong> = ['']</dl>
 
 <dl><dt><strong>flavorName</strong> = ''</dl>
+
+<dl><dt><strong>floating_ip</strong> = False</dl>
 
 <dl><dt><strong>imageName</strong> = ''</dl>
 
