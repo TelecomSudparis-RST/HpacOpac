@@ -68,7 +68,7 @@ CREATE TABLE NetLinks(
 -- UNIQUE = (name) as to have single identifiable names
 -- UNIQUE = (locationId) as to keep a single POP in each location. This assumtion might change, but it will impact most of the OPAC/HMAC implementation code (and break the foreing key)
 --
--- `url`,`region`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, ussually put in Enviroment Variables
+-- `url`,`region`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, usually put in Enviroment Variables
 -- `url` to be the Public Keystone Endpoint, versioned
 -- `region` can be NULL
 -- `url` is expected to be the Public/Admin Keystone
@@ -115,7 +115,7 @@ CREATE TABLE POPs(
 );
 
 -- \table Hypervisors
--- UNIQUE = (name,popId). 2 Hypervisors can belong to a single POP, as long as they have different names. 2 Hpervisors can have the same name, but on different POPs. This reflects OpenStack characteristics
+-- UNIQUE = (name,popId). 2 Hypervisors can belong to a single POP, as long as they have different names. 2 Hypervisors can have the same name, but on different POPs. This reflects OpenStack characteristics
 --
 -- `xDisk` in GB,`xRAM` in MB,`xCPU` in units, `xNetBW` in Mbps
 --
@@ -126,7 +126,7 @@ DROP TABLE IF EXISTS Hypervisors;
 
 CREATE TABLE Hypervisors(
 	id int AUTO_INCREMENT,
-	name varchar(20) not null,
+	name varchar(60) not null,
 	popId int not null,
 	model varchar(20),
 	maxDisk int,
@@ -208,7 +208,7 @@ CREATE TABLE Metrics (
 -- \table MigrationCostMultipliers
 -- Values of the Migration decision, the value is multiplied to the calculated cost to tune the Migration decision
 -- UNIQUE = (popAId,popBId) as not to have 2 entries for the same migration. At DB it is CHECKED that (popAId <> popBId) to avoid loops
--- Birectionality is not checked in DB, so (popAId,popBId) and (popBId,popAId) can happen
+-- Bidirectional is not checked in DB, so (popAId,popBId) and (popBId,popAId) can happen
 --
 -- `costMultiplier` is a value that could be used as cost multiplier.
 --
@@ -254,9 +254,10 @@ CREATE TABLE ClientGroups(
 );
 
 -- \table vCDNs
--- UNIQUE = (name). Because each vCDN is identified by a single name. This allows, later; so associate a vCDN to a file in ObjectStorage or a specific VM Image
+-- UNIQUE = (name). Because each vCDN is identified by a single name. 
+-- This allows, later; so associate a vCDN to a file in ObjectStorage or a specific VM Image
 --
--- `url`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, ussually put in Enviroment Variables (via a file)
+-- `url`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, usually put in Environment Variables (via a file)
 -- `xDisk` in GB,`xRAM` in MB,`xCPU` in units
 -- `xNetBW` is not used for now, NULL
 -- `defaultQosBW` is the BW in kbps to be given ClienGroups connecting to this vCDN, by default. BW in kbps
@@ -276,7 +277,7 @@ CREATE TABLE vCDNs(
 	vCPU int,
 	vNetBW int,
 	vInstances int,
-	
+	dnsDomain varchar(100),
 	defaultQosBW int,
 	
 	created_at DATETIME     ,
@@ -348,7 +349,7 @@ CREATE TABLE Instances(
 -- 
 -- `cost` is a value that is produced by HMAC, calculated as the vCDN.size * migration path hops
 -- `delay` is a value that is produced by HMAC, calculated as the vCDN.size / minimum link capacity
--- `minBW` is the minimum link BW found on the gomory Tree for this migration. Used to know the liminit BW for the migration. In Mbps
+-- `minBW` is the minimum link BW found on the Gomory Tree for this migration. Used to know the limit BW for the migration. In Mbps
 -- `migrate` indicates that the entry is an effective Migration. If false, the entry is a Redirect (the dstPOP has already an Instance of the vCDN)
 --
 -- \related Demands, POPs, Instances
@@ -416,7 +417,7 @@ DROP VIEW IF EXISTS Redirects;
 -- UNIQUE = (ClientGroupId,popId,vcdnId). As only 1 optimal server is to supply the demand for a vCDN,
 -- This should ideally associate a Demand to an Instance, but not necessarily as the Instance can just have disappeared when the Demand was calculated or measured
 --
--- `volue` is a number presenting the demand volume, concurrent demans, demand's importance, etc. This value is only used for sorting
+-- `value` is a number presenting the demand volume, concurrent demans, demand's importance, etc. This value is only used for sorting
 -- `bw` is the total BW required for this Demand, in Mbps.
 -- `validInstance` is True if the demanded pair (vCDN,POP) is actually an exiting Instance or not
 --

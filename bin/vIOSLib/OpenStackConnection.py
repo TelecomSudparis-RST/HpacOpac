@@ -15,31 +15,12 @@ Module to interact with the Nova, Ceilometer, Glance and Keystone API
 
 :Example:
 	
-	OsConn = OpenStackConnection()
-	OsConn.setURL( url, region)
-	OsConn.setCredentials(...)
-	if OsConn.connect():
-		if OsConn.connectMetrics():
-			lims = OsConn.getLimits()
-			met = OsConn.getMetrics()
-			OsConn.disconnect()
+
 	
-	OsConn = OpenStackConnection()
-	OsConn.setURL( url, region)
-	OsConn.setCredentials(...)
-	if OsConn.connect():
-		servers = getServers()
-		for s in servers:
-			Thread(OsConn.migrate(s))
-			s.pause()
-			snapID = s.snapshot()
-			OsConn.DownloadImg(snapID)
-			OsConn.UploadImg(snapID)
-			OsConn.UploadImg(snapID)
-			met = OsConn.getMetrics()
-			OsConn.disconnect()
-	
-	
+## Authentication ##
+
+	For all operations, a Keystone authentication is required. Make sure the KeyStone Service has the appropriate EndPoints.
+
 """
 
 """
@@ -51,7 +32,7 @@ References:
 """
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -67,9 +48,12 @@ References:
 
 from novaclient import client as NovaApiClient
 from keystoneclient.auth.identity import v2
-from keystoneclient import session
+from keystoneclient import session as KeystoneSession
 from ceilometerclient import client as CielClient
 import glanceclient.v2.client as GlanceClient
+from designateclient.v1 import Client as DesignateClient
+from designateclient.v1.records import Record
+
 import glanceclient.exc as GlanceExceptions
 import novaclient.exceptions as NovaExceptions
 from datetime import datetime, timedelta			### Needed for time formating and time calculations
@@ -85,7 +69,8 @@ logger = logging.getLogger(__name__)
 
 INI_Section = "openstack" 
 """ This is the INI file section where we expect to find our values """
-	
+
+
 TIMEOUT = 5				
 """ HTTP API Connection timeOut. In Seconds """
 CEILOMETER_PERIOD = 600	
@@ -135,38 +120,42 @@ def readSettingsFile():
 		IMG_RETRIES = SettingsFile.getOptionInt(INI_Section,"glance_poll_retries")	
 	if SettingsFile.getOptionInt(INI_Section,"nova_poll_retries"):
 		SERVER_RETRIES = SettingsFile.getOptionInt(INI_Section,"nova_poll_retries")	
-		
+
 	#endif
+	
+#enddef
+
+
 
 	
-class APIConnection(object):
+class NovaAPIConnection(object):
 	"""
-		This class represents the connection with the Nova API, passing by authentication with KeyStone
-		The values provided in setURL() and setCredentials() are the same as the ones used for CLI client
-		Internally, the client will get the Nova API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable
+		This class represents the connection with the OpenStack APIs, passing by authentication with KeyStone
+		
+		Internally, the client will get the Nova API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable.
 	"""
 	
 	# Constants used on API connections
 	NOVA_VERSION = "2"		# Invalid client version '2.0'. must be one of: 3, 2, 1.1
-	CIEL_VERSION = "2"		# 
-	GLANCE_VERSION = "2"
 
-	def __init__(self):
+	def __init__(self,auth_url="",region = None,tenant="",user="",passwd=""):
 		"""
 			Starts with no connections, with no credentials to connect with. Empty start
 		"""
 		self.Session = None
 		self.Nova = None
-		self.Ceil = None
-		self.Glance = None
+		self.user = user
+		self.region = region
+		self.tenant = tenant
+		self.passwd = passwd
+		self.auth_url = auth_url
+		
 	#enddef
 	
 		
 	def connect(self):
 		"""
 			Connects to the Nova API Server after authenticating with Keystone
-			 
-			Execute after setURL() and setCredentials()
 			 
 			:returns: True if the connection went OK, False if errors
 		"""
@@ -176,11 +165,11 @@ class APIConnection(object):
 								tenant_name=self.tenant, 
 								auth_url=self.auth_url)
 			
-			logger.debug( Messages.AuthOS_url_S_user_s_tenant_S % (self.auth_url ,self.user ,self.tenant))
+			#logger.debug( Messages.AuthOS_url_S_region_S_user_s_tenant_S % (url ,region,user ,tenant))
 			
 			## auth = v2.Password(username="user_hbo", password="USER_PASS", tenant_name="tenant_hbo", auth_url="http://controller-evry:35357/v2.0")
 			
-			self.Session = session.Session(auth=auth)
+			self.Session = KeystoneSession.Session(auth=auth)
 			
 			self.Nova = NovaApiClient.Client(
 								self.NOVA_VERSION,
@@ -191,11 +180,11 @@ class APIConnection(object):
 								
 			# Nova = NovaApiClient.Client("2", session = Session)
 								
-			logger.debug( Messages.AuthOS_region_S % self.region)
+			logger.debug( Messages.AuthOS_url_S_region_S_user_s_tenant_S % (self.auth_url ,self.region,self.user ,self.tenant))
 			
 			self.Nova.servers.list()
 			
-			logger.debug( Messages.Authenticated)
+			logger.debug( Messages.Authenticated_Nova)
 			
 		except Exception, e:
 			logger.error( Messages.Exception_Nova_url_S_region_S_user_S_tenant_S % (self.auth_url ,self.region,self.user ,self.tenant))
@@ -207,124 +196,6 @@ class APIConnection(object):
 		return True
 	#enddef
 	
-	
-	def connectMetrics(self):
-		"""
-			Connects to the Ceilometer API Server after authenticating with Keystone
-			
-			Execute after connect()
-			 
-			Could return False in case of error.. for now errors are detected though Exceptions
-			
-			:returns: True if the connection went OK, False if errors
-			
-		"""
-		try:
-			auth = v2.Password(username= self.user, 
-								password= self.passwd, 
-								tenant_name= self.tenant, 
-								auth_url= self.auth_url)
-			
-			logger.debug( Messages.AuthOS_url_S_user_s_tenant_S % (self.auth_url ,self.user ,self.tenant))
-			
-			## auth = v2.Password(username="admin", password="ADMIN_PASS", tenant_name="admin", auth_url="http://controller-saclay:35357/v2.0")
-			
-			self.Session = session.Session(auth=auth)
-			self.Ceil = CielClient.get_client(
-								self.CIEL_VERSION,
-								session = self.Session,
-								timeout=TIMEOUT,
-								region_name = self.region
-								)
-			logger.debug( Messages.AuthOS_region_S % self.region)
-			self.Ceil.meters.list()
-			logger.debug( Messages.Authenticated)
-		except Exception,e :
-			logger.error( Messages.Exception_Ceilometer_url_S_region_S_user_S_tenant_S % (self.auth_url,self.region ,self.user ,self.tenant))
-			logger.error(repr(e))
-			return False
-		#  Session = CielClient.get_client("2",username="admin", password="ADMIN_PASS",tenant_name="admin", auth_url="http://controller:35357/v2.0")
-		return True
-	#enddef
-	
-	def connectImages(self):
-		"""
-			Connects to the Glance API Server after authenticating with Keystone
-			
-			Execute after connect()
-			 
-			Could return False in case of error.. for now errors are detected though Exceptions
-			
-			:returns: True if the connection went OK, False if errors
-			
-		"""
-		try:
-			auth = v2.Password(username= self.user, 
-								password= self.passwd, 
-								tenant_name= self.tenant, 
-								auth_url= self.auth_url)
-			
-			logger.debug( Messages.AuthOS_url_S_user_s_tenant_S % (self.auth_url ,self.user ,self.tenant))
-			
-			## auth = v2.Password(username="admin", password="ADMIN_PASS", tenant_name="admin", auth_url="http://controller-saclay:35357/v2.0")
-			
-			self.Session = session.Session(auth=auth)
-			self.Glance = GlanceClient.Client(
-								self.GLANCE_VERSION,
-								session = self.Session,
-								region_name = self.region
-								)
-			logger.debug( Messages.AuthOS_region_S % self.region)
-			list(self.Glance.images.list())
-			logger.debug( Messages.Authenticated)
-			
-			#Glance = GlanceClient.Client("2", session = Session)
-			
-		except Exception,e :
-			logger.error( Messages.Exception_Glance_url_S_region_S_user_S_tenant_S % (self.auth_url,self.region ,self.user ,self.tenant))
-			logger.error(repr(e))
-			return False
-		
-		return True
-	#enddef
-	
-	def disconnect(self):
-		""" Disconnects from the Nova, Ceilometer and Keystone API Server """
-		self.Nova = None
-		self.Ceil = None
-		self.Session = None
-	#enddef
-	
-	def setURL(self,url,region = None):
-		"""
-			:param url: url is the KeyStone Auth
-			:type url: String
-			:param region: Region of the OpenStack services to use. Defaults to None
-			:type region: String
-			
-			Same as the credentials file used in CLI
-			
-			.. note:: Make sure that the Nova API URL given in the Keysonte reply is reachable from this host. Do "nova --debug list" to verify where Keystone send the Api Call
-		"""
-		self.auth_url = url
-		self.region = region
-	#enddef
-	
-	def setCredentials(self,tenant,user,passwd):
-		"""
-			:param tenant: url is the Admin tenant
-			:type tenant: String
-			:param user: url is the Admin user
-			:type user: String
-			:param passwd: url is the Admin pass
-			:type passwd: String
-			
-			Same as the credentials file used in CLI
-		"""
-		self.tenant = tenant
-		self.user = user
-		self.passwd = passwd
-	#enddef	
 	
 	def getHypervisors(self):
 		"""
@@ -355,61 +226,9 @@ class APIConnection(object):
 		return self.Nova.servers.list()
 	#enddef
 	
-	def getSnapshotImage(self,imageId,filename):
-		"""
-		Downloads to the filename the Image file of the ImageId 
-		
-		:param imageId: Glance Id of the Image to download
-		:type imageId: String as per Glance Id
-		:param filename: Absolute path to filename to write
-		:type filename: String
-		
-		:returns: True if image was downloaded OK, False else
-		
-		"""
-		
-		try:
-			aImage = self.Glance.images.get(imageId)
-			try:
-				image_file = open(filename, 'w+')
-				for chunk in self.Glance.images.data(imageId):
-					image_file.write(chunk)
-				image_file.close()
-				return True
-			except IOError:
-				#Not able to open file
-				return False
-			
-		except GlanceExceptions.HTTPNotFound:
-			#Unable to retreive the Image
-			return False
-	#enddef
-	
-	def putSnapshotImage(self,imageName,filename):
-		"""
-			Uploads the filename the Image and creates the Image named as such 
-			
-			:param imageName: Glance name of the Image to create
-			:type imageName: String
-			:param filename: Absolute path to filename to read
-			:type filename: String
-		
-			:returns: Image Id of the new Image created from the snapshot file
-			:rtype: String as per Glance ID
-		
-		"""
-		
-		try:
-			aImage = self.Glance.images.create(name = imageName, container_format = "bare", visibility = "private", disk_format="qcow2" )
-			self.Glance.images.upload(aImage.id, open(filename, 'rb'))			
-			return aImage.id
-		except GlanceExceptions.HTTPNotFound, IOError:
-			#Unable to upload the Image
-			return False
-	#enddef
 	
 		
-	def serverMetadata(self,serverId):
+	def getServerMetadata(self,serverId):
 		"""
 			From a ServerId existing in a ComputeNode, a MetaData structure is extracted
 			
@@ -437,7 +256,7 @@ class APIConnection(object):
 			for address in server.addresses.values():
 				for ip in address:
 					if ip['OS-EXT-IPS:type'] == "floating":
-						serverMeta.floating_ip = True
+						serverMeta.floating_ip = ip['addr']
 			
 			return serverMeta
 		except:
@@ -516,16 +335,24 @@ class APIConnection(object):
 		"""
 		try:
 			
-			server = self.Nova.servers.find(id = serverId)
+			server = self.Nova.servers.get(serverId)
 			
 			for address in server.addresses.values():
 				for ip in address:
 					if ip['OS-EXT-IPS:type'] == "floating":
 						pass
+						# For testing only!!!!!
 						server.remove_floating_ip(ip['addr'])
 						self.Nova.floating_ips.delete(ip['addr'])
 			
-			server.pause()
+			# For testing only, the Server is left Paused
+			try:
+				server = self.Nova.servers.get(serverId)
+				server.pause()
+				#server.delete()
+			except NovaExceptions.Conflict:
+				pass
+			
 			
 			return True
 						
@@ -534,29 +361,6 @@ class APIConnection(object):
 			return False
 	#enddef	
 	
-	def deleteImage(self, imageId):
-		"""
-		
-		Given an imageId, it is deleted
-		
-		:param imageId: the image Id to be deleted
-		:type imageId: String as in Glance Server Id
-		
-		:returns: True if the VM was deleted OK; False else
-		
-		"""
-		try:
-			
-			aImage = self.Glance.images.get(imageId)
-			
-			aImage = self.Glance.images.delete(imageId)
-			
-			return True
-						
-		except GlanceExceptions.HTTPNotFound:
-			logger.error(Messages.ImageId_S_NotFound % imageId )
-			return False
-	#enddef	
 	
 		
 	def isServerReady(self,serverId):
@@ -577,47 +381,6 @@ class APIConnection(object):
 			#Unable to retreive the Server
 			return False
 	
-	def isImageReady(self,imageId):
-		"""
-		
-		Checks is an Image is active or not
-		
-		:param imageId: Id of the Glance Image to check its status
-		:type imageId: String as per Glance Image Id
-		
-		:returns: True if the image has 'ACTIVE' status, False else
-		
-		"""
-		try:
-			aImage = self.Glance.images.get(imageId)
-			return aImage.status.lower() == "active"
-		except GlanceExceptions.HTTPNotFound:
-			#Unable to retreive the Image
-			return False
-	
-	def waitImageReady(self,imageId):
-		""" 
-			Wait for the Glance image to be ready. 
-			It waits IMG_TIMEOUT seconds between each retry, and retries up to IMG_RETRIES times before quiting
-		
-			:param imageId: Id of the Glance Image to check its status
-			:type imageId: String as per Glance Image Id
-		
-			:returns: True if the image has 'ACTIVE' status, False else
-		"""
-		retries = 0
-		try:
-			while( self.Glance.images.get(imageId).status.lower() != 'active') and retries < IMG_RETRIES:
-				time.sleep(IMG_TIMEOUT)
-				retries = retries + 1
-		except GlanceExceptions.HTTPNotFound:
-			logger.error(Messages.ServerId_S_NotFound % serverId )
-			retries = SERVER_RETRIES
-		if retries >= IMG_RETRIES:
-			### The image is not ready ###
-			return False
-		else:
-			return True
 	
 	def waitServerReady(self,serverId):
 		""" 
@@ -681,6 +444,71 @@ class APIConnection(object):
 		return retLim
 	#enddef
 	
+#endclass
+
+
+	
+class CeilometerAPIConnection(object):
+	"""
+		This class represents the connection with the OpenStack Ceilometer API, passing by authentication with KeyStone
+		
+		Internally, the client will get the Ceilometer API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable.
+	"""
+	
+	# Constants used on API connections
+	CIEL_VERSION = "2"		#
+
+	def __init__(self,auth_url="",region = None,tenant="",user="",passwd=""):
+		"""
+			Starts with no connections, with no credentials to connect with. Empty start
+		"""
+		self.Session = None
+		self.Ceil = None
+		self.user = user
+		self.region = region
+		self.tenant = tenant
+		self.passwd = passwd
+		self.auth_url = auth_url
+		
+	#enddef
+	
+		
+	def connect(self):
+		"""
+			Connects to the Nova API Server after authenticating with Keystone
+			 
+			:returns: True if the connection went OK, False if errors
+		"""
+		try:
+			auth = v2.Password(username= self.user, 
+								password= self.passwd, 
+								tenant_name= self.tenant, 
+								auth_url= self.auth_url)
+			
+			
+			## auth = v2.Password(username="admin", password="ADMIN_PASS", tenant_name="admin", auth_url="http://controller-saclay:35357/v2.0")
+			
+			self.Session = KeystoneSession.Session(auth=auth)
+			self.Ceil = CielClient.get_client(
+								self.CIEL_VERSION,
+								session = self.Session,
+								timeout=TIMEOUT,
+								region_name = self.region
+								)
+			
+			logger.debug( Messages.AuthOS_url_S_region_S_user_s_tenant_S % (self.auth_url ,self.region,self.user ,self.tenant))
+			
+			self.Ceil.meters.list()
+			logger.debug( Messages.Authenticated_Ceilometer)
+		except Exception,e :
+			logger.error( Messages.Exception_Ceilometer_url_S_region_S_user_S_tenant_S % (self.auth_url,self.region ,self.user ,self.tenant))
+			logger.error(repr(e))
+			return False
+		#  Session = CielClient.get_client("2",username="admin", password="ADMIN_PASS",tenant_name="admin", auth_url="http://controller:35357/v2.0")
+		return True
+	#enddef
+	
+	
 	def getMetrics(self,durationHours):
 		""" 
 		
@@ -728,25 +556,29 @@ class APIConnection(object):
 		
 		for m in meter.values.keys():
 			#Get last sample timestamp. the Sample Api will order the samples; the first is the most recent one
-			sample_set = self.Ceil.samples.list( meter_name = m, limit=1 )
-			if sample_set != None and sample_set != []:
-				timestamp = sample_set[0].timestamp
-				logger.debug(Messages.LastSample_S_at_S % ( m ,str(timestamp)))
-			else:
-				logger.error(Messages.NoMetrics_Meter_S % ( m ))
-				continue
+			#sample_set = self.Ceil.samples.list( meter_name = m, limit=1 )
+			#  meter = self.Ceil.meters.find( meter_name = m )
+			#if sample_set != None and sample_set != []:
+			#	timestamp = sample_set[0].timestamp
+			#	logger.debug(Messages.LastSample_S_at_S % ( m ,str(timestamp)))
+			#else:
+			#	logger.error(Messages.NoMetrics_Meter_S % ( m ))
+			#	continue
 			
 			# Converting the DB Time into normal Python time. Put now() as a last resource
-			try:
-				time_value =  datetime.strptime(timestamp,OS_CEILOMETER_TIME_FORMAT)
-			except:
-				try:
-					time_value =  datetime.strptime(timestamp,OS_CEILOMETER_TIME_FORMAT_USEC)
-				except:
-					time_value = datetime.now()
+			#try:
+			#	time_value =  datetime.strptime(timestamp,OS_CEILOMETER_TIME_FORMAT)
+			#except:
+			#	try:
+			#		time_value =  datetime.strptime(timestamp,OS_CEILOMETER_TIME_FORMAT_USEC)
+			#	except:
+			#		time_value = datetime.now()
 			
-			if minTimeStampValue > time_value:
-				minTimeStampValue = time_value
+			#if minTimeStampValue > time_value:
+			#	minTimeStampValue = time_value
+			
+			time_value = datetime.now()
+			minTimeStampValue = time_value
 			
 			# Now we calculate the time to start measuring; = last sample - X hours
 			delta = timedelta(hours = durationHours)
@@ -759,24 +591,411 @@ class APIConnection(object):
 			query = []
 			query.append({"field": "timestamp", "op": "gt", "value": timestamp})
 					
+			time.sleep(1)
+			#This prevents the API to detect API abuse and pause the connection
 			
+						
 			stats_set = self.Ceil.statistics.list( meter_name = m, q = query, period = CEILOMETER_PERIOD ,  groupby="project_id") 			
+			# On grouping in Ceilometer [Ref](https://wiki.openstack.org/wiki/Ceilometer/blueprints/api-group-by#User_stories)
+			# First filters are applied, then aggregated (min/avg/max) on the Period, then on the extra Grouping.
 			
 			#Building a list with the values
 			values_list = []
 			for data in stats_set:
 				values_list.append(data.sum)
 			
-			#logger.debug( values_list )
-			##Now we do the MIN/MAX/AVG on the aggregated data
-			meter.values[m] = Stats(unit=stats_set[0].unit,**MinMaxAvg(values_list)) 
-			# The values for the meter m have been read; next!
-			logger.debug( Messages.Meter_Stats_minD_maxD_avgD % (meter.values[m]._min,meter.values[m]._max,meter.values[m]._avg) )
+			logger.debug( values_list )
+			
+			if stats_set:
+			
+				##Now we do the MIN/MAX/AVG on the aggregated data
+				meter.values[m] = Stats(unit=stats_set[0].unit,**MinMaxAvg(values_list)) 
+				# The values for the meter m have been read; next!
+				logger.debug( Messages.Meter_Stats_minD_maxD_avgD % (meter.values[m]._min,meter.values[m]._max,meter.values[m]._avg) )
 		#endfor
 		meter.sampletime = str(minTimeStampValue)		
 		## The oldest sample timestamp is used as a representative of the complete metric. 
 		return meter
 	#enddef
+#endclass
+
+
+class GlanceAPIConnection(object):
+	"""
+		This class represents the connection with the OpenStack Glance API, passing by authentication with KeyStone
+		The values provided in setURL() and setCredentials() are the same as the ones used for CLI client
+		Internally, the client will get the Nova API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable.
+	"""
+	
+	# Constants used on API connections
+	GLANCE_VERSION = "2"
+
+	def __init__(self,auth_url="",region = None,tenant="",user="",passwd=""):
+		"""
+			Starts with no connections, with no credentials to connect with. Empty start
+		"""
+		self.Session = None
+		self.Glance = None
+		self.user = user
+		self.region = region
+		self.tenant = tenant
+		self.passwd = passwd
+		self.auth_url = auth_url
+		
+	#enddef
+	
+		
+	def connect(self):
+		"""
+			Connects to the Glance API Server after authenticating with Keystone
+			 
+			:returns: True if the connection went OK, False if errors
+		"""
+		try:
+			auth = v2.Password(username= self.user, 
+								password= self.passwd, 
+								tenant_name= self.tenant, 
+								auth_url= self.auth_url)
+			
+			
+			## auth = v2.Password(username="admin", password="ADMIN_PASS", tenant_name="admin", auth_url="http://controller-saclay:35357/v2.0")
+			
+			self.Session = KeystoneSession.Session(auth=auth)
+			self.Glance = GlanceClient.Client(
+								self.GLANCE_VERSION,
+								session = self.Session,
+								region_name = self.region
+								)
+			
+			logger.debug( Messages.AuthOS_url_S_region_S_user_s_tenant_S % (self.auth_url ,self.region,self.user ,self.tenant))
+			
+			list(self.Glance.images.list())
+			logger.debug( Messages.Authenticated_Glance)
+			
+			#Glance = GlanceClient.Client("2", session = Session)
+			
+		except Exception,e :
+			logger.error( Messages.Exception_Glance_url_S_region_S_user_S_tenant_S % (self.auth_url,self.region ,self.user ,self.tenant))
+			logger.error(repr(e))
+			return False
+		
+		return True
+	#enddef
+	
+	
+	def getSnapshotImage(self,imageId,filename):
+		"""
+		Downloads to the filename the Image file of the ImageId 
+		
+		:param imageId: Glance Id of the Image to download
+		:type imageId: String as per Glance Id
+		:param filename: Absolute path to filename to write
+		:type filename: String
+		
+		:returns: True if image was downloaded OK, False else
+		
+		"""
+		
+		try:
+			aImage = self.Glance.images.get(imageId)
+			try:
+				image_file = open(filename, 'w+')
+				for chunk in self.Glance.images.data(imageId):
+					image_file.write(chunk)
+				image_file.close()
+				return True
+			except IOError:
+				#Not able to open file
+				return False
+			
+		except GlanceExceptions.HTTPNotFound:
+			#Unable to retreive the Image
+			return False
+	#enddef
+	
+	def putSnapshotImage(self,imageName,filename):
+		"""
+			Uploads the filename the Image and creates the Image named as such 
+			
+			:param imageName: Glance name of the Image to create
+			:type imageName: String
+			:param filename: Absolute path to filename to read
+			:type filename: String
+		
+			:returns: Image Id of the new Image created from the snapshot file
+			:rtype: String as per Glance ID
+		
+		"""
+		
+		try:
+			aImage = self.Glance.images.create(name = imageName, container_format = "bare", visibility = "private", disk_format="qcow2" )
+			self.Glance.images.upload(aImage.id, open(filename, 'rb'))			
+			return aImage.id
+		except GlanceExceptions.HTTPNotFound, IOError:
+			#Unable to upload the Image
+			return False
+	#enddef
+	
+		
+	
+	def deleteImage(self, imageId):
+		"""
+		
+		Given an imageId, it is deleted
+		
+		:param imageId: the image Id to be deleted
+		:type imageId: String as in Glance Server Id
+		
+		:returns: True if the VM was deleted OK; False else
+		
+		"""
+		try:
+			
+			aImage = self.Glance.images.get(imageId)
+			
+			aImage = self.Glance.images.delete(imageId)
+			
+			return True
+						
+		except GlanceExceptions.HTTPNotFound:
+			logger.error(Messages.ImageId_S_NotFound % imageId )
+			return False
+	#enddef	
+	
+		
+	def isImageReady(self,imageId):
+		"""
+		
+		Checks is an Image is active or not
+		
+		:param imageId: Id of the Glance Image to check its status
+		:type imageId: String as per Glance Image Id
+		
+		:returns: True if the image has 'ACTIVE' status, False else
+		
+		"""
+		try:
+			aImage = self.Glance.images.get(imageId)
+			return aImage.status.lower() == "active"
+		except GlanceExceptions.HTTPNotFound:
+			#Unable to retreive the Image
+			return False
+	
+	def waitImageReady(self,imageId):
+		""" 
+			Wait for the Glance image to be ready. 
+			It waits IMG_TIMEOUT seconds between each retry, and retries up to IMG_RETRIES times before quiting
+		
+			:param imageId: Id of the Glance Image to check its status
+			:type imageId: String as per Glance Image Id
+		
+			:returns: True if the image has 'ACTIVE' status, False else
+		"""
+		retries = 0
+		try:
+			while( self.Glance.images.get(imageId).status.lower() != 'active') and retries < IMG_RETRIES:
+				time.sleep(IMG_TIMEOUT)
+				retries = retries + 1
+		except GlanceExceptions.HTTPNotFound:
+			logger.error(Messages.ServerId_S_NotFound % serverId )
+			retries = SERVER_RETRIES
+		if retries >= IMG_RETRIES:
+			### The image is not ready ###
+			return False
+		else:
+			return True
+	
+#endclass
+
+
+class DesignateAPIConnection(object):
+	"""
+		This class represents the connection to the DNS Designate API
+	"""
+	
+	def __init__(self, auth_url="", region=None, tenant="admin", user="admin", passwd=""):
+		"""
+			.. seealso:: NovaAPIConnection
+		"""
+		
+		self.auth_url = auth_url
+		self.tenant = tenant
+		self.user = user
+		self.passwd = passwd
+		self.region = region
+		self.Session = None
+		self.Designate = None
+		
+	#endif
+	
+	def connect(self):
+		"""
+			Connects to the Nova API Server after authenticating with Keystone
+			 
+			:returns: True if the connection went OK, False if errors
+		"""
+		try:
+			auth = v2.Password(username= self.user, 
+								password= self.passwd, 
+								tenant_name= self.tenant, 
+								auth_url= self.auth_url)
+			
+			
+			## auth = v2.Password(username="admin", password="ADMIN_PASS", tenant_name="admin", auth_url="http://controller-saclay.dvd2c.fr:5000/v3")
+			
+			self.Session = KeystoneSession.Session(auth=auth)
+			self.Designate = DesignateClient(
+								session = self.Session,
+								timeout=TIMEOUT,
+								region_name = self.region
+								)
+			
+			#Designate = DesignateClient(session = Session,timeout=10,	region_name = "regionOne" )
+			
+			logger.debug( Messages.AuthOS_url_S_region_S_user_s_tenant_S % (self.auth_url ,self.region,self.user ,self.tenant))
+			
+			self.Designate.domains.list()
+			logger.debug( Messages.Authenticated_Designate)
+		except Exception,e :
+			logger.error( Messages.Exception_Designate_url_S_region_S_user_S_tenant_S % (self.auth_url,self.region ,self.user ,self.tenant))
+			logger.error(repr(e))
+			return False
+		#  Session = DesignateClient.Client(username="admin", password="ADMIN_PASS",project_name="admin", auth_url="http://controller-saclay.dvd2c.fr:5000")
+		return True
+	#enddef
+	
+	def  findDomain(self,dnsDomain):
+		"""
+		:param dnsDomain: Name of the Domain to look for. It must end in .
+		:type dnsDomain: string
+
+		:returns: id of the Domain, if found on Designate, or None if not
+		:rtype: string or None
+		"""
+		try:
+			domainId = None
+			for dom in self.Designate.domains.list():
+				
+				if dom.name == dnsDomain:
+					domainId = dom.id
+					logger.debug( Messages.Domain_S_found % dnsDomain)
+					break
+			#endfor
+		except:
+			logger.exception(Messages.Exception_Designate)
+		return  domainId
+	#enddef
+		
+	def findRecordsByData(self,domainId, rtype, data):
+		"""
+			Returns a list of records of a certain type that have a certain Data. 
+			
+			:Example:
+				A  vcdn1.test.fr	8.8.4.4
+				A  vcdn2.test.fr	8.8.4.4
+				
+				CNAME alias1.test.fr	the-true.test.fr
+				CNAME alias2.test.fr	the-true.test.fr
+			
+			:param domainId: DomainID to operate. Can be obtained by findDomain()
+			:type domainId: string
+			:param rtype: Type of DNS record to find. Can be "A", "AAAA", "CNAME", "MX"
+			:type rtype: string
+			:param data: Data of the record to be found. Depends on the Record Type
+			:type data: String
+
+			:returns: A list of Records objects found. Empty list if none was found
+			:rtype: Designage.Record[]
+		"""
+		recordList = []
+		if domainId:
+			try:
+				for r in  self.Designate.records.list(domainId):
+					if r.type == rtype and r.data == data:
+						recordList.append(r)
+						logger.debug( Messages.Record_S_S_S_found % (rtype, data, r.name))
+					#endif
+				#endfor	
+			except:
+				logger.exception(Messages.Exception_Designate)
+		#enddef
+		return recordList
+	#enddef
+	
+	def deleteRecordsByData(self,domainId, rtype, data):
+		"""
+			Deletes the records of a certain type that have a certain Data. 
+			
+			:Example:
+				A  vcdn1.test.fr	8.8.4.4
+				A  vcdn2.test.fr	8.8.4.4
+				
+				CNAME alias1.test.fr	the-true.test.fr
+				CNAME alias2.test.fr	the-true.test.fr
+			
+			:param domainId: DomainID to operate. Can be obtained by findDomain()
+			:type domainId: string
+			:param rtype: Type of DNS record to delete. Can be "A", "AAAA", "CNAME", "MX"
+			:type rtype: string
+			:param data: Data of the record to be deleted. Depends on the Record Type
+			:type data: String
+
+			:returns: True if the records were deleted; False if an error ocurred
+			:rtype: boolean
+			
+			.. note:: The deleted records are assumed to exist, verify before with findRecordsByData()
+			
+		"""
+		if domainId:
+			try:
+				for r in  self.Designate.records.list(domainId):
+					if r.type == rtype and r.data == data:
+						self.Designate.records.delete(domainId,r.id)
+						logger.debug( Messages.Record_S_S_S_deleted % (rtype, data, r.name))
+					#endif
+				#endfor	
+				return True
+			except:
+				logger.exception(Messages.Exception_Designate)
+		#enddef
+		return False
+	#enddef
+	
+	def createRecord(self,domainId,  data , name , rtype="A"):
+		"""
+			Creates a record of a certain type, to have a certain Data.
+			
+			:Example:
+				A  vcdn1.test.fr	8.8.4.4
+								
+				CNAME alias1.test.fr	the-true.test.fr
+			
+			:param domainId: DomainID to operate. Can be obtained by findDomain()
+			:type domainId: string
+			:param rtype: Type of DNS record to create. Can be "A", "AAAA", "CNAME", "MX"
+			:type rtype: string
+			:param data: Data of the record to create. Depends on the Record Type
+			:type data: String
+			:param name: Name value of the record to create. Depends on the Record Type
+			:type name: String
+
+			:returns: True if the Record was created OK; False if the record already exists, parameters are invalid or some other error occured.
+			:rtype: boolean
+		"""
+		
+		if domainId:
+			try:			
+				# Create a new Record object
+				record = Record(name=name, type=rtype, data=data)
+				#print record
+				self.Designate.records.create(domainId, record)
+				return True
+			except:
+				logger.exception(Messages.Exception_Designate)
+		#enddef
+		return False
+	#enddef
+	
 #endclass
 
 class Limits(object):
@@ -955,9 +1174,9 @@ class ServerMetadata(object):
 	flavorName = ""
 	NetworkName = [""]
 	SecurityGroups = [""]
-	floating_ip = False
+	floating_ip = None
 	
-	def __init__(self,name="",imageName = "", flavorName="",NetworkNames=[],SecurityGroups=[], floating_ip = False):
+	def __init__(self,name="",imageName = "", flavorName="",NetworkNames=[],SecurityGroups=[], floating_ip = None):
 		self.name = name
 		self.imageName = imageName
 		self.flavorName = flavorName
@@ -974,6 +1193,5 @@ class ServerMetadata(object):
 		d['nets'] = [ s for s in self.NetworkNames]
 		d['secGroups'] = [ s for s in self.SecurityGroups ]
 		d['floatingIp'] =  self.floating_ip
-		
 		
 		return d

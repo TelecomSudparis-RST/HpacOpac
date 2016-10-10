@@ -32,7 +32,7 @@ url = ""
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -129,7 +129,7 @@ def main(argv):
 		
 		sys.exit(7)
 		
-	### Reading settings and conneting to DB ###
+	### Reading settings and connecting to DB ###
 	if not Optimizer.connect( db_url ):
 		print(Messages.ERROR_Connecting_to_DB_in_File %  db_url )
 		sys.exit(4)

@@ -18,8 +18,6 @@ For  DB modifications, update/add/deletes queries, end the Transaction with DBCo
 
 .. seealso:: DataModels.py Messages.py
 	
-	
-	This version includes a Demand BW adjustment mechanism that follows an exponential law, and is representative of the Operator's Infrastructure as a whole
 
 :Example:
 
@@ -37,11 +35,43 @@ For  DB modifications, update/add/deletes queries, end the Transaction with DBCo
 	
 	simulate()  # Simulate the impact on the Infrastructure of the selected changes
 	
+	migrationIds = [Ids as int]
+	triggerMigratinos(migrationIds)
+	
+# Notes #
+
+	This version includes a Demand BW adjustment mechanism that follows an exponential law, and is representative of the Operator's Infrastructure as a whole
+
+	This version is integrated with OpenStack for actual VM Migration and Instantiations
+	
+	This version is integrated with OpenStack Designate DNS Server
+
+## OpenStack Migrating / Cloning ##
+
+	In the middle of the Migration, there is a timeout where the New VMs are and the old VMs are still ACTIVE. After this timeout, the old VMs are paused/deleted. This is to give time to DNS propagation and other internal tasks.
+
+	Migrating means the copy of the VM's disk via Snapshots. Cloning means the instantiation of a new VM using the same Image Name as the Original VM.
+
+## DNS Designate Integration ##
+
+	[CDN DNS](http://www.cloudvps.com/community/knowledge-base/how-does-a-cdn-work/)
+	[RackSpace CDN](https://support.rackspace.com/how-to/change-dns-to-enable-rackspace-cdn/)
+
+	Any CDN Service is based on DNS, really. So vIOS takes that into consideration
+
+	The vCDN can have its own DNS Designate Domain and the records are operated on this domain. Else, the Operator's DNS Designate Domain will be used.
+
+	When migrating/cloning, all the DNS Records (first the vCDN Domain; then the Operator Domain) that match the Original Floating IP are moved to the new Floating IP.
+	
+	The DNS Record parameters are set in the Option INI files.
+	
+	The DNS Designate is assumed centralized and independant of the OpenStack POPs (detached integration). Another possible approach is to suppose that the DNS Service is present in all the DataCenters, but a centraliwed approach is needed because Designate only works on Liberty and superior versions.
+	
 """
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -90,6 +120,9 @@ demandAmplitude = 100.0
 IMG_FOLDER = "/tmp"
 """ Local folder used for Snapshot Migration """
 
+MIGRATION_PAUSE = 5
+""" Minutes to wait in the middle of a migration, before stopping the original VM."""
+
 _MAX_QoE = 5
 """ Maximum MOS value for the Quality of Experience """
 _MIN_QoE = 1
@@ -99,9 +132,28 @@ operatorQoE = _MAX_QoE
 """	Global value used for the Operator to reduce the BW for all demands according to an Exponential law """
 
 
-
 INI_Section = "openstack" 
 """ This is the INI file section where we expect to find our values"""
+DNS_Section = "designate" 
+""" This is the INI file section where we expect to find values for DNS Designate Integration"""
+
+
+DESIGNATE_AUTH_URL=""
+""" Url to the Keystone used for the Designate Server. Unversioned URL. This Keystone MUST have an appropriate DNS endpoint."""
+#It is the Designate to contact its Keystone for authentication, not vIOS.
+DESIGNATE_ADMIN_TENANT=""
+""" Admin Tenant of Designate """
+DESIGNATE_ADMIN_USER=""
+""" Admin User of Designate """
+DESIGNATE_ADMIN_PASSWD=""
+""" Admin Password of Designate """
+# If the vCDN has its own DNS Domain, they the vCDN credentials are presented to Designate for Authentication
+
+OPERATOR_DNS_DOMAIN=""
+""" The Operators CDN domain to create the Records at, if the vCDN has not specified its own DNS Domain . Must end with ."""
+
+
+
 
 
 DBConn = None
@@ -135,6 +187,7 @@ def readSettingsFile():
 	global demandAmplitude
 	global meterDurationHours
 	global IMG_FOLDER
+	global MIGRATION_PAUSE
 		
 	if SettingsFile.getOptionFloat("DEFAULT","demand_probability"):
 		demandProbability = SettingsFile.getOptionFloat(INI_Section,"demand_probability")
@@ -144,7 +197,37 @@ def readSettingsFile():
 		meterDurationHours = SettingsFile.getOptionInt(INI_Section,"sample_period_hours")
 	if SettingsFile.getOptionFloat(INI_Section,"local_tmp_dir"):
 		IMG_FOLDER = SettingsFile.getOptionInt(INI_Section,"local_tmp_dir")
+	if SettingsFile.getOptionInt(INI_Section,"migration_pause"):
+		MIGRATION_PAUSE = SettingsFile.getOptionInt(INI_Section,"migration_pause")	
 	
+	readSettingsFileDNS()
+	
+#enddef
+
+def readSettingsFileDNS():
+	"""
+		.. seealso:: readSettingsFile()		
+	"""
+	
+	global DESIGNATE_AUTH_URL
+	global DESIGNATE_ADMIN_TENANT
+	global DESIGNATE_ADMIN_USER
+	global DESIGNATE_ADMIN_PASSWD
+	global OPERATOR_DNS_DOMAIN
+	
+	if SettingsFile.getOptionString(DNS_Section,"designate_auth_url"):
+		DESIGNATE_AUTH_URL = SettingsFile.getOptionString(DNS_Section,"designate_auth_url")
+	if SettingsFile.getOptionString(DNS_Section,"designate_admin_tenant"):
+		DESIGNATE_ADMIN_TENANT = SettingsFile.getOptionString(DNS_Section,"designate_admin_tenant")
+	if SettingsFile.getOptionString(DNS_Section,"designate_admin_user"):
+		DESIGNATE_ADMIN_USER = SettingsFile.getOptionString(DNS_Section,"designate_admin_user")
+	if SettingsFile.getOptionString(DNS_Section,"designate_admin_password"):
+		DESIGNATE_ADMIN_PASSWD = SettingsFile.getOptionString(DNS_Section,"designate_admin_password")
+	if SettingsFile.getOptionString(DNS_Section,"operator_dns_domain"):
+		OPERATOR_DNS_DOMAIN = SettingsFile.getOptionString(DNS_Section,"operator_dns_domain")
+		
+		 
+	#endif
 #enddef
 
 def connect(url):
@@ -540,7 +623,7 @@ def simulate( migrationList = [],redirectList = [], instantiationList = []):
 													vcdnName = i.vcdn.name , 
 													vcdnId = i.vcdnId,
 													volume = i.volume,
-													bw=v.bw)
+													bw=i.bw)
 													
 			fakeRedirects.append( FakeRedirect (
 											fd, dstPopId = fd.popId, dstPopName = fd.popName
@@ -640,18 +723,16 @@ def updatePOPs():
 	
 	logger.info(Messages.Updating_OpenStack)
 	
-	OSMan = OpenStack.APIConnection()
+	
 	
 	DBConn.start()
 	
 	popList = DBConn.getPOPList()
 	if (popList):
 		for pop in popList:
-			OSMan.disconnect()
 			
-			OSMan.setURL(pop.url,pop.region)
+			OSMan = OpenStack.NovaAPIConnection(auth_url =pop.url , region = pop.region , tenant= pop.tenant, user = pop.loginUser, passwd = pop.loginPass )
 			
-			OSMan.setCredentials(pop.tenant,pop.loginUser,pop.loginPass)
 			if not OSMan.connect():
 				logger.error(Messages.NoConnect_Pop_S % pop.name)
 				_errors = True
@@ -674,7 +755,9 @@ def updatePOPs():
 			try:
 				for hyper in OSMan.getHypervisors():
 					# First we see if there is alreay a Hypervisor entry for this POP in the DB. If there is not, we will create this new Hypervisor
-					for hyperDB in pop.hypervisors:		
+					found = False
+					for hyperDB in pop.hypervisors:	
+				
 						if (hyperDB.name == hyper.hypervisor_hostname):		
 							found=True
 							break
@@ -685,7 +768,7 @@ def updatePOPs():
 						DBConn.add(hyperDB)
 						
 					
-					DBConn.applyChanges()
+					#DBConn.applyChanges()
 					
 					#Update existing values	and increasing the counter for POP resources
 
@@ -759,8 +842,12 @@ def updatePOPs():
 			if (vCDNList):
 				for vcdn in vCDNList:
 					try:
-						OSMan.disconnect()
-						OSMan.setCredentials(vcdn.tenant,vcdn.loginUser,vcdn.loginPass)
+						
+						del OSMan
+						
+						OSMan = OpenStack.NovaAPIConnection(auth_url =pop.url , region = pop.region , 
+															tenant= vcdn.tenant, user = vcdn.loginUser, passwd = vcdn.loginPass )
+						
 						if not OSMan.connect() or OSMan.getLimits()==None:
 							logger.error(Messages.NoConnect_Pop_S % pop.name)
 							_errors = True
@@ -782,7 +869,7 @@ def updatePOPs():
 						
 						if found and lim.curInstances ==0:		
 							# There is an instance in the DB but not in the OpenStack, so it is deleted
-							DBConn.drop(InstanceDB.metric)
+							#DBConn.drop(InstanceDB.metric)
 							DBConn.drop(InstanceDB)
 							logger.debug( Messages.Deleted_Instance_S_at_POP_S % (vcdn.name , pop.name))
 							continue  
@@ -849,7 +936,7 @@ def updateMetrics():
 	
 	logger.info(Messages.Updating_OpenStack_Metrics)
 	
-	OSMan = OpenStack.APIConnection()
+	
 	
 	DBConn.start()
 	
@@ -865,10 +952,11 @@ def updateMetrics():
 			if (instanceList is not None) and (instanceList ):
 				for i in instanceList:
 					# Starting operations with to check the metrics of this instance
-					OSMan.disconnect()
-					OSMan.setURL(pop.url,pop.region)
-					OSMan.setCredentials(i.vcdn.tenant,i.vcdn.loginUser,i.vcdn.loginPass)
-					if not OSMan.connectMetrics():
+										
+					OSMan = OpenStack.CeilometerAPIConnection(auth_url = pop.url, region = pop.region,
+																tenant = i.vcdn.tenant, user = i.vcdn.loginUser, passwd = i.vcdn.loginPass)
+					
+					if not OSMan.connect():
 						logger.error(Messages.NoConnect_Pop_S % pop.name)
 						_errors = True
 						continue
@@ -983,6 +1071,9 @@ def optimize():
 				
 				
 				migrationList, alteredDemands  = OptimizationModel.optimizeHMAC(demands)
+				####################
+				#################### This alteredDemands list is expected to be a few elements long. For a general case, the InvalidDemands should be treated as the Migrations: to have an Instantiations related to several affected Demands (Migrations have this relationship)
+				#####################
 				
 				logger.info(Messages.HMAC_optimized)
 					
@@ -1125,26 +1216,30 @@ def buildModel():
 #enddef
 
 
-def _migrateInstance(instanceId, dstPopId):
+def _copyInstanceBySnapshot(instanceId, dstPopId,deleteOriginal=False):
 	"""
-		Migrates all the VMs from an instance into the Destination POP
+		Copies all the VMs from an instance into the Destination POP, by snapshots
+		
+		The VMs are paused, an Snapshot is taken and the IMG files downloaded.
+		Then the IMG files are uploaded to the destination POP, the VMs are launched from the Snapshot Image.
 		
 		:param instanceId: an instance Id to be migrated
 		:type instanceId: int
 		:param dstPopId: Pop Id where to deploy the VMs
 		:type dstPopId: int
+		:param deleteOriginal: True if the original VMs of the Instance are to be deleted after the copy
+		:type deleteOriginal: boolean
+		
 	
-		The instance and dstPop parameters cannot be None
-			
+		The instance and dstPop parameters cannot be None, have to be valid DB index values.
 		The Parameter is an Id because this function brings up its own connection to the DB
+		
 	"""
 	
 	
 	aDBConn = DBConnection.DBConnection(DBConn.DBString)
 	
 	
-	OSMan = OpenStack.APIConnection()
-	DstOSMan = OpenStack.APIConnection()
 	
 	_errors = False 
 	
@@ -1157,27 +1252,33 @@ def _migrateInstance(instanceId, dstPopId):
 	srcPOP_Name = instance.pop.name
 	dstPOP_Name = dstPop.name
 		
-	OSMan.setURL(instance.pop.url,instance.pop.region)
-	OSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-	DstOSMan.setURL(dstPop.url,dstPop.region)
-	DstOSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
+	SrcNova = OpenStack.NovaAPIConnection(auth_url = instance.pop.url, region = instance.pop.region,
+											tenant = instance.vcdn.tenant, user = instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	DstNova = OpenStack.NovaAPIConnection(auth_url = dstPop.url,region =dstPop.region,
+											tenant = instance.vcdn.tenant, user =  instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	
+	SrcGlance = OpenStack.GlanceAPIConnection(auth_url = instance.pop.url, region = instance.pop.region,
+											tenant = instance.vcdn.tenant, user = instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	DstGlance = OpenStack.GlanceAPIConnection(auth_url = dstPop.url,region =dstPop.region,
+											tenant = instance.vcdn.tenant, user =  instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	
 					
-	logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
+	logger.info(Messages.Copying_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
 	
 	del instance
 	del dstPop
 	aDBConn.cancelChanges()
 	aDBConn.end()
 	
-	if OSMan.connect() and OSMan.connectImages() and DstOSMan.connect() and DstOSMan.connectImages():
+	if SrcNova.connect() and SrcGlance.connect() and DstNova.connect() and DstGlance.connect():
 		
-		for server in OSMan.getServers():
+		for server in SrcNova.getServers():
 			
 			try:
 				
-				originalServerData = OSMan.serverMetadata(server.id)
+				originalServerData = SrcNova.getServerMetadata(server.id)
 				
-				if OSMan.isServerReady(server.id):
+				if SrcNova.isServerReady(server.id):
 					server.pause()
 					time.sleep(2)
 				
@@ -1185,7 +1286,7 @@ def _migrateInstance(instanceId, dstPopId):
 				
 				logger.debug(Messages.Created_Snapshot_Server_S_POP_S % (server.id,srcPOP_Name) )
 				
-				OSMan.waitImageReady(imageId)
+				SrcGlance.waitImageReady(imageId)
 				
 				try:
 					server.unpause()
@@ -1195,43 +1296,80 @@ def _migrateInstance(instanceId, dstPopId):
 					# Not .resume() but unpause()
 					
 					
-				if OSMan.isImageReady(imageId):
+				if SrcGlance.isImageReady(imageId):
 					
 					
 				
 					### Download the image ###	
 					fullpath = os.path.join(IMG_FOLDER,"%s.tmp" % (server.id + "_migration"))
-					if OSMan.getSnapshotImage(imageId,fullpath):
+					if SrcGlance.getSnapshotImage(imageId,fullpath):
 					
 						
 						logger.debug(Messages.downloadedImageFile_S % (fullpath) )
 						
-						dstImageId = DstOSMan.putSnapshotImage(server.id + "_migration", fullpath)
+						dstImageId = DstGlance.putSnapshotImage(server.id + "_migration", fullpath)
 						
-						if DstOSMan.waitImageReady(dstImageId):
+						if DstGlance.waitImageReady(dstImageId):
 							
 							logger.debug(Messages.uploadedImageFile_S % (fullpath) )
 								
 							originalServerData.imageName = server.id + "_migration"
 							
-							ServerId = DstOSMan.createServer(originalServerData)
+							ServerId = DstNova.createServer(originalServerData)
 							
-							if DstOSMan.waitServerReady(ServerId):
+							if DstNova.waitServerReady(ServerId):
 									
 								logger.debug(Messages.Created_Server_S_vCDN_S_POP_S % (ServerId,vCDN_Name, dstPOP_Name) )
 								
-								### Delete original Instance in the src POP
-					
-								if OSMan.deleteServer(server.id):
-									logger.debug(Messages.Deleted_Server_S_POP_S % (server.id,srcPOP_Name) )
-								else:
-									logger.error(Messages.NotDeleted_Server_S_POP_S % (server.id,srcPOP_Name) )
+								if originalServerData.floating_ip:
+						
+									if ( vCDN_Domain  ):
+										_duplicateDNSRecords( srcIp = originalServerData.floating_ip,
+																dstIp = newServerData.floating_ip,  
+																dnsDomain = vCDN_Domain, 
+																tenant= vCDN_Tenant, 
+																user = vCDN_User, 
+																passwd = vCDN_Passwd)
+									else:
+										_duplicateDNSRecords( srcIp = originalServerData.floating_ip,
+																dstIp = newServerData.floating_ip,  
+																dnsDomain = OPERATOR_DNS_DOMAIN, 
+																tenant= DESIGNATE_ADMIN_TENANT, 
+																user = DESIGNATE_ADMIN_USER, 
+																passwd = DESIGNATE_ADMIN_PASSWD)
+									#endif
+								#endif
+								
+								if deleteOriginal:
+									### Delete original Instance in the src POP
 									
+									time.sleep(60*MIGRATION_PAUSE)
+									
+									if SrcNova.deleteServer(server.id):
+										logger.debug(Messages.Deleted_Server_S_POP_S % (server.id,srcPOP_Name) )
+									else:
+										logger.error(Messages.NotDeleted_Server_S_POP_S % (server.id,srcPOP_Name) )
+									
+									if originalServerData.floating_ip:
+										if ( vCDN_Domain  ):
+											_deleteDNSRecords( ip = originalServerData.floating_ip,
+																dnsDomain = vCDN_Domain, 
+																tenant= vCDN_Tenant, 
+																user = vCDN_User, 
+																passwd = vCDN_Passwd) 
+										else:
+											_deleteDNSRecords( ip = originalServerData.floating_ip,
+																dnsDomain = OPERATOR_DNS_DOMAIN, 
+																tenant= DESIGNATE_ADMIN_TENANT, 
+																user = DESIGNATE_ADMIN_USER, 
+																passwd = DESIGNATE_ADMIN_PASSWD)
+									#endif
+						
 							else:
 								#Not able to start the server from the image
 								logger.error(Messages.NoServerCreated_vCDN_S_POP_S % (vCDN_Name, dstPOP_Name))
 								
-							DstOSMan.deleteImage(dstImageId)
+							DstGlance.deleteImage(dstImageId)
 								
 						else:
 							#Not able to upload the image
@@ -1248,10 +1386,10 @@ def _migrateInstance(instanceId, dstPopId):
 				
 				
 				#endif	
-				OSMan.deleteImage(imageId)
+				SrcGlance.deleteImage(imageId)
 									
 			except:
-				logger.exception(Messages.Exception_Migrating_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
+				logger.exception(Messages.Exception_Copying_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
 				continue
 		#endfor	
 	else:
@@ -1261,84 +1399,126 @@ def _migrateInstance(instanceId, dstPopId):
 #enddef
 
 
-def _cloneInstance(instanceId, dstPopId):
+def _copyInstanceByParameters(instanceId, dstPopId, deleteOriginal=False):
 	"""
-		Clones all the VMs from an instance into the Destination POP
+		Copies all the VMs from an instance into the Destination POP
 		
-		There is no actual migration or copy, a exact copy of the current VMs is built (if possible) on the destination POP
+		There is no actual copy of the VM Disk, a exact copy of the current VMs is built (if possible) on the destination POP by choosing
+		 the same OpenStack Nova Boot parameters.
+		 
+		.. seealso:: ServerMetadata
 		
-		:param instance: a Valid instance to be migrated
-		:type instance: int
-		:param dstPop: Pop where to deploy the VMs
-		:type dstPop: int
+		:param instanceId: a Valid instance to be copied
+		:type instanceId: int
+		:param dstPopId: Pop where to deploy the VMs
+		:type dstPopId: int
+		:param deleteOriginal: True if the original VMs of the Instance are to be deleted after the copy
+		:type deleteOriginal: boolean
 	
-		The instance and dstPop parameters cannot be None
+		.. note:: The instanceId and dstPopId are valid DB indexes, because this process will have its own DB Connection asking for these objects
 		
-		The Parameter is an Id because this function brings up its own connection to the DB
 			
 	"""
 	
 	aDBConn = DBConnection.DBConnection(DBConn.DBString)
 	
-	
-	OSMan = OpenStack.APIConnection()
-	DstOSMan = OpenStack.APIConnection()
-	
-	_errors = False 
-	
 	aDBConn.start()
 	
 	instance = aDBConn.getInstanceById(instanceId) 
 	dstPop = aDBConn.getPOPbyId(dstPopId) 
-			
+	
 	vCDN_Name = instance.vcdn.name
 	srcPOP_Name = instance.pop.name
 	dstPOP_Name = dstPop.name
-		
-	OSMan.setURL(instance.pop.url,instance.pop.region)
-	OSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-	DstOSMan.setURL(dstPop.url,dstPop.region)
-	DstOSMan.setCredentials(instance.vcdn.tenant,instance.vcdn.loginUser,instance.vcdn.loginPass)
-					
-	logger.info(Messages.Migrating_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
+	vCDN_Domain = instance.vcdn.dnsDomain
+	
+	vCDN_Tenant = instance.vcdn.tenant
+	vCDN_User = instance.vcdn.loginUser
+	vCDN_Passwd = instance.vcdn.loginPass
+	
+	SrcNova = OpenStack.NovaAPIConnection(auth_url = instance.pop.url, region = instance.pop.region,
+											tenant = instance.vcdn.tenant, user = instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	DstNova = OpenStack.NovaAPIConnection(auth_url = dstPop.url,region =dstPop.region,
+											tenant = instance.vcdn.tenant, user =  instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	
+	logger.info(Messages.Copying_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
 	
 	del instance
 	del dstPop
 	aDBConn.cancelChanges()
 	aDBConn.end()
 	
-	if OSMan.connect() and DstOSMan.connect() :
+	if SrcNova.connect() and DstNova.connect() :
 		
-		for server in OSMan.getServers():
+		for server in SrcNova.getServers():
 			
 			try:
 				
-				originalServerData = OSMan.serverMetadata(server.id)
+				originalServerData = SrcNova.getServerMetadata(server.id)
 				
-				logger.info(Messages.Migrating_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name))
+				logger.info(Messages.Copying_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name))
 				
-				ServerId = DstOSMan.createServer(originalServerData)
+				ServerId = DstNova.createServer(originalServerData)
 				
-				if ServerId and DstOSMan.waitServerReady(ServerId):
+				if ServerId and DstNova.waitServerReady(ServerId):
 					
 					logger.info(Messages.Created_Server_S_vCDN_S_POP_S % (ServerId,vCDN_Name,dstPOP_Name) )
 					
-					### Delete original Instance in the src POP
+					newServerData = DstNova.getServerMetadata(ServerId)
 					
-					if OSMan.deleteServer(server.id):
-						logger.info(Messages.Deleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
-					else:
-						logger.error(Messages.NotDeleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+					if originalServerData.floating_ip:
+						
+						if ( vCDN_Domain  ):
+							_duplicateDNSRecords( srcIp = originalServerData.floating_ip,
+													dstIp = newServerData.floating_ip,  
+													dnsDomain = vCDN_Domain, 
+													tenant= vCDN_Tenant, 
+													user = vCDN_User, 
+													passwd = vCDN_Passwd)
+						else:
+							_duplicateDNSRecords( srcIp = originalServerData.floating_ip,
+													dstIp = newServerData.floating_ip,  
+													dnsDomain = OPERATOR_DNS_DOMAIN, 
+													tenant= DESIGNATE_ADMIN_TENANT, 
+													user = DESIGNATE_ADMIN_USER, 
+													passwd = DESIGNATE_ADMIN_PASSWD)
+						#endif
+					#endif
 					
+					if deleteOriginal:
+						### Delete original Instance in the src POP
+						
+						time.sleep(60*MIGRATION_PAUSE)
+						
+						if SrcNova.deleteServer(server.id):
+							logger.info(Messages.Deleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+						else:
+							logger.error(Messages.NotDeleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+						#endif
+						if originalServerData.floating_ip:
+							if ( vCDN_Domain  ):
+								_deleteDNSRecords( ip = originalServerData.floating_ip,
+													dnsDomain = vCDN_Domain, 
+													tenant= vCDN_Tenant, 
+													user = vCDN_User, 
+													passwd = vCDN_Passwd) 
+							else:
+								_deleteDNSRecords( ip = originalServerData.floating_ip,
+													dnsDomain = OPERATOR_DNS_DOMAIN, 
+													tenant= DESIGNATE_ADMIN_TENANT, 
+													user = DESIGNATE_ADMIN_USER, 
+													passwd = DESIGNATE_ADMIN_PASSWD)
+						#endif
+					#endif
 				else:
 					#Not able to start the server from the image
 					logger.error(Messages.NoServerCreated_vCDN_S_POP_S % (vCDN_Name,dstPOP_Name))
 					
 			except:
-				logger.exception(Messages.Exception_Cloning_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
+				logger.exception(Messages.Exception_Copying_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
 				continue
 		#endfor	
-		logger.info(Messages.Migration_ended_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
+		logger.info(Messages.Copy_ended_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
 	else:
 		logger.error(Messages.NoConnect_Pops)
 #enddef
@@ -1374,7 +1554,7 @@ def _createInstance(demandId):
 		
 		logger.info(Messages.Instantiating_Instance_vCDN_S_POP_S % (vCDN_Name,POP_Name))
 	
-		_cloneInstance(modelInstance.id , demand.popId)
+		_copyInstanceByParameters(modelInstance.id , demand.popId)
 		
 	else:
 		logger.error(Messages.NoInstanceForvCDN_S % vCDN_Name )
@@ -1386,14 +1566,85 @@ def _createInstance(demandId):
 	
 #enddef
 
+
+def _duplicateDNSRecords( srcIp , dstIp , dnsDomain , 
+						tenant= "",  user = "", passwd = "") :
+	"""
+		For a given DNS Domain, all the A Records with data 'srcIp' are duplicated to A records with data 'dstIp'
+		
+		By default, the Operator's DNS Domain is used (read from the INI config File).
+		
+		By default, the Designate ADMIN Credentials are used (read from the INI config File).
+	
+		:returns: True if the Records were found and duplicated; False else
+	
+	"""
+	#Python's default arguments are evaluated once when the function is defined, not each time the function is called
+	
+	result = False
+	if (srcIp and dstIp):
+		
+		dsgnate = OpenStack.DesignateAPIConnection(auth_url= DESIGNATE_AUTH_URL,  tenant=tenant, user=user, passwd=passwd)
+		
+		if dsgnate.connect():
+			
+			
+			dnsDomainId = dsgnate.findDomain(dnsDomain)
+			if dnsDomainId:
+				records = dsgnate.findRecordsByData(dnsDomainId, rtype="A", data=srcIp  )
+				#print records
+				if not records == []:
+					result = True
+					for r in records:
+						if dsgnate.createRecord(dnsDomainId, rtype="A", data = dstIp, name = r.name):
+							logger.info(Messages.DNS_Record_Copied_Domain_S_Data_S_To_S % (dnsDomain, srcIp, dstIp  ) )
+						else:
+							logger.error(Messages.DNS_Record_Not_Copied_Domain_S_Data_S % (dnsDomain, srcIp ) )
+					#endfor
+				#endif
+			#endif
+		 #endif
+	#endif
+	return result
+#enddef
+	
+	
+def _deleteDNSRecords( dnsDomain, ip, 
+						tenant= "",  user = "", passwd = "") :
+	"""
+		For a given DNS Domain, all the A Records with data 'ip' are deleted
+		
+		:param ip: IP to delete the records from
+		:param dnsDomain: Designate DNS Domain where to operate.
+		
+		:returns: True if the Records were found and deleted; False else
+		
+	"""
+	
+	if ip and dnsDomain:
+		dsgnate = OpenStack.DesignateAPIConnection(auth_url= DESIGNATE_AUTH_URL,  tenant=tenant, user=user, passwd=passwd)
+		if dsgnate.connect():
+			dnsDomainId = dsgnate.findDomain(dnsDomain)
+			if dnsDomainId:
+				if dsgnate.deleteRecordsByData(dnsDomainId, rtype="A", data=ip  ):
+					logger.info(Messages.DNS_Record_Deleted_Domain_S_Data_S % (dnsDomain, ip  ) )
+				else:
+					logger.error(Messages.DNS_Record_Not_Deleted_Domain_S_Data_S % (dnsDomain, ip  ) )
+		#endif
+	#endif
+	return False
+	#enddef
+	
 def triggerMigrations(migrations):
 	"""
 		Does perform a set of Migrations on the OpenStack Data Centers.
 		This triggers several Threads for the completion of the migration but does not wait for them.
 		The Migrations operations are not controlled, they have to be followed in the OpenStack controllers or the log files left by vIOS
-	
+		
 		:param migrationIds: A list of migrationsIds to do
 		:type migrationIds: int[]
+		
+		.. seealso:: _copyInstanceByParameters()
 		
 	"""
 	
@@ -1405,7 +1656,8 @@ def triggerMigrations(migrations):
 
 	for mig in migrations:
 		try:
-			thread.start_new_thread ( _migrateInstance, (mig.instanceId, mig.dstPopId) )
+			thread.start_new_thread ( _copyInstanceBySnapshot, (mig.instanceId, mig.dstPopId), {'deleteOriginal':True} )
+			#thread.start_new_thread ( _copyInstanceByParameters, (mig.instanceId, mig.dstPopId), {'deleteOriginal':True} )
 		except:
 			logger.exception(Messages.Unable_Thread)
 			continue
@@ -1439,14 +1691,14 @@ def triggerInstantiations(instantiations):
 	
 	for i in instantiations:
 		
-		logger.info(Messages.Executing_Instantiation_vCDN_S_POP_S % (i.vcdn.name, i.pop.name) )
+		logger.info(Messages.Instantiating_Instance_vCDN_S_POP_S % (i.vcdn.name, i.pop.name) )
 		
 		if i.vcdn.instances:
 			try:
 				
 				modelInstance = i.vcdn.instances[0]
 			
-				thread.start_new_thread ( _cloneInstance, (modelInstance.id, i.popId) )
+				thread.start_new_thread ( _copyInstanceByParameters, (modelInstance.id, i.popId) )
 			except:
 				logger.exception(Messages.Unable_Thread)
 				continue

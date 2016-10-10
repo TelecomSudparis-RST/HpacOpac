@@ -32,7 +32,7 @@ This module does:
 
 .. note:: Check vIOSLib.Messages for settings on the log file. Logging happens to STDOUT, additionally a log file can be used
 
-.. warning:: For every config file passed as parameter, they are processed sequentially and overriden.
+.. warning:: For every config file passed as parameter, they are processed sequentially and overridden.
 
 .. warning:: Debug and LogFile command-line options override the settings in the configuration files
 
@@ -46,7 +46,7 @@ This module does:
 """
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -152,7 +152,7 @@ def main(argv):
 			raise  ### <<< DEBUG >>>
 		sys.exit(7)
 		
-	### Reading settings and conneting to DB ###
+	### Reading settings and connecting to DB ###
 	if not Optimizer.connect( db_url ):
 		print(Messages.ERROR_Connecting_to_DB_in_File %  db_url )
 		sys.exit(4)
@@ -181,7 +181,7 @@ def usage():
 	print("Usage: \t vIOSimulator.py  [-d] -f <INI configuration file> [-f <INI configuration file>] [-l <LOG file>]")	
 	print("\t -d|--debug                                   Enables DEBUG logging, overrides the configuration file option")
 	print("\t -f|--config-file <INI configuration file>    This is one or more configuration files, read sequentially.")
-	print("\t -l|--log-file <LOG file>                     This is the file where log messages will be writen, in addition to STDOUT/STDERR. This overrides the configuration file option ")	
+	print("\t -l|--log-file <LOG file>                     This is the file where log messages will be written, in addition to STDOUT/STDERR. This overrides the configuration file option ")	
 	print("\n\t vIOSimulator.py -h|--help")
 	print("")
 	banner()

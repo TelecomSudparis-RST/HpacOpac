@@ -15,7 +15,7 @@ This is to make it easier to translate the language of this tool and to centrali
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -33,15 +33,15 @@ This is to make it easier to translate the language of this tool and to centrali
 AdminPageTitle = 'vIOSimulator - DB Management'
 Errors_updating_POPs = "There were some errors while updating the POPs"
 Errors_updating_Metrics = "There were some errors while updating the Metrics from the POPs"
-Error_building_Topologie = "There were some errors while building the Topologie graph"
+Error_building_Topologie = "There were some errors while building the Topology graph"
 Errors_random_links = "There were some errors while creating random Links"
 ERROR_creating_Demands = "ERROR creating random demands"
 ERROR_consuming_Demands = "ERROR calculating capacity consumed by demands"
-Exception_drawing_Topologie = "Exception ocurred while drawing the Topologie"
+Exception_drawing_Topologie = "Exception occurred while drawing the Topology"
 ERROR_creating_Demands = "ERROR creating random demands"
 ERROR_optimizing = "ERROR while optimizing"
 
-Updated_Topo_Random = "Topologie updated with random links"
+Updated_Topo_Random = "Topology updated with random links"
 Updated_Graph = "Updated graph"
 Created_Demands = "Demands generated randomly"
 Updated_POPs = "Information updated from OpenStack Controllers"
@@ -72,16 +72,16 @@ ERROR_adjusting_Demands = "Unable to adjust the Demands' BW for the QoE value"
 ### Optimizer.py
 ###
 
-Create_Random_Topologie = "Creating a Random Topologie"
-Consuming_Demands = "Consuming Demands BW on topologie capacity"
+Create_Random_Topologie = "Creating a Random Topology"
+Consuming_Demands = "Consuming Demands BW on topology capacity"
 
-Random_Graph_Created = "A Random Topologie Graph has been created"
-Updated_NetworkLinks = "The Network Links have been replaced by the random topologie"
-Updated_ClientLocations = "The Client Groups have been distributed in the new topologie"
+Random_Graph_Created = "A Random Topology Graph has been created"
+Updated_NetworkLinks = "The Network Links have been replaced by the random topology"
+Updated_ClientLocations = "The Client Groups have been distributed in the new topology"
 
-Exception_updating_Infrastructure =  "Exception ocurred while updating the Infrastructure Topologie"
-Exception_updating_Demand = "Exception ocurred while creating random Demands"
-Exception_optimizing = "Exception ocurred while executing the Optimization"
+Exception_updating_Infrastructure =  "Exception occurred while updating the Infrastructure Topology"
+Exception_updating_Demand = "Exception occurred while creating random Demands"
+Exception_optimizing = "Exception occurred while executing the Optimization"
 
 CreatingRandomDemands_D_probaF_amplitudeD = "Creating random %d Demands, p=%f, amplitude=%d "
 Created_D_Demands = "Created %d random demands "
@@ -97,7 +97,7 @@ HMAC_optimized = "Finished running HMAC"
 OMAC_optimized = "Created OMAC CPLEX data file"
 Optimized_F = "Optimization executed in %f seconds"
 
-Exception_Building_Model =  "Exception ocurred while building the OMAC/HMAC Model"
+Exception_Building_Model =  "Exception occurred while building the OMAC/HMAC Model"
 
 Updated_MigrationCost_MigrationId_D = "Migration cost updated for Migration %d"
 
@@ -108,11 +108,11 @@ Updating_OpenStack_Metrics = "Updating the OpenStack Metrics information for all
 Connected_POP_S = "Connected to POP '%s'"
 Optimizating = "Running the Optimization algorithm"
 
-Exception_Model_POPS = "Exception ocurred while placing the POPs in the OMAC/HMAC Model"
+Exception_Model_POPS = "Exception occurred while placing the POPs in the OMAC/HMAC Model"
 NoClients =  "There are no ClientGroups found in the DB"
-Exception_Model_Clients = "Exception ocurred while placing the Clients in the OMAC/HMAC Model"
+Exception_Model_Clients = "Exception occurred while placing the Clients in the OMAC/HMAC Model"
 
-Exception_updating_Topologie =  "Exception ocurred while updating the Topologie"
+Exception_updating_Topologie =  "Exception occurred while updating the Topology"
 
 
 Exception_Metrics_Tenant_S_POP_S = "Unable to get Metrics for Tenant %s in POP %s "
@@ -124,17 +124,17 @@ Updated_Hypervisor_S_POP_S = " Updated hypervisor %s for POP %s"
 
 Updated_Flavor_S_POP_S = " Updated flavor %s for Pop %s"
 
-Exception_Update_Hypervisor_S_POP_S = "Exception ocurred while updating the hypervisor '%s' on POP '%s'"
-Exception_Update_vCDN_S_POP_S = "Exception ocurred while updating the vCDN '%s' on POP '%s'"
+Exception_Update_Hypervisor_S_POP_S = "Exception occurred while updating the hypervisor '%s' on POP '%s'"
+Exception_Update_vCDN_S_POP_S = "Exception occurred while updating the vCDN '%s' on POP '%s'"
 
-Exception_Update_Flavor_S_POP_S = "Exception ocurred while updating the flavors  '%s' on POP '%s' "
+Exception_Update_Flavor_S_POP_S = "Exception occurred while updating the flavors  '%s' on POP '%s' "
 
 Getting_Metric_Pop_D_tenant_S = "Obtaining metrics from POP '%s' for vCDN '%s'"
 
 NoConnect_Pop_S = "Unable to connect and login to POP '%s' "
 
 
-Exception_Simulating = "Exception occured while running the simulation"
+Exception_Simulating = "Exception occcured while running the simulation"
 
 
 Updated_Pop_S = "Updated information from POP '%s'"
@@ -181,7 +181,7 @@ Executing_D_Instantiations = "Executing %d Instantiations"
 
 Migrating_vCDN_S_fromPOP_S_toPOP_S = "Migrating vCDN '%s' from POP '%s' to POP '%s'"
 
-Migrating_Server_S_vCDN_S_POP_S = "Migrating Server '%s' of vCDN '%s 'from POP '%s'"
+Copying_Server_S_vCDN_S_POP_S = "Copying Server '%s' of vCDN '%s 'from POP '%s'"
 
 Unable_Thread = "Unable to create Thread for the operation"
 NoInstanceForvCDN = "There are no Instances of the vCDN to clone"
@@ -198,12 +198,12 @@ Deleted_Server_S_vCDN_S_POP_S = "Deleted server '%s' of vCDN '%s' in POP '%s' "
 QuotaLimit = "Servers quota full, not allowed to start more servers."
 
 NotDeleted_Server_S_vCDN_S_POP_S = "Server '%s' of vCDN '%s' in POP '%s' was not deleted after Migration "
-NotResumed_Server_S_POP_S =  "Server '%s' in POP '%s' was not resumed after snapshpt "
+NotResumed_Server_S_POP_S =  "Server '%s' in POP '%s' was not resumed after snapshot "
 
 downloadedImageFile_S = "Downloaded the IMG file in '%s' "
 uploadedImageFile_S = "Uploaded the IMG file in '%s' "
 
-Exception_Cloning_Server_S_POP_S_POP_S = "Exception occured when cloning server '%s' from POP '%s' to POP '%s'"
+Exception_Copying_Server_S_POP_S_POP_S = "Exception occurred when copying server '%s' from POP '%s' to POP '%s'"
 
 Error_migrating = "Unable to gather Migrations Information to execute"
 Error_instantiating = "Unable to gather Instantiation Information to execute"
@@ -216,6 +216,16 @@ QoE_outOfModel = "The QoE value is out of the Model boundaries"
 Updating_Demand_BW_QoE_F = "Updating the Demands BW to match a QoE = %f "
 Updating_Demand_BW_x_F = "Updating the Demands BW by a factor of %f "
 Updated_Demand_BW = "Updated the Demands BW "
+
+DNS_Record_Copied_Domain_S_Data_S_To_S = "DNS Records were copied in domain '%s' for IP '%s' To IP '%s'"
+DNS_Record_Not_Copied_Domain_S_Data_S = "Unable to copy DNS Records in domain '%s' for IP '%s'"
+
+DNS_Record_Deleted_Domain_S_Data_S = "DNS Records were deleted in domain '%s' for IP '%s'"
+DNS_Record_Not_Deleted_Domain_S_Data_S = "Unable to delete DNS Records in domain '%s' for IP '%s'"
+
+
+Exception_Designate = "An exception occurred while working with Designate"
+
 ###
 ### OptimizationModels.py
 ###
@@ -250,26 +260,26 @@ Scale_Condition_NetCapacity_D_Mbps = "The Scaling was rejected because Remaining
 
 Migration_check_PopSrc_S_PopDts_S = "Checking possible migration from POP '%s' to POP '%s'"
 
-Graph_Topologie_Consume_Demands = "Consuming a Topologie Graph with a set of demands"
+Graph_Topologie_Consume_Demands = "Consuming a Topology Graph with a set of demands"
 Graph_Capacity_Consume_Demands = "Consuming a Capacity Graph with a set of demands"
 Graph_Consume_D_Demands = "Consumed %d Demands from the Graph"
 
-Exception_Consuming_Demand_D_Graph = "Exception while consuming Demand %d on a Topologie Graph"
-Exception_Removing_Demand_D_Graph = "Exception while returning Demand %d on a Topologie Graph"
+Exception_Consuming_Demand_D_Graph = "Exception while consuming Demand %d on a Topology Graph"
+Exception_Removing_Demand_D_Graph = "Exception while returning Demand %d on a Topology Graph"
 
-Exception_Migrating_vCDN_S_PopSrc_S_PopDts_S = "Exception occured while calculating migration of vCDN '%s' from POP '%s' to POP '%s'"
+Exception_Migrating_vCDN_S_PopSrc_S_PopDts_S = "Exception occurred while calculating migration of vCDN '%s' from POP '%s' to POP '%s'"
 Redirect_Demand_Client_S_vCDN_S_srcPOP_S_dstPOP_S = "Scale-out and redirect Demands of clientGroup '%s' for vCDN '%s' from POP '%s' to POP '%s'"
 
 
-Demand_id_D_isValid = "Demand %d has a valid Instace, unable to simulate an Instantiation"
+Demand_id_D_isValid = "Demand %d has a valid Instance, unable to simulate an Instantiation"
 Redirect_D_invalid = "Redirect %d is invalid; could be a Migration"
 
-Errors_simulating = "Some error occured while executing the simulation"
+Errors_simulating = "Some error occurred while executing the simulation"
 
 Removing_Simulated_Redirects = "Removing the Demands from the previous path before redirection"
 Consuming_Simulated_Redirects = "Adding the Demands on the simulated path after redirection"
 
-Exception_Consuming_Fake_Demand = "Exception occured while Consuming a simulated Demand"
+Exception_Consuming_Fake_Demand = "Exception occurred while Consuming a simulated Demand"
 ClientLocation_S_requests_from_S_TotalBW_F = "Consuming fake Demand of ClientGroup at '%s' to POP '%s' with BW '%.2f'"
 
 Deleted_Fake_Instace_POP_S_vCDN_S = "Deleting Fake Instance in POP '%s' of vCDN '%s'"
@@ -284,28 +294,41 @@ OMAC_DAT_S = "OMAC .dat file was created in '%s'"
 ###
 
 
-AuthOS_url_S_user_s_tenant_S = "Authenticating to URL %s as User '%s' of Tenant '%s'"
+AuthOS_url_S_region_S_user_s_tenant_S = "Authenticating to KeyStone '%s' in Region '%s' as User '%s' of Tenant '%s'"
 AuthOS_region_S = "Authenticating to Region '%s'"
-Exception_Nova_url_S_region_S_user_S_tenant_S = "Unable to authenticate to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
-Exception_Ceilometer_url_S_region_S_user_S_tenant_S = "Unable to authenticate to Ceilometer Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
-Exception_Glance_url_S_region_S_user_S_tenant_S = "Unable to authenticate to Glance Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
+Exception_Nova_url_S_region_S_user_S_tenant_S = "Exception while conneting to Nova Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
+Exception_Ceilometer_url_S_region_S_user_S_tenant_S = "Exception while conneting to Ceilometer Service via URL '%s' in Region '%s' as User '%s' of Tenant '%s'"
+Exception_Glance_url_S_region_S_user_S_tenant_S = "Exception while conneting to Glance Service via URL %s in Region '%s' as User '%s' of Tenant '%s'"
+Exception_Designate_url_S_region_S_user_S_tenant_S = "Exception while conneting to Designate Service via URL '%s' in Region '%s' as User '%s' of Tenant '%s'"
 
 LastSample_S_at_S = "Last sample of meter '%s' at '%s' "
 CollectSamples_S_since_S = "Collecting stats of meter '%s' since '%s' "
 Meter_Stats_minD_maxD_avgD = "Values collected are: Min=%d Max=%d Avg=%d "
 NoMetrics_Meter_S = "No Metric collected for meter '%s' "
 Authenticated = "Authenticated"
+Authenticated_Designate = "Authenticated to Designate"
+Authenticated_Glance = "Authenticated to Glance"
+Authenticated_Nova = "Authenticated to Nova"
+Authenticated_Ceilometer = "Authenticated to Ceilometer"
 
-Migrating_Instance_vCDN_S_POP_S_POP_S = "Migrating Instance of vCDN %s from POP %s to POP %s"
+Domain_S_found = "Designate domain '%s' found"
+Record_S_S_S_found = "DNS record ('%s','%s','%s') found"
+Record_S_S_S_deleted = "DNS record ('%s','%s','%s') deleted"
+
+#Migrating_Instance_vCDN_S_POP_S_POP_S = "Migrating Instance of vCDN %s from POP %s to POP %s"
+Copying_Instance_vCDN_S_POP_S_POP_S = "Copying Instance of vCDN %s from POP %s to POP %s"
+
 Instantiating_Instance_vCDN_S_POP_S = "Instantiating vCDN %s on POP %s"
 Instantiation_ended_Instance_vCDN_S_POP_S = "Instantiation of vCDN %s on POP %s has finished"
-Migration_ended_Instance_vCDN_S_POP_S_POP_S = "Migration of vCDN %s from POP %s to POP %s has finished"
-Exception_Migrating_Server_S_POP_S_POP_S = "Exception occured while migrating a Server Id %s from POP %s to POP %s"
+
+Copy_ended_Instance_vCDN_S_POP_S_POP_S = "Copy of vCDN %s from POP %s to POP %s has finished"
+
+Exception_Migrating_Server_S_POP_S_POP_S = "Exception occurred while migrating a Server Id %s from POP %s to POP %s"
 NoConnect_Pops = "Unable to connect to the POPs to perform the Migration"
 NoDownload_ImgFile_S = "Unable to download the image file %s"
 NoUpload_ImgFile_S = "Unable to upload the image file %s"
 NoWritable_S = "The location %s is not writable"
-NoServerCreated_vCDN_S_POP_S = "Unable to start a new Server in POP '%s' for vCDN '%s'"
+NoServerCreated_vCDN_S_POP_S = "Unable to start a new Server for vCDN '%s' in POP '%s' "
 
 Invalid_Server_Parameters_S = "Invalid parameters for creating a Server: %s"
 ServerId_S_NotFound = "Unable to find a server with id = '%s'"

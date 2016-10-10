@@ -8,7 +8,7 @@
 
 This is a demo implementation of HMAC algorithm for Optimal vCDN Migration on an OpenStack environment. 
 
-HMAC is an Optimal VM migration algorithm that uses topologie information, live OpenStack statistics and metrics and the Demand for a vCDN Service as inputs. These input information can come from Operator's systems or, in our case, from manual input.
+HMAC is an Optimal VM migration algorithm that uses topology information, live OpenStack statistics and metrics and the Demand for a vCDN Service as inputs. These input information can come from Operator's systems or, in our case, from manual input.
 
 The objective of HMAC is to determine where to migrate a VM in order not to saturate the network links capacity neither the OpenStack capacity, minimizing the migration cost. This is an heuritic algorithm, it not an exact solution.
 
@@ -58,11 +58,11 @@ These Python modules are needed:
 
 This demo operates in an OpenStack distributed environment, tested using both `OpenStack Icehouse` and `OpenStack Mitaka`. 
 
-This demo supports also `Regions`, where a single `Horizon` and `Keystone` service is shared among different DataCenters.
+This demo supports also `Regions`, where a single `Horizon` and `Keystone` service is shared among different Data Centers.
 
-An OpenStack DataCenter, to operate with this demo, must have a `Nova` and `Ceilometer` service installed.
+An OpenStack Data Center, to operate with this demo, must have a `Nova` and `Ceilometer` service installed.
 
-The OpenStack DataCenters should have given `Tenants` created, associating each to a `vCDN` client.
+The OpenStack Data Centers should have `Tenants` created, associating each to a `vCDN` client.
 
 > **NOTE:** Make sure the `endpoints` set in the `Keystone` service are properly reachable and point to the appropriate API HTTP url.
 
@@ -79,11 +79,11 @@ The OpenStack DataCenters should have given `Tenants` created, associating each 
  
  * tests : Bash scripts for testing the initial deployment.
  
-## Installl Instructions
+## Install Instructions
 
 > **NOTE:** These instructions are given for Ubuntu systems, please modify they commands according to your system
 
-Once dowloaded the repository, first create a DataBase by executing the SQL script
+Once downloaded the repository, first create a Data Base by executing the SQL script
 
 		mysql -u root -p [-h <server>] <  db/vIOS_db.sql
 
@@ -109,7 +109,11 @@ Adjust the desired configurations in `config_demo.ini`
 
 Connect to the HTTP Server, on the IP and Port set in `config_demo.ini`
 
-#### To lauch the Demo as a Service;
+#### To launch the Demo as a Service;
+
+Use these files and scripts to have **vIOS** running as a Service in an *Ubuntu* machine. 
+
+> **NOTE:** Replace \<\<\>\> by the appropriate value
 
  * Ubuntu 14.04
  
@@ -126,8 +130,8 @@ Create a file `/etc/init/vIOS.conf`:
 				mkdir /var/log/vIOS
 		end script
 		script 
-		cd <installation folder>
-				/usr/bin/python bin/vIOSimulator.py -f <config file> -l <log file>
+		cd <<installation folder>>
+				/usr/bin/python bin/vIOSimulator.py -f <<config file>> -l <<log file>>
 		end script
 
 Restart the Service Daemon
@@ -144,11 +148,11 @@ Create a file `/lib/systemd/system/vIOS.service`, replacing the simbols by the a
 		Description=Running vIOS (vCDN Infrastructure Optimization Simulator)
 		[Service]
 		Type=simple
-		Environment=statedir=<installation folder>
-		Environment=PYTHONPATH=<python packages folder>
-		WorkingDirectory=<installation folder>
+		Environment=statedir=<<installation folder>>
+		Environment=PYTHONPATH=<<python packages folder>>
+		WorkingDirectory=<<installation folder>>
 		ExecStartPre=/bin/mkdir -p /var/log/vIOS
-		ExecStart=/usr/bin/python bin/vIOSimulator.py -f <config file> -l <log file>
+		ExecStart=/usr/bin/python bin/vIOSimulator.py -f <<config file>> -l <log file>
 		[Install]
 		WantedBy=multi-user.target
 
@@ -158,17 +162,18 @@ Restart the Service Daemon
 	$ sudo systemctl status vIOS
 
 
-## Version Changelog
+## Version change log
 
  * Call the actual migration of VMs on OpenStack, via snapshot-copy or VM-cloning.
+ * Integration with OpenStack Designate Service for Instantiation and Migration.
  * Demand BW adjustment by QoE, for the Operator to consider this.
  * All options possible are in the INI file
 
 ### Feature Pipeline
 
- * Deployer les Types de vCDNs
+ * Deploy Types of vCDNs.
  * Test coverage program, Decision Coverage.
- * Use of Client's connection BW and hosting capacities. ClientGroups connections integrated in the Gomuri Tree. Check migration to client
+ * Use of Client's connection BW and hosting capacities. ClientGroups connections integrated in the Gomory Tree. Check migration to client
  * Insert Logic for handling individual VMs
 
 
@@ -177,7 +182,7 @@ Restart the Service Daemon
 Author: Jose Ignacio Tamayo. Master of Science student at Telecom SudParis, France
 Email: jose.tamayo@telecom-sudparis.eu
 
-This program was developped as part of a 6 months intership in the Réseaux et Services de Télécommunications (RST) at Telecom SudParis University. [RST](http://rst.telecom-sudparis.eu/fr)
+This program was developed as part of a 6 months internship in the Réseaux et Services de Télécommunications (RST) at Telecom SudParis University. [RST](http://rst.telecom-sudparis.eu/fr)
 
 This code is delivered AS IS, no warranty is provided neither support nor maintenance.
 

@@ -35,7 +35,7 @@ In the original paper it is said that every node holds a POP for possible migrat
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 

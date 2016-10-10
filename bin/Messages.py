@@ -15,7 +15,7 @@ This is made so that it is easier to translate the tool to other languages
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 

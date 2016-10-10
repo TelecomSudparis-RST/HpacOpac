@@ -1,44 +1,44 @@
 //OMAC CPLEX Data file
 
-S = 4 ;
+S = 3 ;
 N = 8 ;
 F = 3 ;
 L = 18 ;
 
 
-servers_Names = ['PopSaclay', 'PopEvry', 'PopParis', 'PopOrly'];
+servers_Names = ['PopSaclay', 'PopEvry', 'PopParis'];
 clients_Names = ['Clients12', 'Clients11', 'Clients10', 'Clients8', 'Clients7', 'Clients9', 'Clients6', 'Clients5'];
 vcdns_Names = ['NetFlix', 'TF1', 'HBO'];
 locations_Names = ['Evry', 'Paris', 'Saclay', 'Issy', 'Chatillon', 'Boulogne', 'Versailles', 'Antony', 'Palaiseau', 'Orly', 'Melun', 'Corbeille', 'Argenteuil', 'Creteil', 'Ivry-sur-Seine', 'Poissy', 'Limours', 'Sarcelles'];
 
 
-D = [10000, 10000, 10000, 10000];
+D = [10000, 10000, 10000];
 
 
-volume = [235, 860, 235, 127];
+volume = [235, 987, 235];
 
 
 size_of = [60, 20, 20];
 
 
-serverLocation = [2, 0, 1, 9];
+serverLocation = [2, 0, 1];
 
 
 clientLocation = [16, 11, 12, 17, 16, 11, 7, 13];
 
 
-serverOf = [0, 0, 1];
+serverOf = [0, 1, 1];
 
 
 d = [
-[0, 6.16954, 0] ,
-[13.4105, 13.0499, 1.75873] ,
-[0, 11.7188, 0] ,
-[4.33531, 14.0634, 0] ,
-[0, 0, 3.89648] ,
-[0, 0, 8.1208] ,
-[0, 12.5418, 2.16061] ,
-[0, 0, 0] ,
+[0, 0, 17.4871] ,
+[0, 3.02649, 3.45153] ,
+[10.0, 9.31379, 0] ,
+[0, 13.3526, 0] ,
+[6.38584, 15.1072, 14.5666] ,
+[0, 12.6267, 0] ,
+[7.00049, 0, 0] ,
+[4.50991, 0, 12.0] ,
 ];
 
 
@@ -65,16 +65,14 @@ C = [
 
 
 hopcount = [
-[0, 1, 2, 1] ,
-[1, 0, 1, 2] ,
-[2, 1, 0, 3] ,
-[1, 2, 3, 0] ,
+[0, 1, 2] ,
+[1, 0, 1] ,
+[2, 1, 0] ,
 ];
 
 
 migrationCostK = [
-[1.0, 1.0, 1.0, 1.0] ,
-[1.0, 1.0, 1.0, 1.0] ,
-[1.0, 1.0, 1.0, 1.0] ,
-[1.0, 1.0, 1.0, 1.0] ,
+[1.0, 1.0, 1.0] ,
+[1.0, 1.0, 1.0] ,
+[1.0, 1.0, 1.0] ,
 ];

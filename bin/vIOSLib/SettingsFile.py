@@ -45,7 +45,7 @@ Option = Value
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 

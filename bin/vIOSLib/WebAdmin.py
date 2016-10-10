@@ -44,7 +44,7 @@ Site Map:
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -496,6 +496,7 @@ def build():
 								Optimizer.OptimizationModel.drawGomory( filename= app.static_folder + "/" + Topologie_Gomuri_Simulated_filename )
 							else:
 								flash(Messages.Errors_simulating,Flash_msg_error)
+								alteredDemandsList  =[]
 					else:
 						flash(Messages.Error_building_Topologie,Flash_msg_error)
 					

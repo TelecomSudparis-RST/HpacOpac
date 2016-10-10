@@ -7,7 +7,7 @@
  
 """
 """
-	As it is not clear how to express the OMAC problem in the CPLEX Python librariy (also being unable to run it because of licence constraints)
+	As it is not clear how to express the OMAC problem in the CPLEX Python library (also being unable to run it because of license constraints)
 	This module generates a .dat file that is to be executed in CPLEX IDE or via CLI on an appropriate server
 	
 	In theory the problem could be expressed in  .LP format, but the amount of variables make this difficult (could be tried later)
@@ -44,7 +44,7 @@
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 

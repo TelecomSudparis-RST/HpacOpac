@@ -9,10 +9,10 @@ Modules for the Data Model, DB Tables, on sqlalchemy
 
 .. seealso:: vIOS_db.sql
 
-When updating the items in the DB, do not set the date/time by localfunctions. 
+When updating the items in the DB, do not set the date/time by local functions. 
 Let the DB handle all timestamps using ONUPDATE and DEFAULT
 
-.. warning:: The funtions __unicode__ is needed for Flask-Admin, representing in the WEB a single instance of the object.
+.. warning:: The functions __unicode__ is needed for Flask-Admin, representing in the WEB a single instance of the object.
 
 .. note:: Because of SQLAlchemy, the `modified_at` value is actually when the last MODIFICATION took place, not the last time it was queried for information
 
@@ -66,7 +66,7 @@ Units and Values
 | clientGroup.connectionBW                   | Mbps |
 | HmacResult.minBW                           | Mbps |
 
-(*) Calculated value as the SUM of the VirtualMachies of the Tenant in the POP (via its Metrics. Check updateMetrics() )
+(*) Calculated value as the SUM of the Virtual Machies of the Tenant in the POP (via its Metrics. Check updateMetrics() )
 
 Hypervisor.maxNetBW, Hypervisor.curNetBW  are not used
 
@@ -87,7 +87,7 @@ The HmacResult.cost is calculated as vCDN.vDisk * HmacResult path hops in the To
 
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -118,7 +118,7 @@ Base = declarative_base()
 
 class Location(Base):
 	"""
-		This indicates a node in the Operators Infrastructure Topologie.
+		This indicates a node in the Operators Infrastructure Topology.
 		A Location connects to the ClientGroups and can have a POP.
 		
 		UNIQUE (name): To avoid confusion on the related tables. A location name is unique in a certain area.
@@ -535,7 +535,7 @@ class POP(Base):
 				((self.totalDisk - self.curDisk) > AvCDN.vDisk)
 				)
 				
-				### In our Test Infraestructure, the OpenStacks are already to the limit, so the full condition is removed
+				### In our Test Infrastructure, the OpenStack Compute Nodes are already to the limit, so the full condition is removed
 				
 				#((self.totalDisk - self.curDisk) > AvCDN.vDisk) and \
 				#((self.totalRAM - self.curRAM) > AvCDN.vRAM ) and \
@@ -545,7 +545,7 @@ class POP(Base):
 		except TypeError:
 			
 			#self.curDisk is a value obtained from OpenStack. If at any rate this value is NULL 
-			#	(because of problems getting OpenStack info), then we assume full capactity and return True
+			#	(because of problems getting OpenStack info), then we assume full capacity and return True
 			
 			ret = True
 		return ret
@@ -607,7 +607,7 @@ class Hypervisor(Base):
 		
 		UNIQUE = (name,popId). 
 		2 Hypervisors can belong to a single POP, as long as they have different names. 
-		2 Hpervisors can have the same name, but on different POPs. This reflects OpenStack characteristics
+		2 Hypervisors can have the same name, but on different POPs. This reflects OpenStack characteristics
 		
 		max{Y} are values that the OpenStack Nova finds as available in the HW
 		cur{Y} are values that the OpenStack Nova is currently using from the HW
@@ -691,7 +691,7 @@ class Hypervisor(Base):
 
 class Flavor(Base):
 	"""
-		Flavor availabe in the OpenStack DC. This is not used for any operation, but is left for future extension as this could be used together with the available Images to determine what VMs can be launched.
+		Flavor available in the OpenStack DC. This is not used for any operation, but is left for future extension as this could be used together with the available Images to determine what VMs can be launched.
 		
 		UNIQUE = (osId,popId). 2 POP can have the same Flavor ID in OpenStack, coincidence. 1 POP has unique Flavors. This reflects OpenStack characteristics.
 		
@@ -770,7 +770,7 @@ class vCDN(Base):
 	
 	UNIQUE = (name). Because each vCDN is identified by a single name.
 
-	`url`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, ussually put in Enviroment Variables.
+	`url`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, usually put in Envinroment Variables.
 	
 	The capacity values (RAM, disk, CPU, netBW) are values that are compared to the available resources of a POP to determine if the vCDN can be instantiated or not.
 	.. seealso:: POP.canHostVCDN()
@@ -789,12 +789,16 @@ class vCDN(Base):
 	vCPU = Column( Integer)
 	vNetBW = Column( Integer)    
 	defaultQosBW = Column( Integer, default=0 ) 
-	""" It is the BW in kbps to be given ClienGroups connecting to this vCDN, by default. BW in kbps. NOT used for any calculation, informational value. """
+	""" It is the BW in kbps to be given ClientGroups connecting to this vCDN, by default. BW in kbps. NOT used for any calculation, informational value. """
 	netBWUnits = "Mbps"
 	qosBWUnits = "kbps"
 	RAMUnits = "MB"
 	diskUnits = "GB"
 	
+	dnsDomain = Column( String)
+	""" Designate DNS Domain for this vCDN. It MUST end with .
+		If this value is not NULL, the vCDN Credentials will be used to connect to Desigate and operate this Tenant's DNS Domain
+	"""
 	
 	instances = relationship("Instance", backref = backref('vcdn'),passive_deletes=True)
 	""" Instances that is vCDN has in some POPs.
@@ -996,7 +1000,7 @@ class Metric(Base):
 			:param karg: Dictionary of values of the metric. ceilometer meter-list
 			:type karg: Dictionary
 			
-			This correspondonds to mapping the OpenStack objects
+			This corresponds to mapping the OpenStack objects
 			
 			.. seealso:: OpenStack.py
 			
@@ -1042,7 +1046,7 @@ class Metric(Base):
 	
 	def __unicode__(self):
 		"""
-		:returns: instace Id value
+		:returns: instance Id value
 		:rtype: String
 		"""
 		return str(self.instanceId)
@@ -1057,7 +1061,7 @@ class Demand(Base):
 	"""
 	
 	A Demand comes from a clientGroup (which is attached to a Location), asking for a vCDN from a POP (CDN DNS or Anycast mechanisms could be in place, this reflects how the clients are directed to the appropriate CDN servers).
-	A Demand might actually ask for an inexisting pair (vCDN,POP) (This pair is an Intance), then turning this Demand in an InvalidDemand.
+	A Demand might actually ask for an non-existing pair (vCDN,POP) (This pair is an Instance), then turning this Demand in an InvalidDemand.
 	
 	These values are external to vIOSimulator because they must be gathered by the CDN services.
 	
@@ -1090,7 +1094,7 @@ class Demand(Base):
 	invalidInstance = Column (Boolean, default = False)
 	""" True if the demanded pair (vCDN,POP) is actually an exiting Instance or not """
 	volume = Column( Integer , default=0)
-	"""a number presenting the demand volume, concurrent demans, demand's importance, etc. This value is only used for sorting."""
+	"""a number presenting the demand volume, concurrent demands, demand's importance, etc. This value is only used for sorting."""
 	bw = Column (Float, default = 0)
 	""" total BW required for this Demand, in Mbps. """
 	bwUnits = "Mbps"
@@ -1171,7 +1175,7 @@ class AlteredDemand(Base):
 
 class HmacResult(Base):
 	"""
-		This class and table in DB is for the migrations triggered by HMAC algorithim in OptimzationModesl.HMAC.optimize()
+		This class and table in DB is for the migrations triggered by HMAC algorithm in OptimzationModesl.HMAC.optimize()
 		
 		.. seealso:: Optimizer.py
 		
@@ -1198,14 +1202,14 @@ class HmacResult(Base):
 	delayUnits = "mins"
 	
 	minBW = Column(Float)
-	""" The minimum link BW found on the gomory Tree for this migration. Used to know the liminit BW for the migration. In Mbps"""
+	""" The minimum link BW found on the Gomory Tree for this migration. Used to know the limit BW for the migration. In Mbps"""
 	minBWUnits = "Mbps"
 	
 	created_at = Column( DateTime, onupdate=func.now(), default=func.now())
 	
 
 	demands = relationship("Demand", backref = backref('migration'),passive_deletes=True)
-	""" Demands that are optimiwed by this migration.
+	""" Demands that are optimized by this migration.
 	Inverse attribute is `Demand.migration`."""
 	
 	demandsIds = []

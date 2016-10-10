@@ -7,7 +7,7 @@ Module to interact with the DB for vIOSimulator
 > Version 1.4
 > Date: Sept 2016
 
-Uses sqlalchemy. Uses any DB backend supported by SQLAlchemy.
+Uses sqlalchemy. Uses any DB back-end supported by SQLAlchemy.
 
 No method prints messages, no exceptions raised, no logging performed. These methods are silent.
 
@@ -23,7 +23,7 @@ A single Session object is used internally, and it is renewed/recreated
 """
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -42,7 +42,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.exc import MultipleResultsFound
-from sqlalchemy.exc import InvalidRequestError
+
+from sqlalchemy.exc import InvalidRequestError, OperationalError
 from sqlalchemy import create_engine
 from sqlalchemy import or_
 from sqlalchemy import and_
@@ -582,7 +583,7 @@ class DBConnection(object):
 			:param ModelClass: is the Table/Class to lookup and get the values
 			:param ModelField: is the Table/Class field to sort this. 'Must be ModelClass.x'
 		
-			:returns: list of elemenst of the ModelClass class
+			:returns: list of elements of the ModelClass class
 			:rtype: ModelClass[]
 		
 			:raises:  LookupError
@@ -675,14 +676,21 @@ class DBConnection(object):
 			Start a new transaction block, closing the previous.
 			All pending changes not applied are undone.
 		"""
-		self.DBSession.rollback()
-		self.DBSession.close()
-		self.DBSession = self.SessionClass()
+		try:
+			self.DBSession.rollback()
+			self.DBSession.close()
+			self.DBSession = self.SessionClass()
+		except OperationalError:
+			self.connect()
+			self.DBSession = self.SessionClass()
 		
 	def end(self):
 		""" 
 			Ends the transaction block
 		"""
-		self.DBSession.close()
+		try:
+			self.DBSession.close()
+		except OperationalError:
+			self.connect()
 		
 	#enddef

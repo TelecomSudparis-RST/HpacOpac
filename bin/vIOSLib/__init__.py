@@ -29,7 +29,7 @@ With this, any module can inherit the logger by doing
 """
 
 """
-..licence::
+..license::
 
 	vIOS (vCDN Infrastructure Optimization Simulator)
 
@@ -102,14 +102,14 @@ def initializeLogging():
 
 def setDebug():
 	"""
-		Sets the logging level to DEBUG. This overrides or can be overriden by readSettingsFile()
+		Sets the logging level to DEBUG. This overrides or can be overridden by readSettingsFile()
 	"""
 	global debug
 	debug = True
 	
 def setLogFile(filename):
 	"""
-		Sets the Filename where to write the logs. This overrides or can be overriden by readSettingsFile()
+		Sets the Filename where to write the logs. This overrides or can be overridden by readSettingsFile()
 	
 		:param filename: A valid filename where to write the logs
 		:type filename: String
@@ -124,7 +124,7 @@ def readSettingsFile():
 		
 		If the options are not present in the INI file, the existing values are not modified
 		
-		This is so that we add or remove options from the INI file just by mofiying this functions. Also, the same INI entry can be read by many modules
+		This is so that we add or remove options from the INI file just by modifying this functions. Also, the same INI entry can be read by many modules
 		
 		Options set: logfile, backupCount, maxBytes, debug
 		
