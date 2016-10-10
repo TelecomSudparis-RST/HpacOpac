@@ -1,0 +1,82 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module vIOSimulator</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>vIOSimulator</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSimulator.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSimulator.py</a></font></td></tr></table>
+    <p><tt>vIOSimulator&nbsp;WEB&nbsp;main&nbsp;module<br>
+===========================<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.4<br>
+&gt;&nbsp;Date:&nbsp;Sept&nbsp;2016<br>
+&nbsp;<br>
+HMAC/OMAC&nbsp;Demo&nbsp;on&nbsp;a&nbsp;live&nbsp;Open&nbsp;Stack&nbsp;cloud&nbsp;deployment<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;does:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Reads&nbsp;a&nbsp;Config&nbsp;file&nbsp;in&nbsp;INI&nbsp;Format.&nbsp;Loads&nbsp;the&nbsp;options&nbsp;from&nbsp;the&nbsp;config&nbsp;files&nbsp;and&nbsp;pass&nbsp;them&nbsp;to&nbsp;the&nbsp;respective&nbsp;modules<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;error&nbsp;reading&nbsp;the&nbsp;config&nbsp;File,&nbsp;program&nbsp;exits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Gets&nbsp;the&nbsp;DB&nbsp;URL&nbsp;for&nbsp;initial&nbsp;connection&nbsp;and&nbsp;connects&nbsp;to&nbsp;the&nbsp;DB<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;error,&nbsp;program&nbsp;exits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Writes&nbsp;a&nbsp;simple&nbsp;log&nbsp;message&nbsp;to&nbsp;STDOUT&nbsp;(and&nbsp;the&nbsp;logging&nbsp;file,&nbsp;if&nbsp;set).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;error,&nbsp;program&nbsp;exits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Launch&nbsp;a&nbsp;Web&nbsp;Interface&nbsp;in&nbsp;http//&lt;local&nbsp;IP&gt;:&lt;TCP&nbsp;Port&gt;/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;error,&nbsp;program&nbsp;exits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+..&nbsp;note::&nbsp;Main&nbsp;interactions&nbsp;happen&nbsp;in&nbsp;the&nbsp;WEB&nbsp;interface.&nbsp;Modules&nbsp;print&nbsp;DEBUG&nbsp;and&nbsp;ERROR&nbsp;messages&nbsp;to&nbsp;LOG.<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Check&nbsp;vIOSLib.Messages&nbsp;for&nbsp;settings&nbsp;on&nbsp;the&nbsp;log&nbsp;file.&nbsp;Logging&nbsp;happens&nbsp;to&nbsp;STDOUT,&nbsp;additionally&nbsp;a&nbsp;log&nbsp;file&nbsp;can&nbsp;be&nbsp;used<br>
+&nbsp;<br>
+..&nbsp;warning::&nbsp;For&nbsp;every&nbsp;config&nbsp;file&nbsp;passed&nbsp;as&nbsp;parameter,&nbsp;they&nbsp;are&nbsp;processed&nbsp;sequentially&nbsp;and&nbsp;overridden.<br>
+&nbsp;<br>
+..&nbsp;warning::&nbsp;Debug&nbsp;and&nbsp;LogFile&nbsp;command-line&nbsp;options&nbsp;override&nbsp;the&nbsp;settings&nbsp;in&nbsp;the&nbsp;configuration&nbsp;files<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;vIOSimulator.py&nbsp;[-d|--debug]&nbsp;-f|--config-file&nbsp;&lt;INI&nbsp;configuration&nbsp;file&gt;&nbsp;&nbsp;[-f|--config-file&nbsp;&lt;INI&nbsp;configuration&nbsp;file&gt;]&nbsp;[-l|--log-file&nbsp;&lt;LOG&nbsp;file&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;vIOSimulator.py&nbsp;-h|--help&nbsp;<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;Optimizer.py,&nbsp;WebAdmin.py</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="vIOSLib.Messages.html">vIOSLib.Messages</a><br>
+<a href="Messages.html">Messages</a><br>
+<a href="vIOSLib.OpenStackConnection.html">vIOSLib.OpenStackConnection</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.OptimizationModels.html">vIOSLib.OptimizationModels</a><br>
+<a href="vIOSLib.Optimizer.html">vIOSLib.Optimizer</a><br>
+<a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.WebAdmin.html">vIOSLib.WebAdmin</a><br>
+<a href="getopt.html">getopt</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.html">vIOSLib</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-banner"><strong>banner</strong></a>()</dt><dd><tt>Prints&nbsp;a&nbsp;banner</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>(argv)</dt><dd><tt>Main&nbsp;program&nbsp;to&nbsp;execute&nbsp;if&nbsp;this&nbsp;file&nbsp;is&nbsp;called&nbsp;as&nbsp;executable<br>
+&nbsp;<br>
+:param&nbsp;argv:&nbsp;This&nbsp;is&nbsp;sys.argv[1:]&nbsp;to&nbsp;get&nbsp;the&nbsp;CLI&nbsp;options&nbsp;passed&nbsp;at&nbsp;call<br>
+:type&nbsp;argv:&nbsp;String[]</tt></dd></dl>
+ <dl><dt><a name="-usage"><strong>usage</strong></a>()</dt><dd><tt>Prints&nbsp;how&nbsp;to&nbsp;use&nbsp;this&nbsp;tool</tt></dd></dl>
+</td></tr></table>
+</body></html>

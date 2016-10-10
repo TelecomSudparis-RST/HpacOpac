@@ -1,0 +1,627 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module vIOSLib.OptimizationModels</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="vIOSLib.html"><font color="#ffffff">vIOSLib</font></a>.OptimizationModels</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/OptimizationModels.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/OptimizationModels.py</a></font></td></tr></table>
+    <p><tt>Modeling&nbsp;for&nbsp;Optimization<br>
+===================================<br>
+&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.4<br>
+&gt;&nbsp;Date:&nbsp;Sept&nbsp;2016<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;main&nbsp;<a href="#Model">Model</a>&nbsp;of&nbsp;vCDN&nbsp;Infrastructure&nbsp;Optimization&nbsp;(HMAC/<a href="#OMAC">OMAC</a>)<br>
+&nbsp;<br>
+&nbsp;<br>
+It&nbsp;builds&nbsp;graphs&nbsp;based&nbsp;on&nbsp;topology&nbsp;information,&nbsp;and&nbsp;runs&nbsp;HMAC&nbsp;and&nbsp;<a href="#OMAC">OMAC</a>&nbsp;on&nbsp;top&nbsp;of&nbsp;those<br>
+The&nbsp;Topology&nbsp;is&nbsp;made&nbsp;of&nbsp;the&nbsp;locations&nbsp;and&nbsp;the&nbsp;network&nbsp;links.&nbsp;This&nbsp;should&nbsp;reflet&nbsp;a&nbsp;2-tier&nbsp;or&nbsp;3-tier&nbsp;architecture<br>
+Over&nbsp;this&nbsp;topology,&nbsp;clients&nbsp;are&nbsp;located&nbsp;at&nbsp;the&nbsp;Edge&nbsp;nodes&nbsp;and&nbsp;POPs&nbsp;are&nbsp;located&nbsp;anywhere<br>
+&nbsp;<br>
+HMAC&nbsp;runs&nbsp;over&nbsp;this&nbsp;structure&nbsp;and&nbsp;determines&nbsp;the&nbsp;migrations&nbsp;to&nbsp;make.&nbsp;<br>
+The&nbsp;results&nbsp;are&nbsp;placed&nbsp;back&nbsp;in&nbsp;the&nbsp;DB&nbsp;with&nbsp;the&nbsp;updated&nbsp;timestamp<br>
+&nbsp;<br>
+In&nbsp;the&nbsp;original&nbsp;paper&nbsp;it&nbsp;is&nbsp;said&nbsp;that&nbsp;every&nbsp;node&nbsp;holds&nbsp;a&nbsp;POP&nbsp;for&nbsp;possible&nbsp;migration.&nbsp;In&nbsp;this&nbsp;Demo,&nbsp;for&nbsp;extensibility,&nbsp;the&nbsp;nodes&nbsp;can&nbsp;or&nbsp;cannot&nbsp;have&nbsp;an&nbsp;OpenStack&nbsp;DC.&nbsp;HmacResult&nbsp;only&nbsp;happens&nbsp;to&nbsp;nodes&nbsp;that&nbsp;do&nbsp;have&nbsp;an&nbsp;OpenStack&nbsp;DC<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Install&nbsp;python-igraph<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;This&nbsp;module&nbsp;does&nbsp;not&nbsp;interact&nbsp;directly&nbsp;with&nbsp;the&nbsp;DB,&nbsp;the&nbsp;Optimizer&nbsp;module&nbsp;does<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+###&nbsp;Original&nbsp;code&nbsp;note:<br>
+&nbsp;<br>
+&gt;&nbsp;Author:&nbsp;Hatem&nbsp;IBN&nbsp;KHEDHER,&nbsp;Makhlouf&nbsp;HADJII,&nbsp;Emad&nbsp;ABD-ELRAHMAN,&nbsp;Hossam&nbsp;AFIFI,&nbsp;and&nbsp;Ahmed.E&nbsp;KAMAL<br>
+&gt;&nbsp;Date:15/02/2015<br>
+&gt;&nbsp;This&nbsp;source&nbsp;code&nbsp;attempt&nbsp;to&nbsp;resolve&nbsp;the&nbsp;vCDN&nbsp;migration&nbsp;using&nbsp;Gomory-Hu&nbsp;tree&nbsp;for&nbsp;large&nbsp;scale&nbsp;scenario<br>
+&gt;&nbsp;Import&nbsp;the&nbsp;required&nbsp;packages</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="vIOSLib.Messages.html">vIOSLib.Messages</a><br>
+<a href="vIOSLib.Optimizer.html">vIOSLib.Optimizer</a><br>
+</td><td width="25%" valign=top><a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
+<a href="logging.html">logging</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#FakeDemand">FakeDemand</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#FakeInstance">FakeInstance</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#FakeRedirect">FakeRedirect</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#Model">Model</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#NCUPM">NCUPM</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#OMAC">OMAC</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OptimizationModels.html#Random">Random</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FakeDemand">class <strong>FakeDemand</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;Simulation&nbsp;of&nbsp;the&nbsp;Migrations<br>
+&nbsp;<br>
+Because&nbsp;while&nbsp;simulating&nbsp;the&nbsp;Demands&nbsp;are&nbsp;placed&nbsp;according&nbsp;to&nbsp;the&nbsp;Migrations,&nbsp;if&nbsp;the&nbsp;Demands&nbsp;objects&nbsp;are&nbsp;used&nbsp;for&nbsp;analysis&nbsp;the&nbsp;changes&nbsp;will&nbsp;impact&nbsp;the&nbsp;DB<br>
+This&nbsp;is&nbsp;because&nbsp;in&nbsp;the&nbsp;internal&nbsp;methods&nbsp;the&nbsp;DataModel&nbsp;relationships&nbsp;are&nbsp;used&nbsp;to&nbsp;get&nbsp;related&nbsp;objects;&nbsp;requiring&nbsp;the&nbsp;relationship&nbsp;to&nbsp;be&nbsp;effectively&nbsp;existing&nbsp;in&nbsp;the&nbsp;DB<br>
+In&nbsp;our&nbsp;case,&nbsp;if&nbsp;a&nbsp;Demand&nbsp;is&nbsp;deplaced,&nbsp;before&nbsp;using&nbsp;any&nbsp;other&nbsp;method&nbsp;the&nbsp;ORM&nbsp;will&nbsp;try&nbsp;to&nbsp;update&nbsp;the&nbsp;DB&nbsp;&nbsp;to&nbsp;get&nbsp;the&nbsp;new&nbsp;relationships.<br>
+So,&nbsp;to&nbsp;avoid&nbsp;that,&nbsp;we&nbsp;use&nbsp;a&nbsp;fake&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;has&nbsp;per&nbsp;separate&nbsp;the&nbsp;3&nbsp;elements&nbsp;of&nbsp;a&nbsp;Demand<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="FakeDemand-__init__"><strong>__init__</strong></a>(self, clientGroupLocationName<font color="#909090">=''</font>, clientGroupName<font color="#909090">=''</font>, clientGroupId<font color="#909090">=1</font>, popLocationName<font color="#909090">=''</font>, popName<font color="#909090">=''</font>, popId<font color="#909090">=1</font>, vcdnName<font color="#909090">=''</font>, vcdnId<font color="#909090">=1</font>, bw<font color="#909090">=0</font>, volume<font color="#909090">=0</font>)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FakeInstance">class <strong>FakeInstance</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;Simulation&nbsp;of&nbsp;the&nbsp;Migrations<br>
+&nbsp;<br>
+..seealso::&nbsp;<a href="#FakeDemand">FakeDemand</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="FakeInstance-__init__"><strong>__init__</strong></a>(self, popName<font color="#909090">=''</font>, popId<font color="#909090">=1</font>, vcdnName<font color="#909090">=''</font>, vcdnId<font color="#909090">=1</font>, popLocationName<font color="#909090">=''</font>)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FakeRedirect">class <strong>FakeRedirect</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;Simulation<br>
+&nbsp;<br>
+Because&nbsp;a&nbsp;Demand&nbsp;would&nbsp;need&nbsp;to&nbsp;be&nbsp;redirected&nbsp;when&nbsp;the&nbsp;vCND&nbsp;is&nbsp;migrated<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="FakeRedirect-__init__"><strong>__init__</strong></a>(self, fakeDemand, dstPopName<font color="#909090">=''</font>, dstPopId<font color="#909090">=1</font>)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Model">class <strong>Model</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;model&nbsp;just&nbsp;holds&nbsp;the&nbsp;information&nbsp;from&nbsp;the&nbsp;infrastructure&nbsp;into&nbsp;structures&nbsp;for&nbsp;the&nbsp;2&nbsp;optimization&nbsp;algorithms:<br>
+&nbsp;<br>
+HMAC&nbsp;is&nbsp;based&nbsp;on&nbsp;Graph&nbsp;Theory<br>
+<a href="#OMAC">OMAC</a>&nbsp;on&nbsp;Linear-Programming<br>
+&nbsp;<br>
+The&nbsp;model&nbsp;has,&nbsp;internally,&nbsp;a&nbsp;Graph&nbsp;that&nbsp;holds&nbsp;some&nbsp;information&nbsp;about&nbsp;the&nbsp;topologie&nbsp;and&nbsp;its&nbsp;state.&nbsp;<br>
+This&nbsp;Graph&nbsp;can&nbsp;be&nbsp;drawn&nbsp;to&nbsp;a&nbsp;file&nbsp;or&nbsp;screen&nbsp;(using&nbsp;Cairo&nbsp;lib)<br>
+&nbsp;<br>
+The&nbsp;Graph&nbsp;is&nbsp;created&nbsp;with&nbsp;these&nbsp;attributes<br>
+&gt;&nbsp;Vertex:Name&nbsp;=&nbsp;Location<br>
+&gt;&nbsp;Vertex:label&nbsp;=&nbsp;Location&nbsp;or&nbsp;Pop.name&nbsp;where&nbsp;there&nbsp;is&nbsp;a&nbsp;POP<br>
+&gt;&nbsp;Edge:capacity&nbsp;=&nbsp;NetworkLink.capacity<br>
+&gt;&nbsp;Edge:label&nbsp;=&nbsp;NetworkLink.capacity<br>
+&nbsp;<br>
+&gt;&nbsp;Vertex:pop&nbsp;=&nbsp;POP&nbsp;Object;&nbsp;None&nbsp;if&nbsp;there&nbsp;is&nbsp;none<br>
+&nbsp;<br>
+Internally&nbsp;a&nbsp;Gomury&nbsp;Ho&nbsp;Tree&nbsp;is&nbsp;also&nbsp;constructed&nbsp;based&nbsp;on&nbsp;the&nbsp;Topologie&nbsp;Capacity&nbsp;(does&nbsp;not&nbsp;include&nbsp;the&nbsp;clients)<br>
+&nbsp;<br>
+The&nbsp;Tree&nbsp;is&nbsp;created&nbsp;with&nbsp;these&nbsp;attributes<br>
+&gt;&nbsp;Vertex:Name&nbsp;=&nbsp;Location<br>
+&gt;&nbsp;Vertex:label&nbsp;=&nbsp;Location&nbsp;or&nbsp;Pop.name&nbsp;where&nbsp;there&nbsp;is&nbsp;a&nbsp;POP<br>
+&gt;&nbsp;Edge:capacity&nbsp;=&nbsp;Gomory-Hu&nbsp;Tree&nbsp;flow<br>
+&nbsp;<br>
+The&nbsp;Graph&nbsp;can&nbsp;have&nbsp;the&nbsp;links'&nbsp;capacities&nbsp;reduced&nbsp;or&nbsp;consumed&nbsp;by&nbsp;a&nbsp;set&nbsp;of&nbsp;Demands,&nbsp;leaving&nbsp;a&nbsp;Graph&nbsp;of&nbsp;the&nbsp;consumed&nbsp;topologie<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+1)&nbsp;Having&nbsp;update&nbsp;the&nbsp;list&nbsp;of&nbsp;Locations&nbsp;(nodes)&nbsp;and&nbsp;NetworkLinks&nbsp;(edged),&nbsp;create&nbsp;a&nbsp;<a href="#Model">Model</a>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel&nbsp;=&nbsp;HMAC(Locations,&nbsp;NetworkLinks)<br>
+&nbsp;<br>
+2)&nbsp;Put&nbsp;information&nbsp;about&nbsp;the&nbsp;POPs,&nbsp;the&nbsp;ClientGroups,&nbsp;etc&nbsp;and&nbsp;build&nbsp;the&nbsp;Gomory-Hu&nbsp;Tree<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-setPOPs">setPOPs</a>(ListOfPOPs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-setClientGroups">setClientGroups</a>(ListOfClients)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-buildGomoryTree">buildGomoryTree</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+3)&nbsp;Draw&nbsp;the&nbsp;Graph&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-drawTopologie">drawTopologie</a>()&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-drawCapacity">drawCapacity</a>()&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.drawGomoryTree()&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+4)&nbsp;Consume&nbsp;the&nbsp;Graph&nbsp;with&nbsp;a&nbsp;set&nbsp;of&nbsp;Demands<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-consumeDemands">consumeDemands</a>(ListOfDemands)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+5)&nbsp;&nbsp;Draw&nbsp;the&nbsp;Graph&nbsp;with&nbsp;the&nbsp;reduced&nbsp;capacity<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.<a href="#Model-drawCapacity">drawCapacity</a>()&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel.drawGomoryTree()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Model-__init__"><strong>__init__</strong></a>(self, Locations, Links)</dt><dd><tt>This&nbsp;load&nbsp;the&nbsp;Node/Vertex&nbsp;information&nbsp;from&nbsp;the&nbsp;Locations.&nbsp;The&nbsp;nodes&nbsp;on&nbsp;the&nbsp;Graph&nbsp;are&nbsp;the&nbsp;Locations<br>
+&nbsp;<br>
+Then&nbsp;the&nbsp;Edges&nbsp;information&nbsp;from&nbsp;the&nbsp;NetworkLinks.&nbsp;The&nbsp;edges&nbsp;on&nbsp;the&nbsp;Graph&nbsp;have&nbsp;the&nbsp;capacity&nbsp;of&nbsp;the&nbsp;link<br>
+&nbsp;<br>
+By&nbsp;default,&nbsp;all&nbsp;nodes&nbsp;are&nbsp;White&nbsp;Circles&nbsp;of&nbsp;size&nbsp;15,&nbsp;having&nbsp;as&nbsp;LABEL&nbsp;its&nbsp;Location&nbsp;name<br>
+&nbsp;<br>
+:param&nbsp;Locations:&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;Locations&nbsp;(List&nbsp;of&nbsp;nodes)<br>
+:type&nbsp;Locations:&nbsp;Location[]<br>
+&nbsp;<br>
+:param&nbsp;Links:&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;NetworkLinks&nbsp;(Listo&nbsp;of&nbsp;edges)<br>
+:type&nbsp;Links:&nbsp;NetworkLink[]<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;from&nbsp;the&nbsp;internals,&nbsp;catch&nbsp;everything</tt></dd></dl>
+
+<dl><dt><a name="Model-buildGomoryTree"><strong>buildGomoryTree</strong></a>(self)</dt><dd><tt>From&nbsp;the&nbsp;Capacity&nbsp;Graph&nbsp;of&nbsp;the&nbsp;<a href="#Model">Model</a>,&nbsp;make&nbsp;a&nbsp;Gomory-Hu&nbsp;Tree<br>
+&nbsp;<br>
+&nbsp;<br>
+Calculates&nbsp;the&nbsp;Gomory-Hu&nbsp;tree&nbsp;of&nbsp;the&nbsp;given&nbsp;graph,&nbsp;assuming&nbsp;that&nbsp;the&nbsp;edge&nbsp;capacities&nbsp;are&nbsp;given&nbsp;in&nbsp;`capacity`&nbsp;property.<br>
+&nbsp;<br>
+This&nbsp;implementation&nbsp;uses&nbsp;Gusfield's&nbsp;algorithm.<br>
+&nbsp;<br>
+Copy&nbsp;the&nbsp;graph&nbsp;and&nbsp;vertex&nbsp;attributes&nbsp;of&nbsp;the&nbsp;original&nbsp;graph&nbsp;into&nbsp;the&nbsp;returned&nbsp;one<br>
+&nbsp;<br>
+The&nbsp;label&nbsp;property&nbsp;of&nbsp;the&nbsp;Gomuri&nbsp;Tree&nbsp;edges&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;same&nbsp;value&nbsp;as&nbsp;the&nbsp;Gomuri&nbsp;Flow&nbsp;&nbsp;<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;If&nbsp;the&nbsp;Capacity&nbsp;has&nbsp;been&nbsp;affected&nbsp;by&nbsp;<a href="#Model-consumeDemands">consumeDemands</a>(),&nbsp;the&nbsp;Gomory-Hu&nbsp;Tree&nbsp;will&nbsp;be&nbsp;calculated&nbsp;on&nbsp;the&nbsp;new&nbsp;capacity&nbsp;values<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Call&nbsp;this&nbsp;before&nbsp;drawGomoryTree()</tt></dd></dl>
+
+<dl><dt><a name="Model-consumeDemands"><strong>consumeDemands</strong></a>(self, demands)</dt><dd><tt>The&nbsp;set&nbsp;of&nbsp;Demands&nbsp;is&nbsp;consumed/substracted&nbsp;from&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;Topology&nbsp;Graph&nbsp;and&nbsp;Gomory-Hu&nbsp;Tree<br>
+&nbsp;<br>
+:param&nbsp;demands:&nbsp;A&nbsp;list&nbsp;of&nbsp;Demands&nbsp;to&nbsp;consume&nbsp;the&nbsp;model&nbsp;from<br>
+:type&nbsp;demands:&nbsp;Demands[]<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;all&nbsp;OK;&nbsp;False&nbsp;if&nbsp;there&nbsp;were&nbsp;errors<br>
+&nbsp;<br>
+The&nbsp;Demands&nbsp;passed&nbsp;as&nbsp;parameter&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;VALID</tt></dd></dl>
+
+<dl><dt><a name="Model-consumeFakeDemands"><strong>consumeFakeDemands</strong></a>(self, fakeDemands)</dt><dd><tt>The&nbsp;set&nbsp;of&nbsp;FakeDemands&nbsp;is&nbsp;consumed/substracted&nbsp;from&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;Topology&nbsp;Graph&nbsp;and&nbsp;Gomory-Hu&nbsp;Tree<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;used&nbsp;for&nbsp;the&nbsp;simulation(),&nbsp;in&nbsp;order&nbsp;not&nbsp;to&nbsp;use&nbsp;real&nbsp;DB&nbsp;objects.<br>
+&nbsp;<br>
+:param&nbsp;fakeDemans:&nbsp;A&nbsp;list&nbsp;of&nbsp;FakeDemands&nbsp;to&nbsp;consume&nbsp;the&nbsp;model&nbsp;from<br>
+:type&nbsp;fakeDemans:&nbsp;FakeDemands[]<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;all&nbsp;OK;&nbsp;False&nbsp;if&nbsp;there&nbsp;were&nbsp;errors<br>
+&nbsp;<br>
+The&nbsp;Demands&nbsp;passed&nbsp;as&nbsp;parameter&nbsp;are&nbsp;simulated,&nbsp;so&nbsp;their&nbsp;type&nbsp;has&nbsp;to&nbsp;be&nbsp;FakeDemands</tt></dd></dl>
+
+<dl><dt><a name="Model-drawCapacity"><strong>drawCapacity</strong></a>(self, filename<font color="#909090">=None</font>)</dt><dd><tt>..seealso::&nbsp;<a href="#-drawGraph">drawGraph</a>()</tt></dd></dl>
+
+<dl><dt><a name="Model-drawGomory"><strong>drawGomory</strong></a>(self, filename<font color="#909090">=None</font>)</dt><dd><tt>..seealso::&nbsp;<a href="#-drawGraph">drawGraph</a>()</tt></dd></dl>
+
+<dl><dt><a name="Model-drawTopologie"><strong>drawTopologie</strong></a>(self, filename<font color="#909090">=None</font>)</dt><dd><tt>..seealso::&nbsp;<a href="#-drawGraph">drawGraph</a>()</tt></dd></dl>
+
+<dl><dt><a name="Model-optimizeHMAC"><strong>optimizeHMAC</strong></a>(self, demands)</dt><dd><tt>The&nbsp;results&nbsp;of&nbsp;the&nbsp;optimization&nbsp;are&nbsp;a&nbsp;list&nbsp;of&nbsp;recommended&nbsp;migrations<br>
+&nbsp;<br>
+HMAC&nbsp;works&nbsp;on&nbsp;the&nbsp;Gomuri&nbsp;Tree,&nbsp;where&nbsp;it&nbsp;is&nbsp;assumed&nbsp;that&nbsp;the&nbsp;Flow/Capacity&nbsp;is&nbsp;the&nbsp;remaining&nbsp;Link&nbsp;BW.<br>
+HmacResults&nbsp;are&nbsp;triggerd&nbsp;by&nbsp;saturated&nbsp;links,&nbsp;having&nbsp;0&nbsp;or&nbsp;negative&nbsp;Flow/Capacity&nbsp;in&nbsp;the&nbsp;Gomuri&nbsp;Tree<br>
+If&nbsp;all&nbsp;the&nbsp;Gomory&nbsp;Tree&nbsp;shows&nbsp;links&nbsp;with&nbsp;positive&nbsp;Flow/Capacity,&nbsp;it&nbsp;means&nbsp;that&nbsp;the&nbsp;Topologie&nbsp;can&nbsp;very&nbsp;well&nbsp;suppor&nbsp;the&nbsp;Demands&nbsp;the&nbsp;way&nbsp;they&nbsp;are,&nbsp;so&nbsp;no&nbsp;migrations<br>
+&nbsp;<br>
+The&nbsp;HmacResults&nbsp;would&nbsp;indicate&nbsp;the&nbsp;Cost&nbsp;as&nbsp;vCDN.vDisk&nbsp;*&nbsp;(migration&nbsp;path&nbsp;hops&nbsp;in&nbsp;graph)<br>
+The&nbsp;HmacResults&nbsp;would&nbsp;indicate&nbsp;the&nbsp;Delay&nbsp;as&nbsp;vCDN.vDisk&nbsp;/&nbsp;(minimal&nbsp;BW&nbsp;in&nbsp;the&nbsp;migration&nbsp;path)&nbsp;or&nbsp;_SaturatedLinkDelay<br>
+&nbsp;<br>
+..&nbsp;warning::&nbsp;Calling&nbsp;this&nbsp;function&nbsp;should&nbsp;happen&nbsp;after&nbsp;calling&nbsp;<a href="#Model-consumeDemands">consumeDemands</a>().&nbsp;Otherwise,&nbsp;the&nbsp;full&nbsp;Topologie&nbsp;capacity&nbsp;is&nbsp;considered&nbsp;as&nbsp;not&nbsp;used&nbsp;and&nbsp;fully&nbsp;available&nbsp;(less&nbsp;migrations&nbsp;will&nbsp;be&nbsp;triggered)<br>
+&nbsp;<br>
+At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;optimization&nbsp;process,&nbsp;the&nbsp;Demands&nbsp;will&nbsp;be&nbsp;linked&nbsp;to&nbsp;the&nbsp;corresponding&nbsp;Migration&nbsp;or&nbsp;Alteration&nbsp;to&nbsp;Perform.<br>
+At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;optimization&nbsp;process,&nbsp;the&nbsp;Demands&nbsp;will&nbsp;have&nbsp;this&nbsp;`invalidInstance`&nbsp;field&nbsp;updated.&nbsp;<br>
+If&nbsp;needed,&nbsp;update&nbsp;the&nbsp;DB&nbsp;to&nbsp;have&nbsp;this&nbsp;modification&nbsp;registered.<br>
+&nbsp;<br>
+:param&nbsp;demands:&nbsp;List&nbsp;of&nbsp;Demand&nbsp;Objects&nbsp;taken&nbsp;from&nbsp;the&nbsp;DB<br>
+:type&nbsp;demands:&nbsp;Demand[]<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;A&nbsp;List&nbsp;of&nbsp;HmacResults&nbsp;to&nbsp;perform,&nbsp;a&nbsp;List&nbsp;of&nbsp;Demands&nbsp;Alterations<br>
+:rtype:&nbsp;&nbsp;HmacResult[],&nbsp;AlteredDemand[]<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;All&nbsp;internal&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="Model-setClientGroups"><strong>setClientGroups</strong></a>(self, clientGroups)</dt><dd><tt>:param&nbsp;clientGroups:&nbsp;List&nbsp;of&nbsp;ClientGroups&nbsp;to&nbsp;be&nbsp;placed&nbsp;in&nbsp;the&nbsp;nodes.&nbsp;<br>
+:type&nbsp;pops:&nbsp;ClientGroup[]<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;on&nbsp;the&nbsp;internals<br>
+&nbsp;<br>
+The&nbsp;Graph&nbsp;has&nbsp;some&nbsp;vertex&nbsp;and&nbsp;edges&nbsp;added.<br>
+&gt;&nbsp;Vertex.name&nbsp;=&nbsp;Vertex.label&nbsp;=&nbsp;ClientGroup.name<br>
+&gt;&nbsp;Vertex.color&nbsp;=&nbsp;CLIENT_NODE_COLOR<br>
+&gt;&nbsp;Vertex.size&nbsp;=&nbsp;CLIENT_NODE_SIZE<br>
+&gt;&nbsp;Vertex.isClient&nbsp;=&nbsp;True<br>
+&nbsp;<br>
+Edge&nbsp;from&nbsp;ClientGroup&nbsp;to&nbsp;Location<br>
+&gt;&nbsp;Edge.color&nbsp;=&nbsp;CLIENT_NODE_COLOR<br>
+&gt;&nbsp;Edge.capacity&nbsp;=&nbsp;ClientGroup.connectionBW<br>
+&gt;&nbsp;Edge.label&nbsp;=&nbsp;ClientGroup.connectionBW&nbsp;+&nbsp;ClientGroup.connectionBWUnits</tt></dd></dl>
+
+<dl><dt><a name="Model-setPOPs"><strong>setPOPs</strong></a>(self, pops)</dt><dd><tt>:param&nbsp;pops:&nbsp;List&nbsp;of&nbsp;POPs&nbsp;to&nbsp;be&nbsp;placed&nbsp;in&nbsp;the&nbsp;nodes.&nbsp;According&nbsp;to&nbsp;the&nbsp;model,&nbsp;they&nbsp;can&nbsp;be&nbsp;placed&nbsp;in&nbsp;any&nbsp;layer&nbsp;of&nbsp;the&nbsp;topology<br>
+:type&nbsp;pops:&nbsp;POP[]<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;on&nbsp;the&nbsp;internals<br>
+&nbsp;<br>
+The&nbsp;Graph&nbsp;Vertex&nbsp;has&nbsp;some&nbsp;attributes&nbsp;changed<br>
+&gt;&nbsp;Vertex:label&nbsp;=&nbsp;Pop.name&nbsp;where&nbsp;there&nbsp;is&nbsp;a&nbsp;POP<br>
+&gt;&nbsp;Vertex:popId&nbsp;=&nbsp;POP:id<br>
+&gt;&nbsp;Vertex:color&nbsp;=&nbsp;blue<br>
+&gt;&nbsp;Vertex:size&nbsp;=&nbsp;15&nbsp;+&nbsp;cantidad&nbsp;de&nbsp;Instancias</tt></dd></dl>
+
+<dl><dt><a name="Model-updateFakeInstances"><strong>updateFakeInstances</strong></a>(self, fakeInstances)</dt><dd><tt>This&nbsp;takes&nbsp;a&nbsp;list&nbsp;of&nbsp;fakeInstances&nbsp;in&nbsp;order&nbsp;to&nbsp;adjust&nbsp;the&nbsp;Graph's&nbsp;drawing&nbsp;to&nbsp;reflect&nbsp;the&nbsp;proper&nbsp;amount&nbsp;of&nbsp;instances&nbsp;per&nbsp;POP<br>
+&nbsp;<br>
+..seealso::&nbsp;Optimizer.simulate()<br>
+&nbsp;<br>
+:param&nbsp;fakeInstances:&nbsp;List&nbsp;if&nbsp;fakeInstance&nbsp;to&nbsp;check<br>
+:type&nbsp;fakeInstances:&nbsp;<a href="#FakeInstance">FakeInstance</a>[]</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>capacityGraph</strong> = &lt;igraph.Graph object&gt;</dl>
+
+<dl><dt><strong>gomoryTree</strong> = &lt;igraph.Graph object&gt;</dl>
+
+<dl><dt><strong>topologieGraph</strong> = &lt;igraph.Graph object&gt;</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NCUPM">class <strong>NCUPM</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;model&nbsp;represents&nbsp;the&nbsp;exponential&nbsp;law&nbsp;relating&nbsp;a&nbsp;Demand&nbsp;BW&nbsp;with&nbsp;a&nbsp;QoE&nbsp;metric<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;realization&nbsp;of&nbsp;<a href="#NCUPM">NCUPM</a>&nbsp;part&nbsp;of&nbsp;the&nbsp;thesis&nbsp;"Qualite&nbsp;d'Experience&nbsp;et&nbsp;Adaptation&nbsp;de&nbsp;services&nbsp;video"&nbsp;of&nbsp;M.&nbsp;Mamadou&nbsp;Tourad&nbsp;DIALLO<br>
+&nbsp;<br>
+Ref:&nbsp;<a href="http://samovar.telecom-sudparis.eu/spip.php?article824&amp;lang=fr">http://samovar.telecom-sudparis.eu/spip.php?article824&amp;lang=fr</a><br>
+&nbsp;<br>
+:raises:&nbsp;ValueError<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="NCUPM-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>The&nbsp;<a href="#Model">Model</a>&nbsp;is&nbsp;initiated&nbsp;from&nbsp;the&nbsp;global&nbsp;variables&nbsp;(NCUPM_alpha,NCUPM_beta,NCUPM_gamma)<br>
+These&nbsp;variables&nbsp;are&nbsp;read&nbsp;from&nbsp;the&nbsp;INI&nbsp;file,&nbsp;or&nbsp;taken&nbsp;from&nbsp;default&nbsp;values</tt></dd></dl>
+
+<dl><dt><a name="NCUPM-x"><strong>x</strong></a>(self, mos)</dt><dd><tt>&nbsp;For&nbsp;a&nbsp;given&nbsp;'MOS'&nbsp;value&nbsp;to&nbsp;achieve,&nbsp;there&nbsp;is&nbsp;a&nbsp;BW&nbsp;adjustment&nbsp;coefficient&nbsp;'x'&nbsp;given&nbsp;by&nbsp;the&nbsp;model<br>
+&nbsp;<br>
+This&nbsp;coefficient&nbsp;x&nbsp;is&nbsp;to&nbsp;be&nbsp;divided&nbsp;by&nbsp;the&nbsp;original&nbsp;BW&nbsp;to&nbsp;have&nbsp;the&nbsp;adjusted&nbsp;one.<br>
+&nbsp;<br>
+:param&nbsp;mos:&nbsp;a&nbsp;MOS&nbsp;value&nbsp;to&nbsp;achieve&nbsp;with&nbsp;the&nbsp;adjusted&nbsp;BW<br>
+:type&nbsp;mos:&nbsp;float<br>
+&nbsp;<br>
+:returns:&nbsp;A&nbsp;coefficient&nbsp;x&nbsp;in&nbsp;the&nbsp;interval&nbsp;[1,10]<br>
+:rtype:&nbsp;float<br>
+&nbsp;<br>
+:raises:&nbsp;ValueError&nbsp;in&nbsp;case&nbsp;of&nbsp;exception&nbsp;in&nbsp;the&nbsp;math&nbsp;formulae</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="OMAC">class <strong>OMAC</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;defining&nbsp;and&nbsp;contaning&nbsp;arrays&nbsp;values&nbsp;used&nbsp;for&nbsp;the&nbsp;CPLEX&nbsp;<a href="#OMAC">OMAC</a>&nbsp;implementation&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+This&nbsp;class&nbsp;produces&nbsp;a&nbsp;.DAT&nbsp;file&nbsp;that&nbsp;is&nbsp;compatible&nbsp;with&nbsp;the&nbsp;.MOD&nbsp;file&nbsp;in&nbsp;CPLEX&nbsp;IDE<br>
+&nbsp;<br>
+Possibility&nbsp;to&nbsp;gererate&nbsp;directly&nbsp;a&nbsp;LP&nbsp;notation&nbsp;problem<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;CPLEX&nbsp;files&nbsp;from&nbsp;the&nbsp;folder&nbsp;../CPLEX.&nbsp;These&nbsp;.mod&nbsp;and&nbsp;.dat&nbsp;folder&nbsp;can&nbsp;be&nbsp;imported&nbsp;into&nbsp;CPLEX&nbsp;to&nbsp;run&nbsp;the&nbsp;<a href="#OMAC">OMAC</a>&nbsp;exact&nbsp;optimization<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel&nbsp;=&nbsp;new&nbsp;<a href="#OMAC">OMAC</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setTopologie">setTopologie</a>(Locations,&nbsp;NetLinks)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setPOPs">setPOPs</a>(POPs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setvCDNs">setvCDNs</a>(vCDNs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setClientGroups">setClientGroups</a>(clientGroups)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setDemands">setDemands</a>(clientGroups)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setMigrationCost">setMigrationCost</a>(clientGroups)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-optimize">optimize</a>()&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+By&nbsp;running&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;function,&nbsp;some&nbsp;of&nbsp;these&nbsp;functions&nbsp;are&nbsp;already&nbsp;executed&nbsp;and&nbsp;the&nbsp;execution&nbsp;path&nbsp;changes&nbsp;a&nbsp;bit:<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model&nbsp;=&nbsp;new&nbsp;<a href="#Model">Model</a>(Locations,&nbsp;NetLinks)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.<a href="#OMAC-setPOPs">setPOPs</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.<a href="#OMAC-setClientGroups">setClientGroups</a>(POPs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.omac.<a href="#OMAC-setvCDNs">setvCDNs</a>(vCDNs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.omac.<a href="#OMAC-setDemands">setDemands</a>(clientGroups)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.omac.<a href="#OMAC-setMigrationCost">setMigrationCost</a>(clientGroups)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.omac.<a href="#OMAC-optimize">optimize</a>()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="OMAC-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="OMAC-optimize"><strong>optimize</strong></a>(self)</dt><dd><tt>Writes&nbsp;a&nbsp;.dat&nbsp;file&nbsp;for&nbsp;CPLEX&nbsp;engine&nbsp;to&nbsp;run&nbsp;next&nbsp;to&nbsp;the&nbsp;.mod&nbsp;file&nbsp;already&nbsp;prepared<br>
+&nbsp;<br>
+At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;execution,&nbsp;get&nbsp;the&nbsp;2&nbsp;CPLEX&nbsp;files&nbsp;from&nbsp;'../CPLEX/*'<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;is&nbsp;all&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;it&nbsp;was&nbsp;unable&nbsp;to&nbsp;write&nbsp;the&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="OMAC-setClientGroups"><strong>setClientGroups</strong></a>(self, clientGroups)</dt><dd><tt>:param&nbsp;clientGroups:&nbsp;List&nbsp;of&nbsp;ClientGroups<br>
+:type&nbsp;pops:&nbsp;ClientGroup[]<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;on&nbsp;the&nbsp;internals</tt></dd></dl>
+
+<dl><dt><a name="OMAC-setDemands"><strong>setDemands</strong></a>(self, listDemands)</dt><dd><tt>:param&nbsp;demands:&nbsp;List&nbsp;of&nbsp;Demands<br>
+:type&nbsp;demands:&nbsp;Demand[]<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;on&nbsp;the&nbsp;internals<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+..&nbsp;note::&nbsp;The&nbsp;list&nbsp;of&nbsp;Demands&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;valid,&nbsp;they&nbsp;are&nbsp;not&nbsp;checked&nbsp;in&nbsp;this&nbsp;function.</tt></dd></dl>
+
+<dl><dt><a name="OMAC-setMigrationCost"><strong>setMigrationCost</strong></a>(self, migCosts)</dt><dd><tt>:param&nbsp;migCosts:&nbsp;List&nbsp;of&nbsp;MigrationCostMultiplier&nbsp;as&nbsp;defined&nbsp;by&nbsp;the&nbsp;Operator's&nbsp;Infrastructure<br>
+:type&nbsp;migCosts:&nbsp;MigrationCostMultiplier[]</tt></dd></dl>
+
+<dl><dt><a name="OMAC-setPOPs"><strong>setPOPs</strong></a>(self, listPOPs)</dt><dd><tt>:param&nbsp;listPOPs:&nbsp;List&nbsp;of&nbsp;POPs.<br>
+:type&nbsp;listPOPs:&nbsp;POP[]<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;on&nbsp;the&nbsp;internals<br>
+&nbsp;<br>
+The&nbsp;values&nbsp;POP.maxDisk&nbsp;and&nbsp;POP.maxNetBW&nbsp;are&nbsp;used&nbsp;for&nbsp;<a href="#OMAC">OMAC</a>&nbsp;<a href="#Model">Model</a></tt></dd></dl>
+
+<dl><dt><a name="OMAC-setTopologie"><strong>setTopologie</strong></a>(self, locationsList, linksList)</dt><dd><tt>:param&nbsp;locationsList:&nbsp;List&nbsp;of&nbsp;Locations&nbsp;as&nbsp;defined&nbsp;by&nbsp;the&nbsp;Operator's&nbsp;Infrastructure<br>
+:type&nbsp;locationsList:&nbsp;Location[]<br>
+:param&nbsp;linksList:&nbsp;List&nbsp;of&nbsp;NetLinks&nbsp;as&nbsp;defined&nbsp;by&nbsp;the&nbsp;Operator's&nbsp;Infrastructure<br>
+:type&nbsp;linksList:&nbsp;NetLink[]</tt></dd></dl>
+
+<dl><dt><a name="OMAC-setvCDNs"><strong>setvCDNs</strong></a>(self, listvCDNs)</dt><dd><tt>:param&nbsp;listvCDNs:&nbsp;List&nbsp;of&nbsp;vCDNs&nbsp;in&nbsp;the&nbsp;Infra<br>
+:type&nbsp;listvCDNs:&nbsp;vCDN[]<br>
+:raises:&nbsp;&nbsp;any&nbsp;error&nbsp;on&nbsp;the&nbsp;internals</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>topologieGraph</strong> = &lt;igraph.Graph object&gt;</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Random">class <strong>Random</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;an&nbsp;auxiliary&nbsp;model&nbsp;used&nbsp;to&nbsp;create&nbsp;a&nbsp;random&nbsp;infrastructure,<br>
+&nbsp;<br>
+The&nbsp;<a href="#Random">Random</a>&nbsp;Graph&nbsp;Vertex&nbsp;are&nbsp;created&nbsp;with&nbsp;this&nbsp;attributes<br>
+Vertex:name&nbsp;=&nbsp;Location.name<br>
+Vertex:location&nbsp;=&nbsp;Location&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;<br>
+The&nbsp;edge&nbsp;has&nbsp;a&nbsp;property&nbsp;that&nbsp;represents&nbsp;the&nbsp;capacity<br>
+Edge:capacity&nbsp;=&nbsp;NetworkLink.capacity<br>
+&nbsp;<br>
+Once&nbsp;created,&nbsp;pull&nbsp;the&nbsp;NetworkLinks&nbsp;objects&nbsp;using&nbsp;aModel.<a href="#Random-getLinkList">getLinkList</a>()<br>
+Once&nbsp;created,&nbsp;pull&nbsp;the&nbsp;border&nbsp;Locations&nbsp;using&nbsp;aModel.<a href="#Random-getAccessLocations">getAccessLocations</a>()<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aModel&nbsp;=&nbsp;OptimizationModes.<a href="#Random">Random</a>(&nbsp;locations&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;listLinks&nbsp;=&nbsp;aModel.<a href="#Random-getLinkList">getLinkList</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;listLocations&nbsp;=&nbsp;aModel.<a href="#Random-getAccessLocations">getAccessLocations</a>()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Random-__init__"><strong>__init__</strong></a>(self, Locations)</dt><dd><tt>This&nbsp;model&nbsp;creates&nbsp;a&nbsp;<a href="#Random">Random</a>&nbsp;Graph&nbsp;with&nbsp;the&nbsp;random&nbsp;probability,&nbsp;with&nbsp;as&nbsp;many&nbsp;nodes&nbsp;as&nbsp;Locations<br>
+&nbsp;<br>
+Then&nbsp;the&nbsp;Locations&nbsp;are&nbsp;linked&nbsp;to&nbsp;the&nbsp;nodes&nbsp;in&nbsp;the&nbsp;random&nbsp;Graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Then&nbsp;the&nbsp;Edges&nbsp;are&nbsp;set&nbsp;a&nbsp;random&nbsp;Capacity&nbsp;BW,&nbsp;in&nbsp;a&nbsp;range&nbsp;[0&nbsp;,&nbsp;maxLinkCapacity]<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;The&nbsp;objects&nbsp;in&nbsp;Locations&nbsp;array&nbsp;are&nbsp;attached&nbsp;to&nbsp;this&nbsp;<a href="#Model">Model</a>,&nbsp;do&nbsp;not&nbsp;delete&nbsp;unless&nbsp;when&nbsp;the&nbsp;complete&nbsp;model&nbsp;is&nbsp;deleted<br>
+&nbsp;<br>
+:param&nbsp;Locations:&nbsp;List&nbsp;of&nbsp;existing&nbsp;locations<br>
+:type&nbsp;Locations:&nbsp;Locations[]</tt></dd></dl>
+
+<dl><dt><a name="Random-getAccessLocations"><strong>getAccessLocations</strong></a>(self)</dt><dd><tt>Creates&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;Locations&nbsp;that&nbsp;are&nbsp;Access&nbsp;in&nbsp;the&nbsp;topologie&nbsp;graph.<br>
+Access&nbsp;Locations&nbsp;are&nbsp;nodes&nbsp;with&nbsp;degree&nbsp;1<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;Locations&nbsp;that&nbsp;are&nbsp;Access&nbsp;in&nbsp;the&nbsp;Topologie<br>
+:rtype:&nbsp;Location[]</tt></dd></dl>
+
+<dl><dt><a name="Random-getLinkList"><strong>getLinkList</strong></a>(self)</dt><dd><tt>Creates&nbsp;a&nbsp;list&nbsp;of&nbsp;NetworkLink&nbsp;objects&nbsp;taken&nbsp;from&nbsp;the&nbsp;graph<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;a&nbsp;list&nbsp;of&nbsp;NetworkLink&nbsp;objects&nbsp;taken&nbsp;from&nbsp;the&nbsp;graph<br>
+:rtype:&nbsp;NetworkLink[]</tt></dd></dl>
+
+<dl><dt><a name="Random-listSortedLocations"><strong>listSortedLocations</strong></a>(self)</dt><dd><tt>Creates&nbsp;a&nbsp;sorted&nbsp;list&nbsp;of&nbsp;the&nbsp;Locations&nbsp;objects,&nbsp;ordered&nbsp;from&nbsp;higher&nbsp;to&nbsp;lower&nbsp;node&nbsp;degree<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;a&nbsp;list&nbsp;of&nbsp;Locations&nbsp;objects&nbsp;taken&nbsp;from&nbsp;the&nbsp;graph,&nbsp;ordered&nbsp;from&nbsp;higher&nbsp;degree&nbsp;to&nbsp;less&nbsp;degree<br>
+:rtype:&nbsp;Location[]</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>topologieGraph</strong> = &lt;igraph.Graph object&gt;</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-drawGraph"><strong>drawGraph</strong></a>(g, filename<font color="#909090">='graph.png'</font>)</dt><dd><tt>Draws&nbsp;the&nbsp;Graph&nbsp;to&nbsp;the&nbsp;file&nbsp;passed&nbsp;as&nbsp;parameter.&nbsp;This&nbsp;method&nbsp;returns&nbsp;when&nbsp;the&nbsp;file&nbsp;is&nbsp;done.<br>
+&nbsp;<br>
+The&nbsp;Graphical&nbsp;options&nbsp;set&nbsp;either&nbsp;by&nbsp;default&nbsp;or&nbsp;via&nbsp;the&nbsp;INI&nbsp;file<br>
+&nbsp;<br>
+:param&nbsp;filename:&nbsp;PNG&nbsp;filename&nbsp;where&nbsp;to&nbsp;store&nbsp;the&nbsp;graph.&nbsp;Valid&nbsp;formats&nbsp;is&nbsp;PNG&nbsp;or&nbsp;PDF,&nbsp;the&nbsp;file&nbsp;must&nbsp;have&nbsp;.PNG&nbsp;or&nbsp;.PDF&nbsp;ending<br>
+:type&nbsp;filename:&nbsp;String&nbsp;with&nbsp;an&nbsp;absoute&nbsp;path&nbsp;and&nbsp;ending&nbsp;in&nbsp;.PNG&nbsp;of&nbsp;.PDF<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;all&nbsp;was&nbsp;OK.</tt></dd></dl>
+ <dl><dt><a name="-exp"><strong>exp</strong></a>(...)</dt><dd><tt><a href="#-exp">exp</a>(x)<br>
+&nbsp;<br>
+Return&nbsp;e&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-graphConsumeBW"><strong>graphConsumeBW</strong></a>(graph, node_src_name, node_dst_name, capacity, bw)</dt><dd><tt>Given&nbsp;any&nbsp;graph&nbsp;and&nbsp;2&nbsp;nodes&nbsp;(Node's&nbsp;name&nbsp;to&nbsp;find&nbsp;them),&nbsp;the&nbsp;bw&nbsp;value&nbsp;is&nbsp;substracted&nbsp;from&nbsp;the&nbsp;SPT&nbsp;path&nbsp;between&nbsp;the&nbsp;nodes<br>
+The&nbsp;attribute&nbsp;`capacity`&nbsp;is&nbsp;expected&nbsp;to&nbsp;be&nbsp;in&nbsp;the&nbsp;graph's&nbsp;edges&nbsp;and&nbsp;it&nbsp;is&nbsp;here&nbsp;where&nbsp;`bw`&nbsp;is&nbsp;substracted<br>
+&nbsp;<br>
+:param&nbsp;graph:&nbsp;A&nbsp;Graph<br>
+:type&nbsp;graph:&nbsp;Graph<br>
+:param&nbsp;node_src_name:&nbsp;Name&nbsp;of&nbsp;the&nbsp;source&nbsp;Node.&nbsp;This&nbsp;is&nbsp;checked&nbsp;against&nbsp;the&nbsp;`name`&nbsp;attribute&nbsp;of&nbsp;the&nbsp;Vertex<br>
+:type&nbsp;node_src_name:&nbsp;String<br>
+:param&nbsp;node_dst_name:&nbsp;Name&nbsp;of&nbsp;the&nbsp;destination&nbsp;Node.&nbsp;This&nbsp;is&nbsp;checked&nbsp;against&nbsp;the&nbsp;`name`&nbsp;attribute&nbsp;of&nbsp;the&nbsp;Vertex<br>
+:type&nbsp;node_dst_name:&nbsp;String<br>
+:param&nbsp;capacity:&nbsp;Name&nbsp;of&nbsp;the&nbsp;Edge&nbsp;attribute&nbsp;to&nbsp;substract&nbsp;the&nbsp;`bw`&nbsp;from<br>
+:type&nbsp;capacity:&nbsp;String<br>
+:param&nbsp;bw:&nbsp;value&nbsp;to&nbsp;be&nbsp;substracted&nbsp;from&nbsp;all&nbsp;the&nbsp;edges&nbsp;in&nbsp;the&nbsp;SPT&nbsp;path<br>
+:type&nbsp;bw:&nbsp;float</tt></dd></dl>
+ <dl><dt><a name="-log"><strong>log</strong></a>(...)</dt><dd><tt><a href="#-log">log</a>(x[,&nbsp;base])<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;logarithm&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;given&nbsp;base.<br>
+If&nbsp;the&nbsp;base&nbsp;not&nbsp;specified,&nbsp;returns&nbsp;the&nbsp;natural&nbsp;logarithm&nbsp;(base&nbsp;e)&nbsp;of&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-matrix2string"><strong>matrix2string</strong></a>(matrix)</dt><dd><tt>From&nbsp;a&nbsp;2d&nbsp;matrix;&nbsp;a&nbsp;string&nbsp;is&nbsp;returned&nbsp;in&nbsp;the&nbsp;form&nbsp;of&nbsp;a&nbsp;print<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;to&nbsp;agree&nbsp;with&nbsp;the&nbsp;CPLEX&nbsp;array&nbsp;notation<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;matrix[rows][columns]<br>
+&nbsp;<br>
+Becomes<br>
+&nbsp;<br>
+[<br>
+&nbsp;<br>
+[&nbsp;columns&nbsp;],<br>
+&nbsp;<br>
+[&nbsp;columns&nbsp;],<br>
+[&nbsp;columns&nbsp;],<br>
+...&nbsp;rows&nbsp;...<br>
+&nbsp;<br>
+]<br>
+&nbsp;<br>
+:param&nbsp;matrix:&nbsp;a&nbsp;2d&nbsp;matrix<br>
+:type&nbsp;matrix:&nbsp;int&nbsp;or&nbsp;float&nbsp;or&nbsp;String</tt></dd></dl>
+ <dl><dt><a name="-random"><strong>random</strong></a>(...)</dt><dd><tt><a href="#-random">random</a>()&nbsp;-&gt;&nbsp;x&nbsp;in&nbsp;the&nbsp;interval&nbsp;[0,&nbsp;1).</tt></dd></dl>
+ <dl><dt><a name="-readSettingsFile"><strong>readSettingsFile</strong></a>()</dt><dd><tt>This&nbsp;function&nbsp;asks&nbsp;the&nbsp;INI&nbsp;file&nbsp;parser&nbsp;module,&nbsp;that&nbsp;must&nbsp;have&nbsp;read&nbsp;the&nbsp;INI&nbsp;file,&nbsp;to&nbsp;look&nbsp;for&nbsp;the&nbsp;options&nbsp;in&nbsp;the&nbsp;sections&nbsp;and&nbsp;variables&nbsp;that&nbsp;are&nbsp;of&nbsp;interest&nbsp;for&nbsp;this&nbsp;module.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;options&nbsp;are&nbsp;not&nbsp;present&nbsp;in&nbsp;the&nbsp;INI&nbsp;file,&nbsp;the&nbsp;existing&nbsp;values&nbsp;are&nbsp;not&nbsp;modified<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;so&nbsp;that&nbsp;we&nbsp;add&nbsp;or&nbsp;remove&nbsp;options&nbsp;from&nbsp;the&nbsp;INI&nbsp;file&nbsp;just&nbsp;by&nbsp;mofiying&nbsp;this&nbsp;functions.&nbsp;Also,&nbsp;the&nbsp;same&nbsp;INI&nbsp;entry&nbsp;can&nbsp;be&nbsp;read&nbsp;by&nbsp;many&nbsp;modules<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;Make&nbsp;sure&nbsp;that&nbsp;the&nbsp;SettingsFile&nbsp;module&nbsp;has&nbsp;been&nbsp;initialized&nbsp;and&nbsp;read&nbsp;a&nbsp;valid&nbsp;file<br>
+&nbsp;<br>
+::Example::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SettingsFile.read(INI_file)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OptimizationModels.<a href="#-readSettingsFile">readSettingsFile</a>()</tt></dd></dl>
+ <dl><dt><a name="-str_array"><strong>str_array</strong></a>(listString)</dt><dd><tt>Becase&nbsp;the&nbsp;way&nbsp;tha&nbsp;Python&nbsp;prints&nbsp;an&nbsp;array&nbsp;is&nbsp;different&nbsp;from&nbsp;CPLEX,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;function&nbsp;goes&nbsp;the&nbsp;proper&nbsp;CPLEX&nbsp;writing&nbsp;of&nbsp;Arrays<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+:param&nbsp;listString:&nbsp;A&nbsp;list&nbsp;of&nbsp;values<br>
+:type&nbsp;listString:&nbsp;List[]<br>
+&nbsp;<br>
+:returns:&nbsp;The&nbsp;String&nbsp;printing&nbsp;of&nbsp;the&nbsp;array,&nbsp;in&nbsp;CPLEX&nbsp;format<br>
+:rtype:&nbsp;String</tt></dd></dl>
+ <dl><dt><a name="-subgraph"><strong>subgraph</strong></a>(graph, filter_dict<font color="#909090">=None</font>)</dt><dd><tt>Returns&nbsp;a&nbsp;subgraph&nbsp;of&nbsp;an&nbsp;existing&nbsp;one,&nbsp;where&nbsp;the&nbsp;Nodes&nbsp;matching&nbsp;the&nbsp;atrributes&nbsp;in&nbsp;the&nbsp;FILTER&nbsp;are&nbsp;removed.<br>
+&nbsp;<br>
+@param&nbsp;filter:&nbsp;Dictionary&nbsp;of&nbsp;attributes&nbsp;such&nbsp;that&nbsp;if&nbsp;a&nbsp;node&nbsp;matches&nbsp;any&nbsp;of&nbsp;them,&nbsp;it&nbsp;is&nbsp;discarded&nbsp;from&nbsp;the&nbsp;subgraph<br>
+&nbsp;<br>
+@return:&nbsp;Graph&nbsp;with&nbsp;only&nbsp;the&nbsp;nodes&nbsp;that&nbsp;were&nbsp;not&nbsp;catched&nbsp;by&nbsp;the&nbsp;Filter<br>
+&nbsp;<br>
+Used&nbsp;when&nbsp;calculating&nbsp;the&nbsp;Gomory-Hu&nbsp;Tree.&nbsp;Because&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;graph&nbsp;has&nbsp;Clients&nbsp;as&nbsp;nodes&nbsp;(to&nbsp;draw&nbsp;it),&nbsp;we&nbsp;first&nbsp;filter&nbsp;the&nbsp;Client&nbsp;Nodes&nbsp;before&nbsp;building&nbsp;the&nbsp;Tree<br>
+Another&nbsp;aproach&nbsp;could&nbsp;have&nbsp;been&nbsp;to&nbsp;have&nbsp;2&nbsp;graphs&nbsp;internally,&nbsp;one&nbsp;for&nbsp;drawing&nbsp;and&nbsp;one&nbsp;for&nbsp;operating,&nbsp;but&nbsp;then&nbsp;changes&nbsp;would&nbsp;need&nbsp;appropriate&nbsp;coordination&nbsp;and&nbsp;that&nbsp;is&nbsp;harder&nbsp;than&nbsp;just&nbsp;filtering</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>BOX_SIZE</strong> = 1000<br>
+<strong>CLIENT_NODE_COLOR</strong> = 'green'<br>
+<strong>CLIENT_NODE_SIZE</strong> = 10<br>
+<strong>DEFAULT_NODE_COLOR</strong> = 'white'<br>
+<strong>INI_Section</strong> = 'graph'<br>
+<strong>LAYOUT</strong> = 'fruchterman_reingold'<br>
+<strong>NCUPM_alpha</strong> = 1.25<br>
+<strong>NCUPM_beta</strong> = 6.8<br>
+<strong>NCUPM_gamma</strong> = 1.67<br>
+<strong>NEGATIVE_CAPACITY_COLOR</strong> = 'red'<br>
+<strong>POP_NODE_COLOR</strong> = 'blue'<br>
+<strong>POP_NODE_SIZE</strong> = 20<br>
+<strong>POP_NODE_SIZE_INC</strong> = 10<br>
+<strong>logger</strong> = &lt;logging.Logger object&gt;<br>
+<strong>networkMaxCapacity</strong> = 100<br>
+<strong>networkTreeChildren</strong> = 3</td></tr></table>
+</body></html>

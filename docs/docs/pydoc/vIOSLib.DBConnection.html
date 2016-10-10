@@ -1,0 +1,281 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module vIOSLib.DBConnection</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="vIOSLib.html"><font color="#ffffff">vIOSLib</font></a>.DBConnection</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/DBConnection.py">/home/rsm/Documents/DVD2C/Algorithm/Ver1.4/bin/vIOSLib/DBConnection.py</a></font></td></tr></table>
+    <p><tt>Module&nbsp;to&nbsp;interact&nbsp;with&nbsp;the&nbsp;DB&nbsp;for&nbsp;vIOSimulator<br>
+=======================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&gt;&nbsp;Ignacio&nbsp;Tamayo,&nbsp;TSP,&nbsp;2016<br>
+&gt;&nbsp;Version&nbsp;1.4<br>
+&gt;&nbsp;Date:&nbsp;Sept&nbsp;2016<br>
+&nbsp;<br>
+Uses&nbsp;sqlalchemy.&nbsp;Uses&nbsp;any&nbsp;DB&nbsp;back-end&nbsp;supported&nbsp;by&nbsp;SQLAlchemy.<br>
+&nbsp;<br>
+No&nbsp;method&nbsp;prints&nbsp;messages,&nbsp;no&nbsp;exceptions&nbsp;raised,&nbsp;no&nbsp;logging&nbsp;performed.&nbsp;These&nbsp;methods&nbsp;are&nbsp;silent.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="vIOSLib.DBConnection.html#DBConnection">DBConnection</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DBConnection">class <strong>DBConnection</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Connection&nbsp;to&nbsp;the&nbsp;DB&nbsp;that&nbsp;is&nbsp;able&nbsp;to&nbsp;produce&nbsp;directly&nbsp;the&nbsp;appropriate&nbsp;Models<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;DataModels<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;done&nbsp;as&nbsp;a&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;so&nbsp;that&nbsp;different&nbsp;modules&nbsp;or&nbsp;packages&nbsp;can&nbsp;have&nbsp;its&nbsp;own&nbsp;independent&nbsp;connection&nbsp;to&nbsp;the&nbsp;DB.<br>
+&nbsp;<br>
+The&nbsp;interactions&nbsp;with&nbsp;the&nbsp;DB&nbsp;are&nbsp;thought&nbsp;to&nbsp;be&nbsp;performed&nbsp;in&nbsp;blocks&nbsp;delimited&nbsp;by<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#DBConnection">DBConnection</a>.<a href="#DBConnection-start">start</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Query,&nbsp;update,&nbsp;add,&nbsp;drop<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#DBConnection">DBConnection</a>.<a href="#DBConnection-applyChanges">applyChanges</a>()&nbsp;or&nbsp;<a href="#DBConnection">DBConnection</a>.<a href="#DBConnection-cancelChanges">cancelChanges</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#DBConnection">DBConnection</a>.<a href="#DBConnection-end">end</a>()<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+DBobj&nbsp;=&nbsp;<a href="#DBConnection">DBConnection</a>.<a href="#DBConnection">DBConnection</a>(url)<br>
+if&nbsp;DBobj.connect:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DBobj.<a href="#DBConnection-start">start</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Operations&nbsp;getting&nbsp;objects&nbsp;from&nbsp;the&nbsp;Model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DBobj.getPOPs()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DBobj.<a href="#DBConnection-getvCDNbyId">getvCDNbyId</a>(2)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Alterations&nbsp;or&nbsp;updates&nbsp;of&nbsp;the&nbsp;objets<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Either&nbsp;write&nbsp;the&nbsp;changes&nbsp;to&nbsp;the&nbsp;objects&nbsp;or&nbsp;discard&nbsp;them<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DBobj.<a href="#DBConnection-applyChanges">applyChanges</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DBobj.<a href="#DBConnection-cancelChanges">cancelChanges</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DBobj.<a href="#DBConnection-end">end</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+DBString&nbsp;=&nbsp;""<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DBConnection-__init__"><strong>__init__</strong></a>(self, connString)</dt><dd><tt>Constructor,&nbsp;does&nbsp;not&nbsp;connect<br>
+&nbsp;<br>
+:param&nbsp;connString:&nbsp;Connection&nbsp;string&nbsp;to&nbsp;use,&nbsp;just&nbsp;like&nbsp;the&nbsp;ones&nbsp;in&nbsp;nova.conf&nbsp;for&nbsp;SqlAlchemy<br>
+:type&nbsp;connString:&nbsp;String</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-add"><strong>add</strong></a>(self, ModelClass)</dt><dd><tt>Adds&nbsp;the&nbsp;new&nbsp;element&nbsp;to&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;ModelClass:&nbsp;is&nbsp;the&nbsp;Table/Class&nbsp;to&nbsp;add<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:raises:&nbsp;&nbsp;internal&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-applyChanges"><strong>applyChanges</strong></a>(self)</dt><dd><tt>Commits&nbsp;the&nbsp;DB&nbsp;memory,&nbsp;if&nbsp;there&nbsp;is&nbsp;something&nbsp;to&nbsp;commit<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:raises:&nbsp;&nbsp;internal&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-cancelChanges"><strong>cancelChanges</strong></a>(self)</dt><dd><tt>Undoes&nbsp;all&nbsp;pending&nbsp;changes&nbsp;done&nbsp;to&nbsp;any&nbsp;of&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;obtained&nbsp;from&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
+:raises:&nbsp;&nbsp;internal&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-connect"><strong>connect</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;was&nbsp;OK,&nbsp;False&nbsp;if&nbsp;not<br>
+:rtype:&nbsp;boolean</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-drop"><strong>drop</strong></a>(self, ModelClass)</dt><dd><tt>Drops&nbsp;the&nbsp;element&nbsp;from&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;ModelClass:&nbsp;is&nbsp;the&nbsp;Table/Class&nbsp;to&nbsp;add<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:raises:&nbsp;&nbsp;internal&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-end"><strong>end</strong></a>(self)</dt><dd><tt>Ends&nbsp;the&nbsp;transaction&nbsp;block</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getAlteredDemandById"><strong>getAlteredDemandById</strong></a>(self, id)</dt><dd><tt>Get&nbsp;the&nbsp;AlteredDemand&nbsp;identified&nbsp;by&nbsp;the&nbsp;id<br>
+&nbsp;<br>
+:param&nbsp;id:&nbsp;id&nbsp;of&nbsp;the&nbsp;AlteredDemand<br>
+:type&nbsp;id:&nbsp;int<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;AlteredDemand&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;None<br>
+:rtype:&nbsp;AlteredDemand&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getAlteredDemands"><strong>getAlteredDemands</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;current&nbsp;AlteredDemands,&nbsp;caused&nbsp;by&nbsp;the&nbsp;simulation<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;AlteredDemand&nbsp;class,&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;AlteredDemand[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getClientGroups"><strong>getClientGroups</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;ClientGroups.&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;ClientGroup&nbsp;class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;ClientGroup[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getDemandById"><strong>getDemandById</strong></a>(self, id)</dt><dd><tt>Get&nbsp;the&nbsp;Demand&nbsp;identified&nbsp;by&nbsp;the&nbsp;id<br>
+&nbsp;<br>
+:param&nbsp;id:&nbsp;id&nbsp;of&nbsp;the&nbsp;Demand<br>
+:type&nbsp;id:&nbsp;int<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;Demand&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;None<br>
+:rtype:&nbsp;Demand&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getDemands"><strong>getDemands</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;current&nbsp;Demands<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;Demand&nbsp;class,&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;Demand[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getHmacResults"><strong>getHmacResults</strong></a>(self)</dt><dd><tt>Get&nbsp;all&nbsp;the&nbsp;HmacResult&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;HmacResult&nbsp;class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;HmacResult[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getInstanceById"><strong>getInstanceById</strong></a>(self, id)</dt><dd><tt>Get&nbsp;a&nbsp;certain&nbsp;Instance&nbsp;based&nbsp;on&nbsp;the&nbsp;ID.<br>
+&nbsp;<br>
+:returns:&nbsp;an&nbsp;Instance&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;Instance&nbsp;or&nbsp;None&nbsp;if&nbsp;error</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getInstanceList"><strong>getInstanceList</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;Instances.<br>
+&nbsp;<br>
+:returns:&nbsp;list&nbsp;of&nbsp;Instances&nbsp;class<br>
+:rtype:&nbsp;Instance[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getInstanceOf"><strong>getInstanceOf</strong></a>(self, vcdnId, popId)</dt><dd><tt>For&nbsp;a&nbsp;given&nbsp;pair&nbsp;of&nbsp;vCDN&nbsp;and&nbsp;POP&nbsp;(their&nbsp;ids),&nbsp;returns&nbsp;the&nbsp;instance&nbsp;that&nbsp;matches&nbsp;the&nbsp;pair;&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+&nbsp;<br>
+:param&nbsp;vcdnId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;vCDN&nbsp;to&nbsp;look&nbsp;for&nbsp;instances<br>
+:type&nbsp;vcdnId:&nbsp;int<br>
+:param&nbsp;popId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;POP&nbsp;to&nbsp;look&nbsp;for&nbsp;instances<br>
+:type&nbsp;popId:&nbsp;int<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;&nbsp;the&nbsp;Instance&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;Instance&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getInvalidDemandsSorted"><strong>getInvalidDemandsSorted</strong></a>(self, field<font color="#909090">='id'</font>)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;&nbsp;Demands&nbsp;that&nbsp;have&nbsp;set&nbsp;the&nbsp;field&nbsp;`invalidInstance`&nbsp;to&nbsp;True,&nbsp;sorted&nbsp;by&nbsp;the&nbsp;parameter&nbsp;field<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param&nbsp;field:&nbsp;Any&nbsp;of&nbsp;the&nbsp;fields&nbsp;in&nbsp;the&nbsp;list&nbsp;{"demand","pop","vcdn"}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type&nbsp;field:&nbsp;String<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;Demand&nbsp;class,&nbsp;or&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;Demand[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getLocations"><strong>getLocations</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;available&nbsp;Locations.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;Location&nbsp;class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;Location[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getMetricList"><strong>getMetricList</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;POPs.<br>
+&nbsp;<br>
+:returns:&nbsp;list&nbsp;of&nbsp;POP&nbsp;class<br>
+:rtype:&nbsp;Metric[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getMigrationById"><strong>getMigrationById</strong></a>(self, id)</dt><dd><tt>Get&nbsp;the&nbsp;HmacResult&nbsp;identified&nbsp;by&nbsp;the&nbsp;id<br>
+&nbsp;<br>
+:param&nbsp;id:&nbsp;id&nbsp;of&nbsp;the&nbsp;HmacResult<br>
+:type&nbsp;id:&nbsp;int<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;The&nbsp;HmacResult&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;None<br>
+:rtype:&nbsp;HmacResult&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getMigrationCostMultiplier"><strong>getMigrationCostMultiplier</strong></a>(self, srcPOPId, dstPOPId)</dt><dd><tt>Get&nbsp;the&nbsp;HmacResult&nbsp;Cost&nbsp;Multiplier&nbsp;for&nbsp;a&nbsp;given&nbsp;pair&nbsp;of&nbsp;POPs,&nbsp;identified&nbsp;by&nbsp;their&nbsp;IDs.<br>
+&nbsp;<br>
+:param&nbsp;srcPOPId:&nbsp;&nbsp;Source&nbsp;POP&nbsp;for&nbsp;the&nbsp;Operation<br>
+:type&nbsp;srcPOPId:&nbsp;int<br>
+:param&nbsp;dstPOPId:&nbsp;Target&nbsp;POP&nbsp;for&nbsp;the&nbsp;Operation<br>
+:type&nbsp;dstPOPId:&nbsp;int<br>
+&nbsp;<br>
+:returns:&nbsp;the&nbsp;MigrationCostMultiplier&nbsp;value&nbsp;found&nbsp;for&nbsp;a&nbsp;given&nbsp;pair&nbsp;of&nbsp;values,&nbsp;or&nbsp;1.0&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getMigrationCostMultiplierList"><strong>getMigrationCostMultiplierList</strong></a>(self)</dt><dd><tt>Get&nbsp;all&nbsp;the&nbsp;HmacResult&nbsp;Costs&nbsp;Multipliers&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;MigrationCostMultiplier&nbsp;class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;MigrationCostMultiplier[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getMigrationsSorted"><strong>getMigrationsSorted</strong></a>(self, field<font color="#909090">='id'</font>)</dt><dd><tt>Get&nbsp;all&nbsp;the&nbsp;HmacResult&nbsp;entries&nbsp;in&nbsp;the&nbsp;DB&nbsp;that&nbsp;have&nbsp;the&nbsp;`migrate`&nbsp;field&nbsp;set&nbsp;to&nbsp;True,&nbsp;sorted&nbsp;by&nbsp;the&nbsp;argument&nbsp;field.<br>
+&nbsp;<br>
+Sorting&nbsp;field&nbsp;can&nbsp;be&nbsp;{"vcdn","fromPOP","toPOP","cost",&nbsp;"delay"&nbsp;}.&nbsp;<br>
+&nbsp;<br>
+If&nbsp;any&nbsp;else,&nbsp;the&nbsp;results&nbsp;are&nbsp;sorted&nbsp;by&nbsp;ID<br>
+&nbsp;<br>
+:param&nbsp;field:&nbsp;A&nbsp;Field&nbsp;of&nbsp;the&nbsp;HmacResult&nbsp;table&nbsp;to&nbsp;sort&nbsp;the&nbsp;results,&nbsp;<br>
+:type&nbsp;field:&nbsp;String&nbsp;<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;list&nbsp;of&nbsp;HmacResult&nbsp;class,&nbsp;sorted<br>
+:rtype:&nbsp;HmacResult[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getNetworkLinks"><strong>getNetworkLinks</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;Network&nbsp;Links.&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;NetworkLink&nbsp;class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;NetworkLink[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getPOPList"><strong>getPOPList</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;POPs<br>
+:returns:&nbsp;list&nbsp;of&nbsp;POP&nbsp;class,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;POP[]&nbsp;or&nbsp;None&nbsp;if&nbsp;error</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getPOPbyId"><strong>getPOPbyId</strong></a>(self, id)</dt><dd><tt>Get&nbsp;a&nbsp;certain&nbsp;POP&nbsp;based&nbsp;on&nbsp;the&nbsp;ID.<br>
+&nbsp;<br>
+:returns:&nbsp;a&nbsp;POP&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;POP&nbsp;or&nbsp;None&nbsp;if&nbsp;error</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getRedirectsSorted"><strong>getRedirectsSorted</strong></a>(self, field<font color="#909090">='id'</font>)</dt><dd><tt>Get&nbsp;all&nbsp;the&nbsp;AlteredDemand&nbsp;entries&nbsp;in&nbsp;the&nbsp;DB,&nbsp;sorted&nbsp;by&nbsp;the&nbsp;argument&nbsp;field.<br>
+&nbsp;<br>
+Sorting&nbsp;field&nbsp;can&nbsp;be&nbsp;{"vcdn","fromPOP","toPOP",&nbsp;"demand"}.&nbsp;<br>
+&nbsp;<br>
+If&nbsp;any&nbsp;else,&nbsp;the&nbsp;results&nbsp;are&nbsp;sorted&nbsp;by&nbsp;ID<br>
+&nbsp;<br>
+:param&nbsp;field:&nbsp;A&nbsp;Field&nbsp;of&nbsp;the&nbsp;list&nbsp;["vcdn","fromPOP","toPOP",&nbsp;"demand"]<br>
+:type&nbsp;field:&nbsp;String&nbsp;<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;list&nbsp;of&nbsp;AlteredDemand&nbsp;class,&nbsp;sorted<br>
+:rtype:&nbsp;AlteredDemand[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getvCDNbyId"><strong>getvCDNbyId</strong></a>(self, id)</dt><dd><tt>Get&nbsp;a&nbsp;certain&nbsp;vCDN&nbsp;based&nbsp;on&nbsp;the&nbsp;ID.<br>
+&nbsp;<br>
+:returns:&nbsp;a&nbsp;vCDN&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found<br>
+:rtype:&nbsp;vCDN&nbsp;or&nbsp;None&nbsp;if&nbsp;error</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-getvCDNs"><strong>getvCDNs</strong></a>(self)</dt><dd><tt>Get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;vCDNs<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;list&nbsp;of&nbsp;vCDN&nbsp;class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;vCDN[]&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;a&nbsp;new&nbsp;transaction&nbsp;block,&nbsp;closing&nbsp;the&nbsp;previous.<br>
+All&nbsp;pending&nbsp;changes&nbsp;not&nbsp;applied&nbsp;are&nbsp;undone.</tt></dd></dl>
+
+<dl><dt><a name="DBConnection-toString"><strong>toString</strong></a>(self)</dt><dd><tt>:returns:&nbsp;&nbsp;connection&nbsp;String&nbsp;+&nbsp;CONNECTED/NOT<br>
+:rtype:&nbsp;String</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>DBString</strong> = ''</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>func</strong> = &lt;sqlalchemy.sql.functions._FunctionGenerator object&gt;</td></tr></table>
+</body></html>
