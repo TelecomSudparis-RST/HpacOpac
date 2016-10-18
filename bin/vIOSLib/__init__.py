@@ -2,29 +2,34 @@
 vIOSLib
 ===========
 
-Package containing all the modules and elements for the OMAC/HMAC Demo on OpenStack cloud
-	
+Package containing all the modules and elements for the HMAC Demo on OpenStack infrastructure
+
 > Ignacio Tamayo, TSP, 2016
 > Version 1.4
 > Date: Sept 2016
 
-###Folders:
-
- * /static/ is used for Flask HTTP Server to serve static files (the .PNG file of the Topologie)
- * /templates/ is used for Flask HTTP Server to have the Web pages to parse and dynamically serve
 
 :Example:
 	
 	vIOSLib.SettingsFile.read(INI_file)
 	vIOSLib.readSettingsFile()
 	vIOSLib.setDebug()
-	vIOSLib.initialize()
+	vIOSLib.initializeLogging()
 	
-	
-With this, any module can inherit the logger by doing
+This module sets up the loggin facility. With this, any module can inherit the logger by doing
 
 	import logging
 	logger = logging.getLogger(__name__)
+
+### Folders:
+
+ * /static/ is used for Flask HTTP Server to serve static files (the .PNG file of the Topologie)
+ * /templates/ is used for Flask HTTP Server to have the Web pages to parse and dynamically serve
+
+### Main Files:
+
+ * Optimizer.py = Main Controller of the Data Model for vIOS.
+ * WebAdmin.py = View of the vIOS system.
 
 """
 
@@ -76,9 +81,7 @@ def initializeLogging():
 	"""
 		This initialize the logging service, by default on INFO level. This configures the logger object used by all the modules in the package.
 		
-		If there is a filename set, the logger2file handler is configured.
-		
-		:raises:  Internal Exceptions
+		If there is a filename set, the logger2file handler is configured. Execute after readSettingsFile() and setLogFile()
 		
 		..Example::
 			vIOSLib.readSettingsFile()
@@ -122,11 +125,9 @@ def readSettingsFile():
 	"""
 		This function asks the INI file parser module, that must have read the INI file, to look for the options in the sections and variables that are of interest for this module.
 		
-		If the options are not present in the INI file, the existing values are not modified
+		If the options are not present in the INI file, the existing values are not modified.
 		
-		This is so that we add or remove options from the INI file just by modifying this functions. Also, the same INI entry can be read by many modules
-		
-		Options set: logfile, backupCount, maxBytes, debug
+		This is so that we add or remove options from the INI file just by modifying this functions. Also, the same INI entry can be read by many modules.
 		
 		.. note:: Make sure that the SettingsFile module has been initialized and read a valid file
 		

@@ -27,7 +27,7 @@ For  DB modifications, update/add/deletes queries, end the Transaction with DBCo
 	buildModel()
 	
 	updatePOPs()   # update the latest OpenStack data
-	updateMetris()
+	updateMetrics()
 	
 	createRandomDemands()  # Create a Random set of Demands and optimize based on them
 	consumeDemands()
@@ -36,28 +36,30 @@ For  DB modifications, update/add/deletes queries, end the Transaction with DBCo
 	simulate()  # Simulate the impact on the Infrastructure of the selected changes
 	
 	migrationIds = [Ids as int]
-	triggerMigratinos(migrationIds)
+	triggerMigrations(migrationIds)
 	
 # Notes #
 
-	This version includes a Demand BW adjustment mechanism that follows an exponential law, and is representative of the Operator's Infrastructure as a whole
+	This version includes a Demand BW adjustment mechanism that follows an exponential law, and is representative of the Operator's Infrastructure as a whole.
 
-	This version is integrated with OpenStack for actual VM Migration and Instantiations
+	This version is integrated with OpenStack for actual VM Migration and Instantiations.
 	
-	This version is integrated with OpenStack Designate DNS Server
+	This version is integrated with OpenStack Designate DNS Server.
 
 ## OpenStack Migrating / Cloning ##
 
 	In the middle of the Migration, there is a timeout where the New VMs are and the old VMs are still ACTIVE. After this timeout, the old VMs are paused/deleted. This is to give time to DNS propagation and other internal tasks.
 
-	Migrating means the copy of the VM's disk via Snapshots. Cloning means the instantiation of a new VM using the same Image Name as the Original VM.
+	 * Migrating means the copy of the VM's disk via Snapshots. 
+	 
+	 * Cloning means the instantiation of a new VM using the same Image Name as the Original VM.
 
 ## DNS Designate Integration ##
 
 	[CDN DNS](http://www.cloudvps.com/community/knowledge-base/how-does-a-cdn-work/)
 	[RackSpace CDN](https://support.rackspace.com/how-to/change-dns-to-enable-rackspace-cdn/)
 
-	Any CDN Service is based on DNS, really. So vIOS takes that into consideration
+	Any CDN Service is based on DNS, really. So vIOS takes that into consideration.
 
 	The vCDN can have its own DNS Designate Domain and the records are operated on this domain. Else, the Operator's DNS Designate Domain will be used.
 
@@ -110,10 +112,11 @@ logger = logging.getLogger(__name__)
 # Options read from the Config File somewhere else
 # These options are read from the config file and are expected to be overriden
 
-meterDurationHours = 6
 """Default 6 hours to sample Metrics on the Telemetry"""
-demandProbability = 0.5			
+meterDurationHours = 6
 """Default probability of a client v demand a vcdn f. Values in the range [0,1]"""
+demandProbability = 0.5			
+
 demandAmplitude = 100.0				
 """Maximum value for a Demand bw, in Mbps. Values > 0"""
 
@@ -140,7 +143,7 @@ DNS_Section = "designate"
 
 DESIGNATE_AUTH_URL=""
 """ Url to the Keystone used for the Designate Server. Unversioned URL. This Keystone MUST have an appropriate DNS endpoint."""
-#It is the Designate to contact its Keystone for authentication, not vIOS.
+
 DESIGNATE_ADMIN_TENANT=""
 """ Admin Tenant of Designate """
 DESIGNATE_ADMIN_USER=""
@@ -153,15 +156,11 @@ OPERATOR_DNS_DOMAIN=""
 """ The Operators CDN domain to create the Records at, if the vCDN has not specified its own DNS Domain . Must end with ."""
 
 
-
-
-
 DBConn = None
 """ 
 	Object holding the connection to the Database
 	:type DBConn: DBConnection class
 """
-
 
 OptimizationModel = None
 """ Object holding the connection to the HMAC Model for the calculations to take place
@@ -176,13 +175,28 @@ def readSettingsFile():
 		
 		This is so that we add or remove options from the INI file just by mofiying this functions. Also, the same INI entry can be read by many modules
 		
+		Internally, this method calls also readSettingsFileDNS() to read DNS-related parameters from the INI File
+		
 		.. note:: Make sure that the SettingsFile module has been initialized and read a valid file
 		
 		::Example::
 			SettingsFile.read(INI_file)
 			Optimizer.readSettingsFile()
 		
+		:: INI File::
+		
+			[DEFAULT]
+			sample_period_hours = Default 6 hours to sample Metrics on the Telemetry
+			demand_probability = Default probability of a client v demand a vcdn f. Values in the range [0,1]
+			demand_amplitude = Maximum value for a Demand bw, in Mbps. Values > 0
+			
+			[openstack]
+			local_tmp_dir = Local folder used for Snapshot Migration
+			migration_pause = Minutes to wait in the middle of a migration, before stopping the original VM.
+
+		
 	"""
+	
 	global demandProbability
 	global demandAmplitude
 	global meterDurationHours
@@ -201,12 +215,21 @@ def readSettingsFile():
 		MIGRATION_PAUSE = SettingsFile.getOptionInt(INI_Section,"migration_pause")	
 	
 	readSettingsFileDNS()
-	
 #enddef
 
 def readSettingsFileDNS():
 	"""
 		.. seealso:: readSettingsFile()		
+		
+		:: INI File::
+		
+			[designate]
+			designate_auth_url = Url to the Keystone used for the Designate Server. Unversioned URL. This Keystone MUST have an appropriate DNS endpoint.
+			designate_admin_tenant =  Admin Tenant of Designate.
+			designate_admin_user = Admin User of Designate.
+			designate_admin_password =  Admin Password of Designate. If the vCDN has its own DNS Domain, they the vCDN credentials are presented to Designate for Authentication
+			operator_dns_domain = The Operators CDN domain to create the Records at, if the vCDN has not specified its own DNS Domain . Must end with .
+		
 	"""
 	
 	global DESIGNATE_AUTH_URL
@@ -225,14 +248,12 @@ def readSettingsFileDNS():
 		DESIGNATE_ADMIN_PASSWD = SettingsFile.getOptionString(DNS_Section,"designate_admin_password")
 	if SettingsFile.getOptionString(DNS_Section,"operator_dns_domain"):
 		OPERATOR_DNS_DOMAIN = SettingsFile.getOptionString(DNS_Section,"operator_dns_domain")
-		
-		 
 	#endif
 #enddef
 
 def connect(url):
 	""" 
-	Connects to the provided DB String
+		Connects to the provided DB String
 	
 		:param url is a sqlalchemy string, just like the ones in nova.conf [database]
 		:type url String
@@ -247,20 +268,17 @@ def connect(url):
 
 def consumeDemands():
 	"""
-		Gets the Demands from the Database and, one by one; removes the Demanded BW from the Capacity Graph of the Model
+		Gets the Demands from the Database and, one by one; removes the Demanded BW from the Capacity Graph of the Model.
 		
 		Invalid demands are ignored. Demands that request a pair (vCDN,POP) that does not exist are IGNORED. 
 		
-		A new model is created here, taking fresh information from the DB. This is because the Operator can be working on the Demands, alters or receives a change it the Topologie information (clientGroups, Locations, NetLinks, POPs, etc)
-		and would like to re-run the Demands on top. So a new fresh Model is needed in this case to include the possible backend changes
+		A new model is created here, taking fresh information from the DB. This is because the Operator can be working on the Demands, alters or receives a change it the Topologie information (clientGroups, Locations, NetLinks, POPs, etc) and would like to re-run the Demands on top. So a new fresh Model is needed in this case to include the possible backend changes.
 		
 		..seealso:: OptimizationModel.consumeDemands()
 		
-		:returns:  True if all OK; False if there were some errors
+		:returns:  The result of OptimizationModel.consumeDemands(), False if there were some errors
 				
 	"""
-	
-	ret = True
 	
 	## Start from a Fresh model from the DB information
 	if buildModel():
@@ -299,17 +317,15 @@ def consumeDemands():
 
 def createRandomInfrastructure():
 	""" 
-		Updates values from the Infrastructure, non-OpenStack
+		Updates values from the Infrastructure topology (NetworkLinks, clientGroups' Locations) from a Random Graph. This is done by mapping the Model to a Random Tree graph.
 	
 		These values are parameters set by the Operator and its systems, in the production case.
 		In this DEMO, this is a fake function to generate values and put them in the OMAC DB.
 		
-		Changes produced: ClientGroups.location and NetworkLinks table are shuffled ar random
+		 * Changes produced: ClientGroups.location and NetworkLinks table are shuffled at random
 		
-		:returns:  True if all ok; False if there were some errors
-		
-		This is done by mapping the Model to a Random Tree graph
-		
+		:returns:  True if all ok; False if there were some errors.
+			
 	"""
 	
 	#.. warning:: It has proven difficult to shuffle the POPs.location field, to move the POPs randomly. Even if we do a full shuffle and avoid repetitions, because of the constraint UNIQUE(POP.location); when the table is being updated it can happen that for an instant the location is duplicated. 
@@ -358,26 +374,29 @@ def createRandomInfrastructure():
 		logger.error( Messages.No_Locations)
 		return False
 	DBConn.end()
-	
 #enddef
 
 
 def createRandomDemands():
 	""" 
-		Updates values from the Demand registers, non-OpenStack.
-		These values are parameters set by the Operator and its systems.
+		Updates the the Demands, creating random demands based on probability parameters.
 		
+		These values are parameters set by the Operator and its systems, in the real production scenario.
 		In this DEMO, this is a fake function to generate values and put them in the OMAC DB.
 		
-		A demand, in OMAC paper; is said to be d[v][f], but as only 1 server is to supply this demand, and q vCDN can be in more than 1 server, this leads to associate a demand to an Instance, which is 1 server that holds a vCDN inside
+		The Demands are created via a random number and a threshold.
+			
+		Method:
+			For all Clients and all Instances: There is a Demand if a random number [0;1] is bigger than 'demandProbability' value. If so, the bw of the demand is set in the range of values [0 ; demandAmplitude] aproximately.
 		
-		The Demands are created via a random number and a threshold
-		For all Clients and all Instances: There is a demand if a random probability is bigger than 'demandProbability' value.
-		If so, the bw of the demand is set in the range of values [0 ; demandAmplitude] aproximately.
+		After the Demands are created, the 'operatorQoE' value is reset to '_MAX_QoE' value, meaning that the new Demands are for best QoE values.
 		
-		:returns:  True if all ok; False if there were some errors.
+		:returns:  True if all ok; False if there are no Instances or if there were some errors.
+		
+		.. note:: There MUST exist some Instances to create random Demands. This function does not create Invalid Demands.
 		
 	"""
+	
 	global operatorQoE
 	
 	logger.info(Messages.Create_Random_Demands)
@@ -419,8 +438,6 @@ def createRandomDemands():
 											volume =  (demandProbability - rnd) * 2 * 100, 
 											bw =  (demandProbability - rnd) * 2 * demandAmplitude 
 											)  
-								
-								
 								# (demandProbability - rnd) gives a number  in the interval [0,demandProbability]; demandProbability < 1
 								# (demandProbability - rnd) * 2 * demandAmplitude gives a number in the desired range
 								DBConn.add(d)
@@ -442,7 +459,7 @@ def createRandomDemands():
 		#endif
 		
 		DBConn.end()
-		operatorQoE = _MAX_QoE
+		resetQoE()
 		return True
 		
 	except:
@@ -451,26 +468,26 @@ def createRandomDemands():
 		return False
 #enddef
 
-
-
 def simulate( migrationList = [],redirectList = [], instantiationList = []):
 	"""
-		This functions simulates that the Migrations/Redirections/Instantiations were actually executed; changed the Data in the Systems and would be reflected as changes in the Model
+		This functions simulates that the Migrations/Redirections/Instantiations were actually executed and would be reflected as changes in the Model.
 		
-		This procedure starts from a new Model, having fresh Topologie information from the DB.
+		 * This procedure starts from a new Model, having fresh Topologie information from the DB.
 		
-		Then the requested changes are simulated, altering the list of Instances in the Model, and also altering the list of Demands. 
+		 * The requested changes are simulated, altering the list of Instances in the Model, and also altering the list of Demands. 
 		This is because the simulation suposes that the CDN system performs all the needed changes so that the Demands will point to where the vCDN were Migrated or Instantiated or Redirected.
+		
 		So the Model now works on a simulated list of Instances and updated Demands
 		
-		Then the Model is asked to check the representation of the number of Instances, from the new list of simulated instances
+		 * The Model is asked to check the representation of the number of Instances, from the new list of simulated instances. This is to adjust the internal Graph properties to reflect the changes in the Instances.
 		
-		The simulated Demands are checked against the simulated list of Instances; as the moving of Instances could have caused some Demands to now become invalid
+		 * The simulated Demands are checked against the simulated list of Instances; as the moving of Instances could have caused some Demands to now become invalid.
 		
-		Finally, the Model is asked to consume the simulated list of Demands to have an updated Gomory-Hu Tree of remaining capacity. Hopefully, a better scenario that the original
+		 * Finally, the Model is asked to consume the simulated list of Demands to have an updated Gomory-Hu Tree of remaining capacity. Hopefully, a better scenario that the original.
+		 
+		As a result, a list of FakeDemands is returned, to show how the Demands must be altered to fit the new simulated infrastructure topologie.
 		
-		All simulated objects and elements are deleted, the DB is not altered in any way
-		
+		All simulated objects and elements are deleted, the DB is not altered in any way.
 		
 		:param migrationsList: List of Migrations to execute
 		:type migrationsList: HmacResult[]
@@ -479,7 +496,7 @@ def simulate( migrationList = [],redirectList = [], instantiationList = []):
 		:param invalidDemandList: List of Demands to instantiate
 		:type invalidDemandList: Demands[]
 		
-		:returns:  FakeRedirect[] or None
+		:returns:  FakeRedirect[] or None.
 		
 		..note:: This function updates/Changes the Model's Gomory-Hu Tree.
 				
@@ -666,19 +683,20 @@ def simulate( migrationList = [],redirectList = [], instantiationList = []):
 		return None
 	# Done, the Gomory-Hu Tree and the Capacity can be drawn
 	return fakeRedirects
-	
-	#enddef
+#enddef
 	
 
 def getInstanceforDemand(d):
 	"""
-		For a given Demand d, requesting a vCDN from a POP, this function checks if effectively there is any Instance of the vCDN in that POP
+		For a given Demand d, requesting a vCDN from a POP, this function checks if effectively there is any Instance of the vCDN in that POP. If there is, the Instance object is returned.
 		
 		:param d: demand to check for a valid Instance
 		:type d: Demand
 		
-		:returns:   the Instance object or None if not found
+		:returns: the Instance object or None if not found
 		:rtype: Instance or None
+		
+		.. warning:: This function does not start a DB Transaction, it should be called after DBConnection.start().
 
 	"""
 	return DBConn.getInstanceOf(vcdnId = d.vcdnId, popId = d.popId )
@@ -686,7 +704,7 @@ def getInstanceforDemand(d):
 
 def getInstance(pop,vcdn):
 	"""
-		For a given POP and a vCDN, this function retuns the Instance of them both, if it exists
+		For a given POP and a vCDN, this function retuns the Instance of them both, if it exists. If it does, the Instance object is returned.
 		
 		:param pop: POP to check for a valid Instance
 		:type pop: POP
@@ -696,14 +714,16 @@ def getInstance(pop,vcdn):
 		:returns:   the Instance object or None if not found
 		:rtype: Instance or None
 
+		.. warning:: This function does not start a DB Transaction, it should be called after DBConnection.start().
+		
 	"""
 	return DBConn.getInstanceOf(vcdnId = vcdn.id, popId = pop.id )
 #enddef
 
-#enddef
 
 def updatePOPs():
-	""" Reads values of the OpenStack APIs for the POPs
+	""" 
+		Reads values of the OpenStack Nova API for the POPs.
 	
 		With the login provided in the POP ( the provided user must have "admin" access)
 			It updates the Hypervisors table, adding if new hypervisors are found. The total POP capacity values are the sum of all its hypervisors
@@ -713,7 +733,7 @@ def updatePOPs():
 			It updates the limits found for the Tenant in the POPs
 			It updates the number of instances for the Tenant in the POPs
 						
-		:returns:  True is all the POPs were updated; False if any of the POPs failed
+		:returns:  True is all the POPs were updated; False if any of the POPs failed.
 			
 	"""
 	global DBConn
@@ -722,8 +742,6 @@ def updatePOPs():
 	_errors = False
 	
 	logger.info(Messages.Updating_OpenStack)
-	
-	
 	
 	DBConn.start()
 	
@@ -767,11 +785,6 @@ def updatePOPs():
 						logger.debug(Messages.Created_Hypervisor_S_POP_S % (hyperDB.name,pop.name))
 						DBConn.add(hyperDB)
 						
-					
-					#DBConn.applyChanges()
-					
-					#Update existing values	and increasing the counter for POP resources
-
 					hyperDB.model = hyper.hypervisor_type
 					accumCurCPU += hyper.vcpus_used
 					accumCurRAM += hyper.memory_mb_used
@@ -807,10 +820,8 @@ def updatePOPs():
 					#endfor
 					if not found:
 						flavorDB = Flavor(flav.name, flav.id, pop.id)
-						#flavorDB.created_at = datetime.
 						logger.debug(Messages.Created_Flavor_S_POP_S % (flav.name,pop.name))
 						DBConn.add(flavorDB)
-					
 					
 					#Update existing values	 
 					flavorDB.updateValues (name = flav.name,cpu = flav.vcpus, ram = flav.ram, disk = flav.disk, isPublic = True)
@@ -854,7 +865,6 @@ def updatePOPs():
 							continue
 							### Next tenant tries to login
 						
-						
 						lim = OSMan.getLimits()
 						
 						found=False
@@ -865,11 +875,8 @@ def updatePOPs():
 								break
 						#endfor
 						
-						
-						
 						if found and lim.curInstances ==0:		
 							# There is an instance in the DB but not in the OpenStack, so it is deleted
-							#DBConn.drop(InstanceDB.metric)
 							DBConn.drop(InstanceDB)
 							logger.debug( Messages.Deleted_Instance_S_at_POP_S % (vcdn.name , pop.name))
 							continue  
@@ -912,17 +919,17 @@ def updatePOPs():
 
 
 def updateMetrics():
-	""" Reads values of the OpenStack Telemetry APIs for all the Instances
-		With the login provided for each vCDN, a user with "member" access to the Tenant and read access to Telemetry
-		
-		Better if executed after updatePOPs() to have up-to-date Instance information
+	""" Reads values of the OpenStack Telemetry APIs for all the Instances.
+	
+		With the login provided for each vCDN, a user with "member" access to the Tenant and read access to Telemetry.
+		Better if executed after updatePOPs() to have up-to-date Instance information.
 			
 		Starts looking for all Instances in a POP. 
 			For this instance, the vCDN credentials are used to access the Telemetry of the vCDN
 			The Metrics are updated for this Instance. If there is no Metrics, the next Instance in the loop is taken
 			If the vCDN credentials do not login to the Telemetry, the next Instance is the look is taken
 		
-		Finished once checked all the POPs
+		Finished once checked all the POPs.
 		
 		:returns:  True is all the POPs were updated; False if any of the POPs failed
 		
@@ -967,7 +974,7 @@ def updateMetrics():
 					meter = OSMan.getMetrics(meterDurationHours)
 						
 					#try:
-					metricDB = None
+					#metricDB = None
 					metricDB = i.metric
 					if metricDB == None or metricDB==[]:  
 						#There are no metrics created for this instance, lets make one
@@ -984,7 +991,6 @@ def updateMetrics():
 					logger.debug( Messages.Updated_Metric_Instance_D % i.id)
 				#endfor
 				# End of operations with Tenant Login
-				
 				
 				logger.info( Messages.Updated_Metrics_Pop_S % pop.name )
 				logger.info(Messages.Updated__D_OpenStack_Metrics % len(instanceList))
@@ -1004,10 +1010,11 @@ def updateMetrics():
 		
 	#endif
 	
-	DBConn.applyChanges()		### This updates all the values left for update
+	### This updates all the values left for update
+	DBConn.applyChanges()		
 	DBConn.end()
-	return not _errors
 	
+	return not _errors
 #enddef
 
 
@@ -1080,16 +1087,15 @@ def optimize():
 				#If as a result, there are HmacResults to make, they are written to the DB
 				#This is done to Isolate the Modeling only from where and how is the result stored
 				
-				
 				if (migrationList is not None and migrationList ):  
 					for m in migrationList:
 						DBConn.add(m)
-					#DBConn.applyChanges()
+					
 				
 				if (alteredDemands is not None and alteredDemands ):  
 					for alt in alteredDemands:
 						DBConn.add(alt)
-					#DBConn.applyChanges()
+					
 				
 				DBConn.applyChanges()
 				
@@ -1125,9 +1131,7 @@ def optimize():
 				else:
 					logger.info(Messages.OMAC_optimized)
 					
-				
 				DBConn.applyChanges()
-				
 				
 				logger.info(Messages.Optimized)
 				
@@ -1143,7 +1147,6 @@ def optimize():
 	else:
 		logger.error(Messages.NoModel)
 		
-	
 	return False
 #enddef
 
@@ -1151,9 +1154,10 @@ def optimize():
 def buildModel():
 	""" 
 		Gathers information from the DB and calls creates an HMAC/OMAC Model
+		
 		..note:: Call this before optimize()
 		
-		This resets/rebuils the global object Model
+		.. warning:: This resets/rebuils the global object Model.
 		
 		:returns:  True if Model was built; False if not.
 		
@@ -1173,7 +1177,9 @@ def buildModel():
 			OptimizationModel = Model(locations,netLinks)
 		else:
 			logger.error(Messages.Missing_Elements_to_Build_Model)
-			return False  # No model, just quit
+			return False  
+			# No model, just quit
+			
 		del locations[:] 
 		del netLinks[:] 
 		DBConn.cancelChanges()
@@ -1215,33 +1221,207 @@ def buildModel():
 	return True
 #enddef
 
-
-def _copyInstanceBySnapshot(instanceId, dstPopId,deleteOriginal=False):
+	
+def triggerMigrations(migrations):
 	"""
-		Copies all the VMs from an instance into the Destination POP, by snapshots
+		Performs a set of Migrations on the OpenStack Data Centers.
+		
+		This triggers several Threads for the completion of the migration but does not wait for them.
+		The Migrations operations are not controlled, they have to be followed in the OpenStack controllers or the log files left by vIOS.
+		
+		:param migrationIds: A list of migrationsIds to do
+		:type migrationIds: int[]
+		
+		:returns: True if the Threads were triggered, False if any error occurred.
+		:rtype: boolean
+		
+		.. note:: If IMG_FOLDER is not writable, this function returns False directly.
+		
+		.. seealso:: _copyInstanceByParameters()
+		
+	"""
+	
+	if not _testWritableDir(IMG_FOLDER):
+		logger.error(Messages.NoWritable_S % IMG_FOLDER)
+		return False
+	
+	logger.info(Messages.Executing_D_Migrations % len(migrations) )
+
+	for mig in migrations:
+		try:
+			thread.start_new_thread ( _migrateInstance, (mig.instanceId, mig.dstPopId) )
+		except:
+			logger.exception(Messages.Unable_Thread)
+			continue
+	#endfor
+	
+	return True
+#enddef
+
+
+def triggerInstantiations(instantiations):
+	"""
+		Perform a set of Instantiations on the OpenStack Data Centers.
+		
+		This triggers several Threads for the completion of the instantation but does not wait for them.
+		The Instantation operations are not controlled, they have to be followed in the OpenStack controllers or the log files left by vIOS
+		
+		The instantiaton is a copy of an already existing Instance, because when describing the vCDN, it can have many different VMs and of very different sizes. Describing such a structure is out of the scope of vIOS.
+			
+		So, as all vCDN Instances are assumed to be the same all over the Infrastructure, a new Instance of a vCDN is a copy
+		of an already existing instance, with the proper amount of VMs, IPs, security Groups, etc.
+		
+		:param instantiationIds: A list of demand ids to satisfy by creating the Instance.
+		:type instantiationIds: int[]
+		
+		:returns: True if the Threads were triggered, False if any error occurred.
+		:rtype: boolean
+		
+		
+	"""
+	
+	for i in instantiations:
+		
+		logger.info(Messages.Instantiating_Instance_vCDN_S_POP_S % (i.vcdn.name, i.pop.name) )
+		
+		if i.vcdn.instances:
+			try:
+				
+				modelInstance = i.vcdn.instances[0]
+			
+				thread.start_new_thread ( _copyInstanceByParameters, (modelInstance.id, i.popId) )
+			except:
+				logger.exception(Messages.Unable_Thread)
+				continue
+			
+		else:
+			logger.exception(Messages.NoInstance)
+			continue
+		
+	#endfor
+	
+	logger.info(Messages.Executing_D_Instantiations % len(instantiations) )
+	return True
+#enddef
+
+
+def resetQoE():
+	"""
+		Without touching any Demand, the variable 'operatorQoE' value is set to '_MAX_QoE'.
+		
+		This is used when the Demands are updated externally and vIOS must considered that the Demands are expecting the best QoE possible.
+		
+	"""
+	global operatorQoE
+	
+	operatorQoE = _MAX_QoE
+#enddef
+
+def updateDemandsQoE(qoe):
+	"""
+		For the given QoE value, all the Demands have their BW updated.
+		
+		This is to simulate how much less BW can the Operator offer to the clients to have a desired/agreed QoE MOS level
+		
+		This is based on the TSP paper "Qualite d'Experience et Adaptation de services video" by  Mamadou Tourad DIALLO
+		
+		:param qoe: Value of the desired QoE to adjust the Demands
+		:type qoe: float or int or String
+		
+		:returns: False if the QoE is not valid, True else.
+	"""
+	
+	global operatorQoE
+	
+	qoe = float(qoe)
+	
+	
+	if qoe is not None and  qoe <= _MAX_QoE or qoe >= _MIN_QoE:
+		
+		
+		logger.info(Messages.Updating_Demand_BW_QoE_F % qoe)
+		
+		aNCUPMModel = NCUPM()
+		
+		DBConn.start()
+		
+		x = aNCUPMModel.x(operatorQoE)/aNCUPMModel.x(qoe)
+		
+		logger.info(Messages.Updating_Demand_BW_x_F % x)
+		
+		Demands = DBConn.getDemands()
+		if Demands:
+			for d in Demands:
+				d.bw = x * d.bw
+			#endfor
+			DBConn.applyChanges()
+		else:
+			logger.error(Messages.NoDemands)
+		
+		operatorQoE = qoe
+		DBConn.end()
+		
+		logger.info(Messages.Updated_Demand_BW)
+		return True
+	else:
+		logger.error(Messages.Invalid_QoE_Value)
+	return False
+		
+def minMaxDemandsQoE():
+	"""
+		Returns de minimum and maximum QoE values possible with the NCUPM parameters
+		
+		:returns: (min,max)
+		:rtype: (float,float)
+		
+	"""
+	
+	aNCUPMModel = NCUPM()
+	return (aNCUPMModel.minMOS, aNCUPMModel.maxMOS)
+#enddef
+
+def _testWritableDir(folder):
+	"""
+		Tests if a folder does exists and if it is possible to write and delete files from it
+		
+		..note:: a file 'test.tmp' will be created and deleted from the folder
+		
+		:param folder: a folder to test
+		:type folder: String
+		
+		:returns: True if the folder is valid and a test file was written and deleted. False else
+		
+	"""
+	if os.path.isdir(folder):
+		try:
+			testfile = open(os.path.join(folder,"test.tmp"),"w+")
+			testfile.close()
+			os.remove(os.path.join(folder,"test.tmp"))
+			return True
+		except IOError:
+			#unable to write files in the locations
+			return False
+	else:
+		return False
+
+
+def _copyInstanceBySnapshot(instanceId, dstPopId):
+	"""
+		Copies all the VMs from an instance into the Destination POP, by snapshots.
 		
 		The VMs are paused, an Snapshot is taken and the IMG files downloaded.
 		Then the IMG files are uploaded to the destination POP, the VMs are launched from the Snapshot Image.
 		
-		:param instanceId: an instance Id to be migrated
-		:type instanceId: int
-		:param dstPopId: Pop Id where to deploy the VMs
-		:type dstPopId: int
-		:param deleteOriginal: True if the original VMs of the Instance are to be deleted after the copy
-		:type deleteOriginal: boolean
+		... seealso:: _copyInstanceByParameters()
 		
+		.. note:: This method will have its own connection to the DB.
 	
 		The instance and dstPop parameters cannot be None, have to be valid DB index values.
 		The Parameter is an Id because this function brings up its own connection to the DB
 		
 	"""
 	
-	
 	aDBConn = DBConnection.DBConnection(DBConn.DBString)
-	
-	
-	
-	_errors = False 
 	
 	aDBConn.start()
 	
@@ -1339,31 +1519,6 @@ def _copyInstanceBySnapshot(instanceId, dstPopId,deleteOriginal=False):
 																passwd = DESIGNATE_ADMIN_PASSWD)
 									#endif
 								#endif
-								
-								if deleteOriginal:
-									### Delete original Instance in the src POP
-									
-									time.sleep(60*MIGRATION_PAUSE)
-									
-									if SrcNova.deleteServer(server.id):
-										logger.debug(Messages.Deleted_Server_S_POP_S % (server.id,srcPOP_Name) )
-									else:
-										logger.error(Messages.NotDeleted_Server_S_POP_S % (server.id,srcPOP_Name) )
-									
-									if originalServerData.floating_ip:
-										if ( vCDN_Domain  ):
-											_deleteDNSRecords( ip = originalServerData.floating_ip,
-																dnsDomain = vCDN_Domain, 
-																tenant= vCDN_Tenant, 
-																user = vCDN_User, 
-																passwd = vCDN_Passwd) 
-										else:
-											_deleteDNSRecords( ip = originalServerData.floating_ip,
-																dnsDomain = OPERATOR_DNS_DOMAIN, 
-																tenant= DESIGNATE_ADMIN_TENANT, 
-																user = DESIGNATE_ADMIN_USER, 
-																passwd = DESIGNATE_ADMIN_PASSWD)
-									#endif
 						
 							else:
 								#Not able to start the server from the image
@@ -1394,17 +1549,20 @@ def _copyInstanceBySnapshot(instanceId, dstPopId,deleteOriginal=False):
 		#endfor	
 	else:
 		logger.error(Messages.NoConnect_Pops)
-		return False
 	
 #enddef
 
 
-def _copyInstanceByParameters(instanceId, dstPopId, deleteOriginal=False):
+def _copyInstanceByParameters(instanceId, dstPopId):
 	"""
-		Copies all the VMs from an instance into the Destination POP
+		Copies all the VMs from an instance into the Destination POP.
 		
 		There is no actual copy of the VM Disk, a exact copy of the current VMs is built (if possible) on the destination POP by choosing
 		 the same OpenStack Nova Boot parameters.
+		 
+		If the original VM has FloatingIps, the copy VM is also assigned a FloatingIP. These IPs will not be the same, neither in the same range, as each OpenStack Neutron will have its own PublicIP Network and assignment policy
+		
+		If the original VM had its FloatingIP associated with DNS A records, these records will be also copied to have the new FloatingIP. The DNS Domain can be the vCDN's or the Operator's (if the vCDN did not specify any DNS Domain).
 		 
 		.. seealso:: ServerMetadata
 		
@@ -1412,8 +1570,6 @@ def _copyInstanceByParameters(instanceId, dstPopId, deleteOriginal=False):
 		:type instanceId: int
 		:param dstPopId: Pop where to deploy the VMs
 		:type dstPopId: int
-		:param deleteOriginal: True if the original VMs of the Instance are to be deleted after the copy
-		:type deleteOriginal: boolean
 	
 		.. note:: The instanceId and dstPopId are valid DB indexes, because this process will have its own DB Connection asking for these objects
 		
@@ -1485,40 +1641,101 @@ def _copyInstanceByParameters(instanceId, dstPopId, deleteOriginal=False):
 						#endif
 					#endif
 					
-					if deleteOriginal:
-						### Delete original Instance in the src POP
-						
-						time.sleep(60*MIGRATION_PAUSE)
-						
-						if SrcNova.deleteServer(server.id):
-							logger.info(Messages.Deleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
-						else:
-							logger.error(Messages.NotDeleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
-						#endif
-						if originalServerData.floating_ip:
-							if ( vCDN_Domain  ):
-								_deleteDNSRecords( ip = originalServerData.floating_ip,
-													dnsDomain = vCDN_Domain, 
-													tenant= vCDN_Tenant, 
-													user = vCDN_User, 
-													passwd = vCDN_Passwd) 
-							else:
-								_deleteDNSRecords( ip = originalServerData.floating_ip,
-													dnsDomain = OPERATOR_DNS_DOMAIN, 
-													tenant= DESIGNATE_ADMIN_TENANT, 
-													user = DESIGNATE_ADMIN_USER, 
-													passwd = DESIGNATE_ADMIN_PASSWD)
-						#endif
-					#endif
 				else:
 					#Not able to start the server from the image
 					logger.error(Messages.NoServerCreated_vCDN_S_POP_S % (vCDN_Name,dstPOP_Name))
-					
 			except:
 				logger.exception(Messages.Exception_Copying_Server_S_POP_S_POP_S % (server.id,srcPOP_Name, dstPOP_Name) )
 				continue
-		#endfor	
+		#endfor
+		
 		logger.info(Messages.Copy_ended_Instance_vCDN_S_POP_S_POP_S % (vCDN_Name,srcPOP_Name,dstPOP_Name))
+	else:
+		logger.error(Messages.NoConnect_Pops)
+#enddef
+
+
+def _deleteInstance(instanceId):
+	"""
+		Deletes all the VMs from an Instance.
+		
+		If the original VM has FloatingIps, these are freed and returned to the pool.
+		
+		If the original VM had its FloatingIP associated with DNS A records, these records will be also removed. The DNS Domain can be the vCDN's or the Operator's (if the vCDN did not specify any DNS Domain).
+		
+		Just before deleting the VMs, after deleting the DNS Records, there is a pause of sole minutes to wait before stopping the original VM. This allows for new connections to find by DNS the new FloatingIP and start using the new copy of the vCDN. During this pause, the original and the new VMs will be UP
+		 
+		.. seealso:: ServerMetadata
+		
+		:param instanceId: a Valid instance to be copied
+		:type instanceId: int
+		
+		.. note:: The instanceId and dstPopId are valid DB indexes, because this process will have its own DB Connection asking for these objects
+		
+			
+	"""
+	
+	aDBConn = DBConnection.DBConnection(DBConn.DBString)
+	
+	aDBConn.start()
+	
+	instance = aDBConn.getInstanceById(instanceId) 
+		
+	vCDN_Name = instance.vcdn.name
+	srcPOP_Name = instance.pop.name
+	vCDN_Domain = instance.vcdn.dnsDomain
+	
+	vCDN_Tenant = instance.vcdn.tenant
+	vCDN_User = instance.vcdn.loginUser
+	vCDN_Passwd = instance.vcdn.loginPass
+	
+	SrcNova = OpenStack.NovaAPIConnection(auth_url = instance.pop.url, region = instance.pop.region,
+											tenant = instance.vcdn.tenant, user = instance.vcdn.loginUser, passwd = instance.vcdn.loginPass)
+	
+	logger.info(Messages.Deleting_Instance_vCDN_S_POP_S % (vCDN_Name,srcPOP_Name))
+	
+	del instance
+	
+	aDBConn.cancelChanges()
+	aDBConn.end()
+	
+	if SrcNova.connect() :
+						
+		## First kill the DNS of the original IP
+		for server in SrcNova.getServers():
+			originalServerData = SrcNova.getServerMetadata(server.id)
+			if originalServerData.floating_ip:
+				if ( vCDN_Domain  ):
+					_deleteDNSRecords( ip = originalServerData.floating_ip,
+										dnsDomain = vCDN_Domain, 
+										tenant= vCDN_Tenant, 
+										user = vCDN_User, 
+										passwd = vCDN_Passwd) 
+				else:
+					_deleteDNSRecords( ip = originalServerData.floating_ip,
+										dnsDomain = OPERATOR_DNS_DOMAIN, 
+										tenant= DESIGNATE_ADMIN_TENANT, 
+										user = DESIGNATE_ADMIN_USER, 
+										passwd = DESIGNATE_ADMIN_PASSWD)
+			#endif
+		#endfor
+			
+		#Pause for a coffee
+		time.sleep(60*MIGRATION_PAUSE)
+			
+		#Delete the original VMs
+		for server in SrcNova.getServers():
+			try:
+				if SrcNova.deleteServer(server.id):
+					logger.info(Messages.Deleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+				else:
+					logger.error(Messages.NotDeleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+				#endif
+			except:
+				logger.exception(Messages.NotDeleted_Server_S_vCDN_S_POP_S % (server.id,vCDN_Name,srcPOP_Name) )
+			continue
+		#endfor
+		logger.info(Messages.Deletion_ended_Instance_vCDN_S_POP_S % (vCDN_Name,srcPOP_Name))
 	else:
 		logger.error(Messages.NoConnect_Pops)
 #enddef
@@ -1534,13 +1751,12 @@ def _createInstance(demandId):
 		:param demand: a Demand  id to be instantiated
 		:type demand: int
 
-		The instance and dstPop parameters cannot be None
-		The Parameter is an Id because this function brings up its own connection to the DB
+		The instance and dstPop parameters cannot be None.
+		The Parameter is an Id because this function brings up its own connection to the DB.
+		
 	"""
 	
-	
 	aDBConn = DBConnection.DBConnection(DBConn.DBString)
-	
 	
 	aDBConn.start()
 	
@@ -1553,7 +1769,6 @@ def _createInstance(demandId):
 	if modelInstance:
 		
 		logger.info(Messages.Instantiating_Instance_vCDN_S_POP_S % (vCDN_Name,POP_Name))
-	
 		_copyInstanceByParameters(modelInstance.id , demand.popId)
 		
 	else:
@@ -1567,19 +1782,50 @@ def _createInstance(demandId):
 #enddef
 
 
-def _duplicateDNSRecords( srcIp , dstIp , dnsDomain , 
-						tenant= "",  user = "", passwd = "") :
+def _migrateInstance(instanceId, dstPopId):
+	"""
+		Migrates all the VMs from an Instance to a destination, by cloning the Instance and then deleting the original
+		
+		A copy of the current VMs is built (if possible) on the destination POP. The copy can be by Parameters or by Snapshots
+		
+		:param instanceId: a Valid instance to be copied
+		:type instanceId: int
+		:param dstPopId: Pop where to deploy the VMs
+		:type dstPopId: int
+
+		The instance and dstPop parameters cannot be None.
+		The Parameter is an Id because this function brings up its own connection to the DB.
+		
+	"""
+	
+	_copyInstanceByParameters(instanceId , dstPopId)
+	#_copyInstanceBySnapshot(instanceId , dstPopId)
+	_deleteInstance(instanceId)
+	
+#enddef
+
+#Python's default arguments are evaluated once when the function is defined, not each time the function is called
+def _duplicateDNSRecords( srcIp , dstIp , dnsDomain , tenant= "",  user = "", passwd = "") :
 	"""
 		For a given DNS Domain, all the A Records with data 'srcIp' are duplicated to A records with data 'dstIp'
 		
-		By default, the Operator's DNS Domain is used (read from the INI config File).
 		
-		By default, the Designate ADMIN Credentials are used (read from the INI config File).
-	
-		:returns: True if the Records were found and duplicated; False else
+		:param srcIp: IP of the A records to duplicate. It will duplicate all the A records of IP srcIp.
+		:type srcIp: String
+		:param dstIp: IP of the duplicated A records.
+		:type srcIp: String
+		:param dnsDomain: Valid DNS domain to opearate. Must end in (.) and must be under the control of the 'tenant' in Designate.
+		:type dnsDomain: String
+		
+		:returns: True if the Records were found and duplicated; False else.
+		
+		This function uses the Keystone URL definde in 'DESIGNATE_AUTH_URL' for authentication.
+		
+		This function will be successful only if readSettingsFileDNS() was able to read all the DNS Designate Options from an INI file
+		
+		.. warning:: execute after readSettingsFileDNS() 
 	
 	"""
-	#Python's default arguments are evaluated once when the function is defined, not each time the function is called
 	
 	result = False
 	if (srcIp and dstIp):
@@ -1609,15 +1855,22 @@ def _duplicateDNSRecords( srcIp , dstIp , dnsDomain ,
 #enddef
 	
 	
-def _deleteDNSRecords( dnsDomain, ip, 
-						tenant= "",  user = "", passwd = "") :
+def _deleteDNSRecords( dnsDomain, ip, tenant= "",  user = "", passwd = "") :
 	"""
 		For a given DNS Domain, all the A Records with data 'ip' are deleted
 		
-		:param ip: IP to delete the records from
-		:param dnsDomain: Designate DNS Domain where to operate.
+		:param ip: IP of the A records to delete. It will delete all the A records of IP ip.
+		:type ip: String
+		:param dnsDomain: Valid DNS domain to opearate. Must end in (.) and must be under the control of the 'tenant' in Designate.
+		:type dnsDomain: String
 		
-		:returns: True if the Records were found and deleted; False else
+		:returns: True if the Records were found and deleted; False else.
+		
+		This function uses the Keystone URL definde in 'DESIGNATE_AUTH_URL' for authentication.
+		
+		This function will be successful only if readSettingsFileDNS() was able to read all the DNS Designate Options from an INI file
+		
+		.. warning:: execute after readSettingsFileDNS() 
 		
 	"""
 	
@@ -1630,188 +1883,7 @@ def _deleteDNSRecords( dnsDomain, ip,
 					logger.info(Messages.DNS_Record_Deleted_Domain_S_Data_S % (dnsDomain, ip  ) )
 				else:
 					logger.error(Messages.DNS_Record_Not_Deleted_Domain_S_Data_S % (dnsDomain, ip  ) )
+			#endif
 		#endif
-	#endif
 	return False
 	#enddef
-	
-def triggerMigrations(migrations):
-	"""
-		Does perform a set of Migrations on the OpenStack Data Centers.
-		This triggers several Threads for the completion of the migration but does not wait for them.
-		The Migrations operations are not controlled, they have to be followed in the OpenStack controllers or the log files left by vIOS
-		
-		:param migrationIds: A list of migrationsIds to do
-		:type migrationIds: int[]
-		
-		.. seealso:: _copyInstanceByParameters()
-		
-	"""
-	
-	if not _testWritableDir(IMG_FOLDER):
-		logger.error(Messages.NoWritable_S % IMG_FOLDER)
-		return False
-	
-	logger.info(Messages.Executing_D_Migrations % len(migrations) )
-
-	for mig in migrations:
-		try:
-			thread.start_new_thread ( _copyInstanceBySnapshot, (mig.instanceId, mig.dstPopId), {'deleteOriginal':True} )
-			#thread.start_new_thread ( _copyInstanceByParameters, (mig.instanceId, mig.dstPopId), {'deleteOriginal':True} )
-		except:
-			logger.exception(Messages.Unable_Thread)
-			continue
-	#endfor
-	
-	return True
-	#else:
-		#logger.error(Messages.Error_migrating)
-		#return False
-	
-#enddef
-
-
-def triggerInstantiations(instantiations):
-	"""
-		Does perform a set of Instantiations on the OpenStack Data Centers.
-		This triggers several Threads for the completion of the instantation but does not wait for them.
-		The Instantation operations are not controlled, they have to be followed in the OpenStack controllers or the log files left by vIOS
-		
-		The instantiaton is a copy because when describing the vCDN, it can have many different VMs and of very different sizes.
-			Describing such a structure is out of the scope of Optimization.
-			So, as all vCDN Instances are assumed to be the same all over the Infrastructure, a new Instance of a vCDN is a copy
-			of an already existing instance, with the proper amount of VMs, IPs, security Groups, etc
-		
-		:param instantiationIds: A list of demand ids to satisfy by creating the Instance
-		:type instantiationIds: int[]
-		
-		..note:: Needed another DB session
-		
-	"""
-	
-	for i in instantiations:
-		
-		logger.info(Messages.Instantiating_Instance_vCDN_S_POP_S % (i.vcdn.name, i.pop.name) )
-		
-		if i.vcdn.instances:
-			try:
-				
-				modelInstance = i.vcdn.instances[0]
-			
-				thread.start_new_thread ( _copyInstanceByParameters, (modelInstance.id, i.popId) )
-			except:
-				logger.exception(Messages.Unable_Thread)
-				continue
-			
-		else:
-			logger.exception(Messages.NoInstance)
-			continue
-		
-	#endfor
-	
-	logger.info(Messages.Executing_D_Instantiations % len(instantiations) )
-	return True
-	#else:
-		#logger.error(Messages.Error_instantiating)
-		#return False
-	
-#enddef
-
-
-def resetQoE():
-	"""
-		Without touching any Demand, the QoE value is set to the Max
-		
-		This is used when the Demands are updated externally and vIOS must considered that the Demands are expecting the best QoE possible
-		
-	"""
-	global operatorQoE
-	
-	operatorQoE = maxQoE
-
-def updateDemandsQoE(qoe):
-	"""
-		For the given QoE value, all the Demands have their BW updated.
-		
-		This is to simulate how much less BW can the Operator offer to the clients to have a desired/agreed QoE MOS level
-		
-		This is based on the TSP paper "Qualite d'Experience et Adaptation de services video" by  Mamadou Tourad DIALLO
-		:param qoe: Value of the desired QoE to adjust the Demands
-		:type qoe: float or int or String
-	"""
-	
-	global operatorQoE
-	
-	qoe = float(qoe)
-	
-	
-	if qoe is not None and  qoe <= _MAX_QoE or qoe >= _MIN_QoE:
-		
-		
-		logger.info(Messages.Updating_Demand_BW_QoE_F % qoe)
-		
-		aNCUPMModel = NCUPM()
-		
-		DBConn.start()
-		x = aNCUPMModel.x(operatorQoE)/aNCUPMModel.x(qoe)
-		
-		logger.info(Messages.Updating_Demand_BW_x_F % x)
-		
-		Demands = DBConn.getDemands()
-		if Demands:
-			for d in Demands:
-				d.bw = x * d.bw
-			#endfor
-			DBConn.applyChanges()
-		else:
-			logger.error(Messages.NoDemands)
-		
-		operatorQoE = qoe
-		DBConn.end()
-		
-		logger.info(Messages.Updated_Demand_BW)
-		
-		return True
-		
-		
-	else:
-		logger.error(Messages.Invalid_QoE_Value)
-		
-	return False
-		
-def minMaxDemandsQoE():
-	"""
-		Returns de minimum and maximum QoE values possible with the NCUPM parameters
-		
-		:returns: (min,max)
-		:rtype: float
-		
-	"""
-	aNCUPMModel = NCUPM()
-	
-	return (aNCUPMModel.minMOS, aNCUPMModel.maxMOS)
-		
-
-def _testWritableDir(folder):
-	"""
-		Tests if a folder does exists and if it is possible to write and delete files from it
-		
-		..note:: a file 'test.tmp' will be created and deleted from the folder
-		
-		:param folder: a folder to test
-		:type folder: String
-		
-		:returns: True if the folder is valid and a test file was written and deleted. False else
-		
-	"""
-	if os.path.isdir(folder):
-		try:
-			testfile = open(os.path.join(folder,"test.tmp"),"w+")
-			testfile.close()
-			os.remove(os.path.join(folder,"test.tmp"))
-			return True
-		except IOError:
-			#unable to write files in the locations
-			return False
-	else:
-		return False

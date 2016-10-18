@@ -13,10 +13,8 @@ Module to interact with the Nova, Ceilometer, Glance and Keystone API
 .. note:: This module does not interact directly with the DB, the Optimizer module does
 
 
-:Example:
-	
+The different APIs connections are set into Objects because it could be needed to hold 2 or more simultaneous connections to one or more Services.
 
-	
 ## Authentication ##
 
 	For all operations, a Keystone authentication is required. Make sure the KeyStone Service has the appropriate EndPoints.
@@ -98,6 +96,15 @@ def readSettingsFile():
 		:param SettingsParser: A SettingsParser object that starts from SettingsFile.py
 		:type SettingsParser: SettingsParser
 		
+		INI File:
+		
+			[openstack]
+			connection_timeout = HTTP API Connection timeOut. In Seconds.
+			ceilometer_period = Ceilometer, by default, takes samples every 600 seconds. This is the most granular the default Ceilometer gets.
+			glance_poll_timeout = Seconds to wait before polling the Glance Service to check if an Image is ready.
+			glance_poll_retries = Max times to poll the Glance Service to check if an Image is ready.
+			nova_poll_timeout = Seconds to wait before polling the Nova Service to check if an VM is ready.
+			nova_poll_retries = Max times to poll the Nova Service to check if an VM is ready.
 		
 	"""
 	
@@ -133,12 +140,24 @@ class NovaAPIConnection(object):
 		This class represents the connection with the OpenStack APIs, passing by authentication with KeyStone
 		
 		Internally, the client will get the Nova API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable.
+		
+		:Example:
+		
+			nova = NovaAPIConnection(auth_url,region  ,tenant ,user ,passwd )
+			if nova.connect():
+				for s in nova.getServers():
+					print s
+					if nova.isServerReady(s.id):
+						print "Yes"
+				l = nova.getLimits()
+			
 	"""
 	
 	# Constants used on API connections
-	NOVA_VERSION = "2"		# Invalid client version '2.0'. must be one of: 3, 2, 1.1
+	NOVA_VERSION = "2"		
+	# Invalid client version '2.0'. must be one of: 3, 2, 1.1
 
-	def __init__(self,auth_url="",region = None,tenant="",user="",passwd=""):
+	def __init__(self,auth_url,region = None,tenant="",user="",passwd=""):
 		"""
 			Starts with no connections, with no credentials to connect with. Empty start
 		"""
@@ -232,7 +251,7 @@ class NovaAPIConnection(object):
 		"""
 			From a ServerId existing in a ComputeNode, a MetaData structure is extracted
 			
-			This data is usefull to describe the machine when instantiating in another DC
+			This data is usefull to describe the machine when instantiating in another DC.
 			
 			..This is not the Nova Metadata, it is an internal call used to contain all parameters needed to create a clone VM
 			
@@ -264,13 +283,14 @@ class NovaAPIConnection(object):
 	
 	def createServer(self, serverMetadata):
 		"""
-		
-		Given a ServerMetadata describing the desired parameters, a new VM is launched with these parameters
-		
-		:param serverMetadata: the server metadata description
-		:type serverMetadata: ServerMetadata
-		
-		:returns: True if the VM was created OK; False else
+			Given a ServerMetadata object describing the desired parameters, a new VM is launched with these parameters.
+			
+			If the parameters indicate to have a FloatingIp, a new floating IP is requested from the Public Pool and assigned to the VM. If there is no more capacity in the Pool of FloatingIPs; 
+			
+			:param serverMetadata: the server metadata description
+			:type serverMetadata: ServerMetadata
+			
+			:returns: True if the VM was created OK; False else
 		
 		"""
 		try:
@@ -306,14 +326,20 @@ class NovaAPIConnection(object):
 				logger.error(Messages.Invalid_Server_Parameters_S,serverMetadata.to_dict() )
 				return None
 			except NovaExceptions.OverLimit:
-				logger.error(Messages.QuotaLimit )
+				logger.error(Messages.QuotaLimit  )
 				return None
 						
 			time.sleep(5)
+			#Pause for the Server to be allocated and registered
 			
 			if serverMetadata.floating_ip:
-				floating_ip = self.Nova.floating_ips.create(self.Nova.floating_ip_pools.list()[0].name)
-				server.add_floating_ip(floating_ip)
+				try:
+					floating_ip = self.Nova.floating_ips.create(self.Nova.floating_ip_pools.list()[0].name)
+					if floating_ip:
+						server.add_floating_ip(floating_ip)
+				except:
+					logger.error(Messages.NoFloatingIPs )
+				
 			
 			return server.id
 			
@@ -325,7 +351,7 @@ class NovaAPIConnection(object):
 	def deleteServer(self, serverId):
 		"""
 		
-		Given a ServerId, it is deleted and its Floating IP returned to the Pool
+		Given a ServerId, it is deleted and its Floating IP returned to the Pool.
 		
 		:param serverId: the server Id to be deleted
 		:type serverId: String as in Nova Server Id
@@ -414,7 +440,7 @@ class NovaAPIConnection(object):
 		Gets a list of the absolute limiting values for the connected tenant 
 		
 			> nova quota-show
-			>nova quota-defaults
+			> nova quota-defaults
 
 			:returns:  an Limits object with the limits
 			:rtype: Limits class
@@ -453,6 +479,13 @@ class CeilometerAPIConnection(object):
 		This class represents the connection with the OpenStack Ceilometer API, passing by authentication with KeyStone
 		
 		Internally, the client will get the Ceilometer API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable.
+		
+		:Example:
+		
+			ceil = CeilometerAPIConnection(auth_url,region  ,tenant ,user ,passwd )
+			if ceil.connect():
+				m = ceil.getMetrics()
+			
 	"""
 	
 	# Constants used on API connections
@@ -475,7 +508,7 @@ class CeilometerAPIConnection(object):
 		
 	def connect(self):
 		"""
-			Connects to the Nova API Server after authenticating with Keystone
+			Connects to the Ceilometer API Server after authenticating with Keystone
 			 
 			:returns: True if the connection went OK, False if errors
 		"""
@@ -520,7 +553,7 @@ class CeilometerAPIConnection(object):
 			:rtype: Meter class
 			
 						
-			 CLI equivalent: 
+			CLI equivalent: 
 				> ceilometer  statistics -m vcpus -q 'timestamp>2016-06-14T00:00:00' -p 600
 			
 			Collects many samples, with the SUM of the values for each tenant. So te SUM of all disk/mem/cpu/net used every 10mins(600 secs, default sample rate)
@@ -555,28 +588,7 @@ class CeilometerAPIConnection(object):
 		minTimeStampValue = datetime.now()
 		
 		for m in meter.values.keys():
-			#Get last sample timestamp. the Sample Api will order the samples; the first is the most recent one
-			#sample_set = self.Ceil.samples.list( meter_name = m, limit=1 )
-			#  meter = self.Ceil.meters.find( meter_name = m )
-			#if sample_set != None and sample_set != []:
-			#	timestamp = sample_set[0].timestamp
-			#	logger.debug(Messages.LastSample_S_at_S % ( m ,str(timestamp)))
-			#else:
-			#	logger.error(Messages.NoMetrics_Meter_S % ( m ))
-			#	continue
-			
-			# Converting the DB Time into normal Python time. Put now() as a last resource
-			#try:
-			#	time_value =  datetime.strptime(timestamp,OS_CEILOMETER_TIME_FORMAT)
-			#except:
-			#	try:
-			#		time_value =  datetime.strptime(timestamp,OS_CEILOMETER_TIME_FORMAT_USEC)
-			#	except:
-			#		time_value = datetime.now()
-			
-			#if minTimeStampValue > time_value:
-			#	minTimeStampValue = time_value
-			
+						
 			time_value = datetime.now()
 			minTimeStampValue = time_value
 			
@@ -622,9 +634,21 @@ class CeilometerAPIConnection(object):
 
 class GlanceAPIConnection(object):
 	"""
-		This class represents the connection with the OpenStack Glance API, passing by authentication with KeyStone
-		The values provided in setURL() and setCredentials() are the same as the ones used for CLI client
+		This class represents the connection with the OpenStack Glance API, passing by authentication with KeyStone.
+		
+		The values provided in setURL() and setCredentials() are the same as the ones used for CLI client.
+		
 		Internally, the client will get the Nova API endpoint from Keystone, so make sure the Endpoints in Keystone are correct and reachable.
+		
+		:Example:
+		
+			glance = GlanceAPIConnection(auth_url,region  ,tenant ,user ,passwd )
+			if glance.connect():
+				if glance.isImageReady(imageId):
+					glance.getSnapshotImage( imageId, file)
+					id = glance.putSnapshotImage(file)
+					glance.waitImageReady(id)
+		
 	"""
 	
 	# Constants used on API connections
@@ -776,7 +800,7 @@ class GlanceAPIConnection(object):
 		"""
 		try:
 			aImage = self.Glance.images.get(imageId)
-			return aImage.status.lower() == "active"
+			return (aImage.status.lower() == "active")
 		except GlanceExceptions.HTTPNotFound:
 			#Unable to retreive the Image
 			return False
@@ -810,7 +834,18 @@ class GlanceAPIConnection(object):
 
 class DesignateAPIConnection(object):
 	"""
-		This class represents the connection to the DNS Designate API
+		This class represents the connection to the DNS Designate API.
+		
+		:Example:
+		
+			dsg = DesignateAPIConnection(auth_url,region  ,tenant ,user ,passwd )
+			if dsg.connect():
+				id =  dsg.findDomain("example.com."):
+				if id:
+					google  = dsg.findRecordsByData("8.8.8.8")
+					if google:
+						dsg.deleteRecordsByData("8.8.8.8")
+		
 	"""
 	
 	def __init__(self, auth_url="", region=None, tenant="admin", user="admin", passwd=""):
@@ -830,7 +865,7 @@ class DesignateAPIConnection(object):
 	
 	def connect(self):
 		"""
-			Connects to the Nova API Server after authenticating with Keystone
+			Connects to the Designate API Server after authenticating with Keystone
 			 
 			:returns: True if the connection went OK, False if errors
 		"""
@@ -870,7 +905,7 @@ class DesignateAPIConnection(object):
 		:type dnsDomain: string
 
 		:returns: id of the Domain, if found on Designate, or None if not
-		:rtype: string or None
+		:rtype: String or None
 		"""
 		try:
 			domainId = None
@@ -1000,7 +1035,9 @@ class DesignateAPIConnection(object):
 
 class Limits(object):
 	""" 
-		Class representing the absolute values that a Tenant has in a Nova Api. This is to avoid using the awful OpenStack AbsoluteLimit class
+		Class representing the absolute values that a Tenant has in a Nova Api. 
+		
+		This is to avoid using the awful OpenStack AbsoluteLimit class
 		
 		> nova quota-show
 		> nova quota-default

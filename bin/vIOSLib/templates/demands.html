@@ -8,8 +8,6 @@ Date: July 2016
 	
 	There is a Button to create a Random set of demands, based on random probability parameters (either default or read from the ConfigFile)
 	
-	.. todo:: Do the Button thing. Need to have already started a Optimizer class
-	
 	:param demandsList: List of Demands to show in a nice table
 	:type demandsList: DataModels.Demand[]
 	:param Topologie_Gomuri_filename: filename, located in the 'static' folder
@@ -98,13 +96,15 @@ Date: July 2016
 <small> 
 	(**) The <b>Demand BW </b> is compared to the Topologie's Links capacity in the Optimization process
 	<br>
-	(**) The <b>Demand volume</b> is an informative value, used for sorting the Demands according to their relative importance.
+	(*) The <b>Demand volume</b> is an informative value, used for sorting the Demands according to their relative importance.
 </small>
 
 	<br>
        
 
-    
+<h2>Network Capacity graphs</h2>
+
+<br/> 
     
 <!--p>
 	<form method="POST" action="{{ url_for('demandsTable') }}">

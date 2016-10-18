@@ -3,7 +3,7 @@
 -- \author Ignacio Tamayo, TSP, 2016
 -- \version 1.4
 --
--- \seealso DataModels.py
+-- \seealso vIOSLib/DataModels.py
 --
 -- \internal 
 -- Limit the access scope according to security policy or system access
@@ -25,8 +25,8 @@ GRANT ALL PRIVILEGES ON vios.* TO 'vios'@'%' IDENTIFIED BY 'vIOS_DBPASS';
 USE vios
 
 -- \table Locations
--- UNIQUE = name; To avoid confusion on the related tables (A location name is unique in a certain area; and if not it can be made so)
--- \related NetLinks, ClientGroups, POPs
+-- UNIQUE (name) to avoid confusion on the related tables (A location name is unique in a certain area; and if not it can be made so)
+-- \related NetLinks, ClientGroups, POPs.
 
 DROP TABLE IF EXISTS Locations;
 
@@ -41,11 +41,15 @@ CREATE TABLE Locations(
 );
 
 -- \table NetLinks
--- UNIQUE = (locationAId,locationBId) as not to have 2 entries for the same link. At DB it is CHECKED that (locationAId <> locationBId) to avoid loops
+-- UNIQUE (locationAId,locationBId) as not to have 2 entries for the same link. 
+-- At DB it is CHECKED that (locationAId <> locationBId) to avoid loops
 -- Birectionality is not checked in DB, so (locationAId,locationBId) and (locationBId,locationAId) can happen
+-- 
 -- `capacity` is in Mbps
+-- 
 -- \related Locations
 -- On UPDATE/DELETE a Location, if there is a NetworkLink to or from those locations, the UPDATE/DELETE is stopped and an error happens. Delete the NetworkLinks first
+-- 
 
 DROP TABLE IF EXISTS NetLinks;
 
@@ -64,9 +68,9 @@ CREATE TABLE NetLinks(
 );
 
 -- \table POPs
--- UNIQUE = (region,url,region,tenant,loginUser) as not to have 2 entries for the OpenStack controller. If the Same OpenStack server is used, either there must be a different user/tenant/region
--- UNIQUE = (name) as to have single identifiable names
--- UNIQUE = (locationId) as to keep a single POP in each location. This assumtion might change, but it will impact most of the OPAC/HMAC implementation code (and break the foreing key)
+-- UNIQUE (region,url,region,tenant,loginUser) as not to have 2 entries for the OpenStack controller. If the Same OpenStack server is used, either there must be a different user/tenant/region
+-- UNIQUE (name) as to have single identifiable names
+-- UNIQUE (locationId) as to keep a single POP in each location. This assumtion might change, but it will impact most of the OPAC/HMAC implementation code (and break the foreing key)
 --
 -- `url`,`region`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, usually put in Enviroment Variables
 -- `url` to be the Public Keystone Endpoint, versioned
@@ -115,7 +119,7 @@ CREATE TABLE POPs(
 );
 
 -- \table Hypervisors
--- UNIQUE = (name,popId). 2 Hypervisors can belong to a single POP, as long as they have different names. 2 Hypervisors can have the same name, but on different POPs. This reflects OpenStack characteristics
+-- UNIQUE (name,popId), 2 Hypervisors can belong to a single POP, as long as they have different names. 2 Hypervisors can have the same name, but on different POPs. This reflects OpenStack characteristics
 --
 -- `xDisk` in GB,`xRAM` in MB,`xCPU` in units, `xNetBW` in Mbps
 --
@@ -147,7 +151,7 @@ CREATE TABLE Hypervisors(
 
 
 -- \table Flavors
--- UNIQUE = (osId,popId). 2 POP can have the same Flavor ID in OpenStack, coincidence. 1 POP has unique Flavors. This reflects OpenStack characteristics
+-- UNIQUE (osId,popId), 2 POP can have the same Flavor ID in OpenStack, coincidence. 1 POP has unique Flavors. This reflects OpenStack characteristics
 --
 -- `xDisk` in GB,`xRAM` in MB,`xCPU` in units
 -- `osId` is the OpenStack ID given to this flavor
@@ -207,7 +211,7 @@ CREATE TABLE Metrics (
 
 -- \table MigrationCostMultipliers
 -- Values of the Migration decision, the value is multiplied to the calculated cost to tune the Migration decision
--- UNIQUE = (popAId,popBId) as not to have 2 entries for the same migration. At DB it is CHECKED that (popAId <> popBId) to avoid loops
+-- UNIQUE (popAId,popBId) as not to have 2 entries for the same migration. At DB it is CHECKED that (popAId <> popBId) to avoid loops
 -- Bidirectional is not checked in DB, so (popAId,popBId) and (popBId,popAId) can happen
 --
 -- `costMultiplier` is a value that could be used as cost multiplier.
@@ -234,7 +238,7 @@ CREATE TABLE MigrationCostMultipliers(
 
 
 -- \table ClientGroups
--- UNIQUE = (name). As the Clients can be placed in any location, the name must be unique to be able to identify them
+-- UNIQUE (name). As the Clients can be placed in any location, the name must be unique to be able to identify them
 -- `connectionBW` is the BW in Mbps that the client groups has to the location
 -- \related Location, QOSMaps
 -- On UPDATE/DELETE a Location, if there is a ClientGroups associated, the change is restricted and ERROR happens. First delete/update the ClientGroups
@@ -254,8 +258,7 @@ CREATE TABLE ClientGroups(
 );
 
 -- \table vCDNs
--- UNIQUE = (name). Because each vCDN is identified by a single name. 
--- This allows, later; so associate a vCDN to a file in ObjectStorage or a specific VM Image
+-- UNIQUE (name,tenant,loginUser). Because each vCDN is identified by a name and its OpenStack Credentials. 
 --
 -- `url`,`loginUser`,`loginPass`,`tenant`  are the same credentials used by the Nova CLI client, usually put in Environment Variables (via a file)
 -- `xDisk` in GB,`xRAM` in MB,`xCPU` in units
@@ -286,33 +289,9 @@ CREATE TABLE vCDNs(
 	PRIMARY KEY (id)
 );
 
--- \table QOSMaps
--- UNIQUE = (clientGroupId,vcdnId). A QOSMap entry is an SLA entry set by the vCDN to serve the Clients in a specific way. Otherwise the vCDNs.defaultQosBW is assumed
---
--- `bw` is the BW in kbps to be given to a specific ClienGroup connecting to this vCDN. BW in kbps
---
--- \related vCDNs, ClientGroups
--- On UPDATE/DELETE a ClientGroup, if there is a QOSMap associated, the change is restricted and ERROR happens
--- On UPDATE/DELETE a vCDN, if there is a QOSMap associated, the change is restricted and ERROR happens
-
-DROP TABLE IF EXISTS QOSMaps;
-
--- CREATE TABLE QOSMaps(
-	-- id int AUTO_INCREMENT,
-	-- clientGroupId int not null,
-	-- vcdnId int not null,
-	-- bw int,
-	-- created_at DATETIME    ,
-	-- modified_at DATETIME      ,
-	-- PRIMARY KEY (id),
-	-- unique(clientGroupId,vcdnId),
-	-- FOREIGN KEY (clientGroupId) REFERENCES ClientGroups(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	-- FOREIGN KEY (vcdnId) REFERENCES vCDNs(id) ON UPDATE RESTRICT ON DELETE RESTRICT
--- );
-
 
 -- \table Instances
--- UNIQUE = (popId,vcdnId). 1 server that holds several vCDNs inside, and a vCDN can be in many POPs, but the pair is unique ()
+-- UNIQUE (popId,vcdnId). 1 server that holds several vCDNs inside, and a vCDN can be in many POPs, but the pair is unique ()
 --
 -- `xRAM` in MB,`xCPU` in units
 --
@@ -344,8 +323,7 @@ CREATE TABLE Instances(
 
 -- \table HmacResults
 -- Results of HMAC optimization algorithm
--- UNIQUE = (demandId) as a migration HMAC responds to a single Demand.
--- 
+-- UNIQUE (demandId) as a migration HMAC responds to a single Demand.
 -- 
 -- `cost` is a value that is produced by HMAC, calculated as the vCDN.size * migration path hops
 -- `delay` is a value that is produced by HMAC, calculated as the vCDN.size / minimum link capacity
@@ -366,7 +344,6 @@ CREATE TABLE HmacResults(
 	delay float,
 	cost float,
 	minBW float,
-	-- migrate boolean,
 	created_at DATETIME,
 	PRIMARY KEY (id),
 	
@@ -391,30 +368,9 @@ DROP VIEW IF EXISTS Migrations;
 CREATE VIEW Migrations as
 SELECT * from HmacResults WHERE migrate = True;
 
--- \view Redirects
--- 
--- This view has the Redirections, meaning that the Result of HMAC is a Migration but the destination POP already has the vCDN
--- 
--- \related HmacResults
-
-DROP VIEW IF EXISTS Redirects;
-
--- CREATE VIEW Redirects as
--- SELECT id,instanceId, dstPopId, demandId, migrate,created_at  from HmacResults WHERE migrate = False;
-
-
-
-
-
-
-
-
-
-
-
 
 -- \table Demands
--- UNIQUE = (ClientGroupId,popId,vcdnId). As only 1 optimal server is to supply the demand for a vCDN,
+-- UNIQUE (ClientGroupId,popId,vcdnId). As only 1 optimal server is to supply the demand for a vCDN,
 -- This should ideally associate a Demand to an Instance, but not necessarily as the Instance can just have disappeared when the Demand was calculated or measured
 --
 -- `value` is a number presenting the demand volume, concurrent demans, demand's importance, etc. This value is only used for sorting
@@ -460,7 +416,8 @@ SELECT * from Demands WHERE invalidInstance = True;
 
 
 -- \table AlteredDemands
--- UNIQUE = (demandId). As only 1 demand is to be altered per line
+-- These are the Demands that need to be modified to fit the new Infrastructure Topologie (to find the requested vCDN in a different POP)
+-- UNIQUE (demandId). As only 1 demand is to be altered per line
 --
 --
 -- \related POPs, Demands
@@ -512,10 +469,6 @@ VALUES
 ("HBO","tenant_hbo","user_hbo","USER_PASS",20,4,1,10,1,10)
 ;
 
-
--- INSERT INTO QOSMaps( clientGroupId , vcdnId ,	bw)
--- VALUES (6,1,200),(1,1,20),(2,2,600),(4,3,50),(7,1,100),(1,2,100)
--- ;
 
 INSERT INTO POPs( 	name ,	locationId , 	url ,	tenant, loginUser ,	loginPass ,  totalDisk , totalRAM , totalCPU , totalNetBW  )
 VALUES 

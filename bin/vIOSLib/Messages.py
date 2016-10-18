@@ -196,6 +196,7 @@ Created_Server_S_vCDN_S_POP_S = "Created server '%s' of vCDN '%s' in POP '%s' "
 Deleted_Server_S_vCDN_S_POP_S = "Deleted server '%s' of vCDN '%s' in POP '%s' "
 
 QuotaLimit = "Servers quota full, not allowed to start more servers."
+NoFloatingIPs = "Unable to obtain a Floating IP from the Pool in POP."
 
 NotDeleted_Server_S_vCDN_S_POP_S = "Server '%s' of vCDN '%s' in POP '%s' was not deleted after Migration "
 NotResumed_Server_S_POP_S =  "Server '%s' in POP '%s' was not resumed after snapshot "
@@ -315,13 +316,14 @@ Domain_S_found = "Designate domain '%s' found"
 Record_S_S_S_found = "DNS record ('%s','%s','%s') found"
 Record_S_S_S_deleted = "DNS record ('%s','%s','%s') deleted"
 
-#Migrating_Instance_vCDN_S_POP_S_POP_S = "Migrating Instance of vCDN %s from POP %s to POP %s"
+Deleting_Instance_vCDN_S_POP_S = "Deleting Instance of vCDN %s from POP %s"
 Copying_Instance_vCDN_S_POP_S_POP_S = "Copying Instance of vCDN %s from POP %s to POP %s"
 
 Instantiating_Instance_vCDN_S_POP_S = "Instantiating vCDN %s on POP %s"
 Instantiation_ended_Instance_vCDN_S_POP_S = "Instantiation of vCDN %s on POP %s has finished"
 
 Copy_ended_Instance_vCDN_S_POP_S_POP_S = "Copy of vCDN %s from POP %s to POP %s has finished"
+Deletion_ended_Instance_vCDN_S_POP_S = "Delete of vCDN %s from POP %s has finished"
 
 Exception_Migrating_Server_S_POP_S_POP_S = "Exception occurred while migrating a Server Id %s from POP %s to POP %s"
 NoConnect_Pops = "Unable to connect to the POPs to perform the Migration"

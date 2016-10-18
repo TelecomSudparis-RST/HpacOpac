@@ -84,9 +84,11 @@ In&nbsp;the&nbsp;original&nbsp;paper&nbsp;it&nbsp;is&nbsp;said&nbsp;that&nbsp;ev
 <td colspan=2><tt>This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;Simulation&nbsp;of&nbsp;the&nbsp;Migrations<br>
 &nbsp;<br>
 Because&nbsp;while&nbsp;simulating&nbsp;the&nbsp;Demands&nbsp;are&nbsp;placed&nbsp;according&nbsp;to&nbsp;the&nbsp;Migrations,&nbsp;if&nbsp;the&nbsp;Demands&nbsp;objects&nbsp;are&nbsp;used&nbsp;for&nbsp;analysis&nbsp;the&nbsp;changes&nbsp;will&nbsp;impact&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
 This&nbsp;is&nbsp;because&nbsp;in&nbsp;the&nbsp;internal&nbsp;methods&nbsp;the&nbsp;DataModel&nbsp;relationships&nbsp;are&nbsp;used&nbsp;to&nbsp;get&nbsp;related&nbsp;objects;&nbsp;requiring&nbsp;the&nbsp;relationship&nbsp;to&nbsp;be&nbsp;effectively&nbsp;existing&nbsp;in&nbsp;the&nbsp;DB<br>
+&nbsp;<br>
 In&nbsp;our&nbsp;case,&nbsp;if&nbsp;a&nbsp;Demand&nbsp;is&nbsp;deplaced,&nbsp;before&nbsp;using&nbsp;any&nbsp;other&nbsp;method&nbsp;the&nbsp;ORM&nbsp;will&nbsp;try&nbsp;to&nbsp;update&nbsp;the&nbsp;DB&nbsp;&nbsp;to&nbsp;get&nbsp;the&nbsp;new&nbsp;relationships.<br>
-So,&nbsp;to&nbsp;avoid&nbsp;that,&nbsp;we&nbsp;use&nbsp;a&nbsp;fake&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;has&nbsp;per&nbsp;separate&nbsp;the&nbsp;3&nbsp;elements&nbsp;of&nbsp;a&nbsp;Demand<br>&nbsp;</tt></td></tr>
+So,&nbsp;to&nbsp;avoid&nbsp;that,&nbsp;we&nbsp;use&nbsp;a&nbsp;fake&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;has&nbsp;per&nbsp;separate&nbsp;the&nbsp;3&nbsp;elements&nbsp;of&nbsp;a&nbsp;Demand.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="FakeDemand-__init__"><strong>__init__</strong></a>(self, clientGroupLocationName<font color="#909090">=''</font>, clientGroupName<font color="#909090">=''</font>, clientGroupId<font color="#909090">=1</font>, popLocationName<font color="#909090">=''</font>, popName<font color="#909090">=''</font>, popId<font color="#909090">=1</font>, vcdnName<font color="#909090">=''</font>, vcdnId<font color="#909090">=1</font>, bw<font color="#909090">=0</font>, volume<font color="#909090">=0</font>)</dt></dl>
@@ -130,7 +132,9 @@ Data descriptors defined here:<br>
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>This&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;Simulation<br>
 &nbsp;<br>
-Because&nbsp;a&nbsp;Demand&nbsp;would&nbsp;need&nbsp;to&nbsp;be&nbsp;redirected&nbsp;when&nbsp;the&nbsp;vCND&nbsp;is&nbsp;migrated<br>&nbsp;</tt></td></tr>
+Because&nbsp;a&nbsp;Demand&nbsp;would&nbsp;need&nbsp;to&nbsp;be&nbsp;redirected&nbsp;when&nbsp;the&nbsp;vCND&nbsp;is&nbsp;migrated<br>
+&nbsp;<br>
+..&nbsp;seealso::&nbsp;<a href="#FakeDemand">FakeDemand</a><br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="FakeRedirect-__init__"><strong>__init__</strong></a>(self, fakeDemand, dstPopName<font color="#909090">=''</font>, dstPopId<font color="#909090">=1</font>)</dt></dl>
@@ -392,7 +396,7 @@ Get&nbsp;the&nbsp;CPLEX&nbsp;files&nbsp;from&nbsp;the&nbsp;folder&nbsp;../CPLEX.
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-setMigrationCost">setMigrationCost</a>(clientGroups)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omacModel.<a href="#OMAC-optimize">optimize</a>()&nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;<br>
-By&nbsp;running&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;function,&nbsp;some&nbsp;of&nbsp;these&nbsp;functions&nbsp;are&nbsp;already&nbsp;executed&nbsp;and&nbsp;the&nbsp;execution&nbsp;path&nbsp;changes&nbsp;a&nbsp;bit:<br>
+By&nbsp;running&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;function,&nbsp;some&nbsp;of&nbsp;these&nbsp;functions&nbsp;are&nbsp;already&nbsp;executed&nbsp;and&nbsp;the&nbsp;execution&nbsp;sequence&nbsp;changes&nbsp;a&nbsp;bit:<br>
 &nbsp;<br>
 :Example:<br>
 &nbsp;<br>
@@ -405,8 +409,6 @@ By&nbsp;running&nbsp;the&nbsp;<a href="#Model">Model</a>'s&nbsp;function,&nbsp;s
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.omac.<a href="#OMAC-optimize">optimize</a>()<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="OMAC-__init__"><strong>__init__</strong></a>(self)</dt></dl>
-
 <dl><dt><a name="OMAC-optimize"><strong>optimize</strong></a>(self)</dt><dd><tt>Writes&nbsp;a&nbsp;.dat&nbsp;file&nbsp;for&nbsp;CPLEX&nbsp;engine&nbsp;to&nbsp;run&nbsp;next&nbsp;to&nbsp;the&nbsp;.mod&nbsp;file&nbsp;already&nbsp;prepared<br>
 &nbsp;<br>
 At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;execution,&nbsp;get&nbsp;the&nbsp;2&nbsp;CPLEX&nbsp;files&nbsp;from&nbsp;'../CPLEX/*'<br>

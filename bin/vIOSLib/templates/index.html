@@ -6,7 +6,7 @@
   <p>
   Use this web page to operate the Optimization on the Infrastructure using HMAC Algorithm 
   <br>
-  Refer to the Admin site for manual alteration of Infrastructure parameters and values
+  Use the Admin page for manual alteration of Infrastructure parameters and values
   </p>
 	
 	
@@ -15,14 +15,15 @@
 		<br>
 		This is a demo implementation of HMAC algorithm for Optimal vCDN Migration on an OpenStack environment. 
 		<br>
-		HMAC is an Optimal VM migration algorithm that uses topologie information, live OpenStack statistics and metrics and the demands for a vCDN service as inputs. 
-		These input information can come from Operator's systems or, in our case, from manual input.
-		<br>
+		HMAC is an Optimal vCDN migration algorithm that uses topologie information, infrastructure metrics and the demands for a vCDN service as inputs. 
+		These input information can come from Operator's systems or, in our case, from manual input. 
 		The objective of HMAC is to determine where to migrate a VM in order not to saturate the network links capacity neither the OpenStack capacity, 
 		minimizing the migration cost. This is an heuritic algorithm, it not an exact sollution.
 		<br>
-		Regading the OpenStack, statistical and real-time data is obtained from the Nova and Ceilometer Services.
-		Also, after the Simulation stage, some actual Instantiations and Migrations can be triggered from vIOS, affecting the OpenStack VMs.
+		For the Virtualization Infrastructure values (OpenStack), this demo gathers life statistics and metrics directly from OpenStack Controller and Telemetry services.
+		For VM Migration over OpenStacks DataCenters (each DC having its Controller/Network/Telemetry services), this demo integrates with OpenStack KeyStone, Nova, Glance and Ceilometer via API calls.
+		After the Simulation stage, some actual Instantiations and Migrations can be triggered from vIOS, affecting the OpenStack VMs.
+		For DNS Integration (optional), this demo uses a single OpenStack Designate Server holding the DNS Zones to be modified when migrating VMs from an OpenStack DC to another (this is needed because each OpenStack DC can have its own public addressing space from where the <i>Floating IPs</i> are assigned).
 		<br>
 		Additionally, this simulator uses an exponential algorithm that relates the QualityOfExperience metric perceived by the users (in MOS values) with the BW available at the Infrastructure.
 		This way, it can simulate a reduction in the vCDN traffic BW able to sustain a desired QoE metric for the clients in the infrastructure. This would mean that the Infrastructure operator can simulate a BW reduction that still respects the QoE SLA agreed.
@@ -53,17 +54,18 @@
 				<br>
 				The Topologie is shown as a Graph and a Gomory-Hu Tree.
 				<br>
-				In this Demo, the <i>Network Links</i> can be generated randomly, from a random graph with a random capacity, and the <i>ClientGroups</i> are placed in the orders of the random topologie.
+				In this Demo, the <i>Network Links</i> can be generated randomly, from a random graph with a random capacity, and the <i>ClientGroups</i> are placed in the borders of the random topologie.
 			</li>
 			<li>
 				<b>vCDN:</b> The client for the operator's infrastructure is a CDN provider, identified by an <i>OpenStack Tenant/Project</i> credentials. This tenant/project can login on one or more of the <i>POPs</i>. The <i>vCDN</i> also identifies the amount of resources it would deploy when instantiated in a <i>POP</i>.
 				<br>
 				The assemble of servers and resources used by a <i>vCDN</i> in a <i>POP</i> is called an <i>Instance</i>. The sum of all the needed resources is indicated for each <i>vCDN</i>.
 				<br>
-				The <i>vCDN</i> defines the average QoS BW given to the <i>ClientGroup</i> requests. This value is multiplied by the <i>Demand</i> volume to obtained the <i>Demanded QoS BW from the vCDN and the Infrastructure</i>. Optionally, a <i>vCDN</i> can establish a more specific Qos BW for a specific <i>ClientGroup</i>, via the <i>QoS Map</i>.
+				The <i>vCDN</i> defines the average QoS BW given to the <i>ClientGroup</i> requests. 
+				
 			</li>
 			<li>
-				<b>POP:</b> The infrastructure has Points of Presence where an Open Stack DC is deployed, in certain <i>Location</i>. 
+				<b>POP:</b> The infrastructure has Points of Presence where an Open Stack DC is deployed, in a certain <i>Location</i>. 
 				<br>
 				The <i>POP</i> is identified by the OpenStack Keystone Public endpoint and admin credentials, along with the installed capacity (might defer from the values obtained directly via the OpenStack API)
 				<br>
@@ -76,18 +78,20 @@
 				<br>
 				A <i>Demand</i> comes from a <i>ClientGroup</i> and targets a <i>vCDN</i> in a specific <i>POP</i>. This is to relate to the fact that CDN internals take care of client request redirection to the appropriate cache server.
 				<br>
-				A <i>Demand</i> has a Volume property (could be the number of concurrent connections, the number of devices) that gives an idea of the magnitude of the Demand. This value is multiplied by the <i>QoS Bandwidht</i> obtained from the <i>vCDN</i>, either by its <i>QoS Map</i> entry or the default Qos BW.
+				A <i>Demand</i> has a Volume property (could be the number of concurrent connections, the number of devices) that gives an idea of the magnitude of the Demand.
 				<br>
 				In this Demo, the <i>Demands</i> can be generated randomly, requesting services from all the <i>Instances</i> with a random volume
 			</li>
 			<li>
-				<b>Migrations:</b> As a result from the HMAC optimization, for each <i>Demand</i> presented there is possibly a <i>Migration</i> suggested.
+				<b>Migrations:</b> As a result from the HMAC optimization, for a set of <i>Demands</i> presented, there is possibly a <i>Migration</i> suggested.
 				<br>
 				All suggested <i>Migrations</i> have a Cost and Delay associated, and a minimum BW available in the migration path. The list of <i>Migrations</i> can be sorted on any of these parameters.
 				<br>
-				The Cost is <small> (vCDN Disk size) * (migration path hops ) * (Migration Cost Multiplier) </small>. This is to have take into account the size of the data to be migrated and the distance of the migration. The <i>Migration Cost Multiplier</i> is set as a positive value that multiplies the cost of a migration  between any 2 <i>POPs</i>. It is bidirectional.
+				The Cost is <small> (vCDN Disk size) * (migration path hops ) * (Migration Cost Multiplier) </small>. This is to have take into account the size of the data to be migrated and the distance of the migration.
 				<br>
-				The <i>Migration</i> is only possible if the other <i>Demands</i> that are requesting the <i>vCDN</i> from the original <i>POP</i> do not cause another saturation situation when they are redirected to the new migrated <i>POP</i>.
+				The <i>Migration Cost Multiplier</i> is set as a positive value that multiplies the cost of a migration  between any 2 <i>POPs</i>. It is bidirectional.
+				<br>
+				The <i>Migration</i> is only possible if the other <i>Demands</i> that are requesting the <i>vCDN</i> from the original <i>POP</i> do not cause another saturation when they are redirected to the new migrated <i>POP</i>.
 			</li>
 			<li>
 				<b>Redirections:</b> As a result from the HMAC optimization, it could be detected that the <i>Demands</i> requesting a <i>vCDN</i> in a <i>POP</i> could be redirected to the another <i>POP</i> where the same <i>vCDN</i> is already instantiated. 
@@ -109,28 +113,29 @@
 		<br>
 		<ol>
 			<li>
-				A Topologie Graph if built from the Information about the Locations (nodes) and Network Links (edges). Then POPs and Clients are placed on this graph
+				A <b>Topologie Graph</b> if built from the <i>Locations</i> (nodes) and <i>Network Links</i> (edges). Then the <i>POPs</i> and <i>Clients</i> are placed on this graph.
 			</li>
 			<li>
-				At a certain period, data from the OpenStack POPs is gathered and aggregated. This is left to be scheduled on CronTab or a similar mechanism
+				At a certain period, data from the <b>OpenStack Data Centers</b> is gathered, aggregated and associated with the related <i>POP</i>. This is left to be scheduled on CronTab or a similar mechanism.
 			</li>
 			<li>
-				A Gomory-Hu Tree is built from the Topologie graph, and all the <i>Demands</i> are passed by the graph and consume the network capacity. At the end, the Gomory-Hu Tree has the remaining network capacity after all the Demands have been satisfied
+				A <b>Gomory-Hu Tree</b> is built from the <i>Topologie Graph</i>, based on the Network BW capacity. All the <i>Demands</i> are passed by the tree and consume some network capacity. At the end, the Gomory-Hu Tree has the remaining network capacity after all the Demands have been satisfied.
+				For each <i>Demand</i>, a <b>Shortest-path</b> is found from the <i>Client's Location</i> to the demanded <i>POP</i> (the demanded POP holds an <i>Instance</i> of the demanded <i>vCDN</i>). The network links in this shortest-path have their capacity consumed to satisfy the Demand's BW. The <i>Demands</i> for which there is no valid <i>Instace</i> (the demanded <i>POP</i> does not contain the demanded <i>vCDN</i>) are declared <b>invalid</b> and ignored.
 			</li>
 			<li>
-				Some of the network links will have no remaining link capacity; or would be saturated (negative remaining link capacity). Otherwise, if all links have remaining capacity, it means that the network can easily serve all the demands and there is no need to migrate.
+				After all the <i>Demands</i> have been analyzed, some of the network links will have no remaining link capacity, or would be saturated (negative remaining link capacity). Otherwise, if all links have remaining capacity, it means that the network can easily serve all the demands and there is no need to migrate.
 			</li>
 			<li>
-				Every demand is re-analyzed to verify if it traverses a saturated link. If it does, then a <i>Migration</i> is needed. If there is a POP in the demand's path that can hold the demanded vCDN (Using the <i>Needed</i> capacity values set for the vCDN) and if the POP has the Network capacity to hold the streaming (by calculating the difference between the installed BW and the currently used), then a Migration is possible and its cost and delay is calculated.
+				Every <i>Demand</i> is re-analyzed to verify if it traverses a saturated link. If it does, then a <i>Migration</i> is needed. If there is a <i>POP</i> in the Demand's path that can hold the demanded <i>vCDN</i> (Using the <b>needed</b> capacity values set for the <i>vCDN</i>  and the <b>current available</b> resources from OpenStack metrics) and if the <i>POP</i> has the network capacity to hold the streaming (by calculating the difference between the installed BW and the currently used BW), then a <b>Migration</b> is possible and its cost and delay is calculated.
 			</li>
 			<li>
-				However, if the <i>Migration</i> would take place, all the other <i>Demands</i> using the <i>vCDN</i> from the original <i>POP</i> would have to be redirected to the new <i>POP</i>. So, the <i>Migration</i> is only possible if there redirected <i>Demands</i> do not cause another link saturation situation.
+				However, if the <i>Migration</i> would take place, all the other <i>Demands</i> using the <i>vCDN</i> from the original <i>POP</i> would have to be redirected to the new <i>POP</i>. So, the <i>Migration</i> is only possible if there redirected <i>Demands</i> do not cause another link saturation. This is done by comparing the BW capacity recovered because of the <i>Migration</i> versus the BW capacity needed to accomodate all the <i>Demands</i> that have to be redirected because of the <i>Migration</i>.
 			</li>
 			<li>
-				If the POP found in the migration path already has an <i>Instance</i> of the <i>vCDN</i>, then there is no need to Migrate but to Scale-out the destination POP and redirect the Demands to the optimal-located POP.
+				If the destination POP found for a <i>Migration</i> already has an <i>Instance</i> of the requested <i>vCDN</i>, then there is no need to Migrate but to Scale-out the destination POP and redirect the <i>Demands</i> to the optimal-located POP.
 			</li>
 			<li>
-				In the end, by executing the recomended Operations, the Infrastructure will serve better the set of <i>Demands</i>.
+				In the end, by executing the recomended Operations, the Infrastructure will serve better the set of <i>Demands</i>. A subset of these recomendations can be <b>simulated</b> to verify its expected impact in the infrastructure.
 			</li>
 		</ol>
 	</p>
@@ -138,42 +143,53 @@
 		<h3>Simulation</h3>
 		<p>
 		<br>
-		The Simulation show how the Topologie Capacity is consumed as if the selected changes were applied, affecting the <i>Instances</i> and adjusting the <i>Demands</i> to reflect the changes.
+		The Simulation shows how the Topologie Network BW Capacity is consumed if the selected changes were applied, affecting the <i>Instances</i> and adjusting the <i>Demands</i> to reflect the changes.
 		<br>
 		The Simulation of the Optimization follows the following logic:
 		<br>
 		<ol>
 			<li>
-				For the Selected <i>Migrations</i>, the demanded <i>Instace</i> is migrated to the destination <i>POP</i> and all <i>Demands</i> using the migrated <i>Instace</i> are adjusted to demand the same <i>vCDN</i> in the migrated <i>POP</i>.
+				For the Selected <i>Migrations</i>, the <i>Instace</i> is migrated to the destination <i>POP</i> and all <i>Demands</i> using the migrated <i>Instace</i> are adjusted to demand the same <i>vCDN</i> in the destination <i>POP</i>. This might affect more than 1 <i>Demand</i>.
 			</li>
 			<li>
-				For the Selected <i>Redirectios</i>, the <i>Demand</i> is adjusted to request the same <i>vCDN</i> from the redirected <i>POP</i>. All other <i>Demands</i> are not affected.
+				For the Selected <i>Redirections</i>, the <i>Demand</i> is adjusted to request the same <i>vCDN</i> from the redirected <i>POP</i>. This might affect only 1 <i>Demand</i>, all other <i>Demands</i> are not affected.
 			</li>
 			<li>
-				For the Selected <i>Instantiations</i>, the demanded <i>Instace</i> is simulated and all the <i>Demands</i> requesting the new <i>Instance</i> are declared valid and its BW is consumed from the Topologie Capacity.
+				For the Selected <i>Instantiations</i>, the <i>Instace</i> is simulated to exist and all the <i>Demands</i> requesting the new <i>Instance</i> are declared valid and its BW is consumed from the Topologie Capacity.
 			</li>
 		</ol>
 		<br>
-		A list of the simulated operations is shown and could be selected for actual execution in the OpenStack Controllers. Also a list of changes in the <i>Demands</i> is shown, needed for the <i>Demands</i> to adjust to the new optimized infrastructure (the <i>Demand</i> CDN direction mechanism is assumed external to vIOS and OpenStack systems).
+		A list of the simulated operations is shown and could be selected for actual <b>execution</b> in the OpenStack Data Centers. Additionally, a list of changes in the <i>Demands</i> is shown, which are needed for the <i>Demands</i> to adjust to the new optimized infrastructure (the <i>Demand</i> CDN direction mechanism is assumed external to vIOS and OpenStack systems).
 	</p>
 	
 		<h3>Operations in the OpenStack Data Centers </h3>
-		<p>
 		<br>
+		<h4>Optimization</h4>
+	<p>
+		
+		When declaring the <i>POPs</i> of the infrastructure, the <b>OpenStack</b> endpoint and credentials are given. Either manually or periodically, the system connects to the declared OpenStack Controller and uses <b>Nova API</b> calls to obtain information about the status of the <i>Compute Nodes</i> ( A <i>POP</i> is considered composed of one or more <b>Compute Nodes</b>).
+		<br>
+		When declaring the <i>vCDNs</i>, the <b>OpenStack</b> credentials are given. Either manually or periodically, the system connects to the declared <i>POP</i> OpenStack Controllers and uses the <i>vCDN</i> credentials as <b>TENANT</b> for the <b>Nova API</b>. Then the <b>used</b> and <b>quota</b> resources are queried for the vCDN TENANT (The <i>TENANT</i> does not have knoledge of the <i>Compute Nodes</i>, it sees all the available resources as a pool). Additionally, using the <i>vCDN</i> TENANT credentials, the systems calls the <b>Ceilometer API</b> to query for usage statistics of resources for the <i>vCDN</i> TENANT. These statistics are gathered and aggregated over a period of last <b>X</b> hours. In particular, these metrics are used to calculate the <b>BW usage</b> or the OpenStack Data Centers.
+	</p>
+		<h4>Execution</h4>
+	<p>
 		After the <b>Simulation</b> stage, a set of operations could be selected for implementation in the OpenStack Data Centers. These can be either <b>Migrations</b> or <b>Instantiations</b>.
 		<br>
-		The <i>Migrations</i> can be accomplished either by cloning the existing VMs via snapshots (Pause the Server, Take Snapshot, Download Image, Upload Image, Create Server, Start Server)
-		or via metadata (Create a New Server with exactly the same parameters as the original VM).
+		The <i>Migrations</i> can be accomplished either by cloning the existing VMs via snapshots (Pause the VMs, take snapshots, download images, ppload images, create VMs, start VMs) or via metadata (Create VMs with exactly the same parameters as the original VMs). After the <i>Migration</i>, the original VMs are deleted; the <b>floating ips</b> returned to the pool.
 		<br>
 		For both approaches, it is needed that all the OpenStack Data Centers have a unified set of Flavors, Networks and Security Groups.
 		In the second case, it is needed that all the OpenStack Data Centers have a unified set of Images available for instantiation.
 		<br>
+		If the original VM had a <b>floating ip</b> associated, the migrated VM is also asked to have a <b>floating ip</b> in the destination OpenStack Data Center. The <b>floating ip</b> can be completely different from the original one as each OpenStack DataCenter can have its own pool of public IP addresses and its own management and subneting policies.
+		<br>
+		If configured, the system will connect to a <b>OpenStack Designate</b> DNS Server to also move the DNS A Records from the old <b>floating ip</b> to the new one. If the <i>vCDN</i> has defined its <b>DNS Domain</b>, the <b>Designate API</b> will contact the <b>Designate Server</b> using the <i>vCDN</i> TENANT credentials. Otherwise, the default <b>DNS Domain</b> and <b>admin</b> TENANT credentials will be tried in the <b>Designate API</b>.
+		<br>
 		The <i>Instantiations</i> are accomplished by cloning an existing <i>Instance</i> or the <i>vCDN</i>, as <b>vIOS</b> and <b>HMAC</b> assume that all the <i>Instances</i> of a <i>vCDN</i> have exactly the same size and characteristics.
 		<br>
-		However, <b>vIOS</b> does not monitor the progress in the Web interface, the status of the operations is to be monitored directly from the OpenStack Controllers and from the messages and logs of <b>vIOS</b>.
-		This is because the operations are executed by independent Threads that do not report to the Web interface.
-		<br>
-		<b>vIOS</b> includes DNS integration, refer to the <i>vIOSLib</i> documentation for details.
+		<h4>Note:</h4>
+		<b>vIOS</b> does not monitor the progress of any of the operations in the Web interface, the status of the operations is to be monitored directly from the OpenStack Controllers and from the messages and logs of <b>vIOS</b>.
+		This is because the operations are executed by independent <b>threads</b> that do not report to the Web interface.
+		
 	</p>
 	
 		<h3>QoE BW coefficient </h3>
@@ -195,10 +211,10 @@
 		<br>
 		<ul>
 			<li>
-			Ideally there should be a syncronization among the frequency and time period of the OpenStack metrics and statistics gathering. <i>Meaning that every X hours the OpenStack Telemetry service is asked to produce the statistics of the last Y hours </i>. The values X hours and Y hours can be different between them.
+			Ideally there should be a syncronization among the frequency and time period of the OpenStack metrics and statistics gathering. <i>Meaning that every <b>X</b> hours the OpenStack Telemetry service is asked to produce the statistics of the last <b>Y</b> hours </i>. The values <b>X</b> hours and <b>Y</b> hours can be different between them.
 			</li>
 			<li>
-			The Demands, for optimization, are expected to be produced of statistical analysis. <i>Meaning that the Demands represent the average/maximum/mean demand on the infrastructure for the last Z hours</i>. In the case of CDNs; this statistics can be gathered by the DNS redirection system and aggregated in the manner that suits the business needs (average, maximum, etc). <i>The data for this analysis and its aggregation is outside of the scope of vIOS, this is expected to be an input</i>. The value Z of the analysis should be comparable with the OpenStack metrics querying frequency to make an adequate optimization decision (remember both are input for the optimization decision).
+			The Demands, for optimization, are expected to be produced by statistical analysis. <i>Meaning that the Demands represent the average/maximum/mean demand on the infrastructure for the last <b>Z</b> hours</i>. In the case of CDNs; this statistics can be gathered by the DNS redirection system and aggregated in the manner that suits the business needs (average, maximum, etc). <i>The data for this analysis and its aggregation is outside of the scope of vIOS, this is expected to be an input</i>. The value <b>Z</b> of the analysis should be comparable with the OpenStack metrics querying frequency to make an adequate optimization decision (remember both are input for the optimization decision).
 			</li>
 			<li>
 			The Optimization operation should be executed in accordance with the data aggregation frequency of the Demands and the OpenStack values. <i>Example: The Optimization is executed every 24 hours, based on Demands aggregated over the last 24 hours (or a prediction of the Demand in the next 24 hours), with the OpenStack operational capacity of the last 48 hours (updated every 6 hours)</i>.

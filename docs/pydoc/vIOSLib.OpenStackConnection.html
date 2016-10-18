@@ -22,31 +22,11 @@
 ..&nbsp;note::&nbsp;This&nbsp;module&nbsp;does&nbsp;not&nbsp;interact&nbsp;directly&nbsp;with&nbsp;the&nbsp;DB,&nbsp;the&nbsp;Optimizer&nbsp;module&nbsp;does<br>
 &nbsp;<br>
 &nbsp;<br>
-:Example:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn&nbsp;=&nbsp;OpenStackConnection()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.setURL(&nbsp;url,&nbsp;region)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.setCredentials(...)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;OsConn.connect():<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;OsConn.connectMetrics():<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lims&nbsp;=&nbsp;OsConn.getLimits()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;met&nbsp;=&nbsp;OsConn.getMetrics()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.disconnect()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn&nbsp;=&nbsp;OpenStackConnection()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.setURL(&nbsp;url,&nbsp;region)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.setCredentials(...)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;OsConn.connect():<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;servers&nbsp;=&nbsp;getServers()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;s&nbsp;in&nbsp;servers:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thread(OsConn.migrate(s))<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s.pause()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;snapID&nbsp;=&nbsp;s.snapshot()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.DownloadImg(snapID)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.UploadImg(snapID)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.UploadImg(snapID)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;met&nbsp;=&nbsp;OsConn.getMetrics()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OsConn.disconnect()</tt></p>
+The&nbsp;different&nbsp;APIs&nbsp;connections&nbsp;are&nbsp;set&nbsp;into&nbsp;Objects&nbsp;because&nbsp;it&nbsp;could&nbsp;be&nbsp;needed&nbsp;to&nbsp;hold&nbsp;2&nbsp;or&nbsp;more&nbsp;simultaneous&nbsp;connections&nbsp;to&nbsp;one&nbsp;or&nbsp;more&nbsp;Services.<br>
+&nbsp;<br>
+##&nbsp;Authentication&nbsp;##<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;all&nbsp;operations,&nbsp;a&nbsp;Keystone&nbsp;authentication&nbsp;is&nbsp;required.&nbsp;Make&nbsp;sure&nbsp;the&nbsp;KeyStone&nbsp;Service&nbsp;has&nbsp;the&nbsp;appropriate&nbsp;EndPoints.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -57,12 +37,12 @@
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="ceilometerclient.client.html">ceilometerclient.client</a><br>
 <a href="glanceclient.v2.client.html">glanceclient.v2.client</a><br>
 <a href="glanceclient.exc.html">glanceclient.exc</a><br>
-</td><td width="25%" valign=top><a href="vIOSLib.Messages.html">vIOSLib.Messages</a><br>
+</td><td width="25%" valign=top><a href="keystoneclient.session.html">keystoneclient.session</a><br>
+<a href="vIOSLib.Messages.html">vIOSLib.Messages</a><br>
 <a href="novaclient.client.html">novaclient.client</a><br>
-<a href="novaclient.exceptions.html">novaclient.exceptions</a><br>
-</td><td width="25%" valign=top><a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
+</td><td width="25%" valign=top><a href="novaclient.exceptions.html">novaclient.exceptions</a><br>
+<a href="vIOSLib.SettingsFile.html">vIOSLib.SettingsFile</a><br>
 <a href="logging.html">logging</a><br>
-<a href="keystoneclient.session.html">keystoneclient.session</a><br>
 </td><td width="25%" valign=top><a href="time.html">time</a><br>
 <a href="keystoneclient.auth.identity.v2.html">keystoneclient.auth.identity.v2</a><br>
 </td></tr></table></td></tr></table><p>
@@ -76,9 +56,12 @@
 <dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#APIConnection">APIConnection</a>
+<dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#CeilometerAPIConnection">CeilometerAPIConnection</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#DesignateAPIConnection">DesignateAPIConnection</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#GlanceAPIConnection">GlanceAPIConnection</a>
 </font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#Limits">Limits</a>
 </font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#Meter">Meter</a>
+</font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#NovaAPIConnection">NovaAPIConnection</a>
 </font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#ServerMetadata">ServerMetadata</a>
 </font></dt><dt><font face="helvetica, arial"><a href="vIOSLib.OpenStackConnection.html#Stats">Stats</a>
 </font></dt></dl>
@@ -88,75 +71,27 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="APIConnection">class <strong>APIConnection</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="CeilometerAPIConnection">class <strong>CeilometerAPIConnection</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>This&nbsp;class&nbsp;represents&nbsp;the&nbsp;connection&nbsp;with&nbsp;the&nbsp;Nova&nbsp;API,&nbsp;passing&nbsp;by&nbsp;authentication&nbsp;with&nbsp;KeyStone<br>
-The&nbsp;values&nbsp;provided&nbsp;in&nbsp;<a href="#APIConnection-setURL">setURL</a>()&nbsp;and&nbsp;<a href="#APIConnection-setCredentials">setCredentials</a>()&nbsp;are&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;ones&nbsp;used&nbsp;for&nbsp;CLI&nbsp;client<br>
-Internally,&nbsp;the&nbsp;client&nbsp;will&nbsp;get&nbsp;the&nbsp;Nova&nbsp;API&nbsp;endpoint&nbsp;from&nbsp;Keystone,&nbsp;so&nbsp;make&nbsp;sure&nbsp;the&nbsp;Endpoints&nbsp;in&nbsp;Keystone&nbsp;are&nbsp;correct&nbsp;and&nbsp;reachable<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>This&nbsp;class&nbsp;represents&nbsp;the&nbsp;connection&nbsp;with&nbsp;the&nbsp;OpenStack&nbsp;Ceilometer&nbsp;API,&nbsp;passing&nbsp;by&nbsp;authentication&nbsp;with&nbsp;KeyStone<br>
+&nbsp;<br>
+Internally,&nbsp;the&nbsp;client&nbsp;will&nbsp;get&nbsp;the&nbsp;Ceilometer&nbsp;API&nbsp;endpoint&nbsp;from&nbsp;Keystone,&nbsp;so&nbsp;make&nbsp;sure&nbsp;the&nbsp;Endpoints&nbsp;in&nbsp;Keystone&nbsp;are&nbsp;correct&nbsp;and&nbsp;reachable.<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ceil&nbsp;=&nbsp;<a href="#CeilometerAPIConnection">CeilometerAPIConnection</a>(auth_url,region&nbsp;&nbsp;,tenant&nbsp;,user&nbsp;,passwd&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;ceil.<a href="#CeilometerAPIConnection-connect">connect</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m&nbsp;=&nbsp;ceil.<a href="#CeilometerAPIConnection-getMetrics">getMetrics</a>()<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="APIConnection-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Starts&nbsp;with&nbsp;no&nbsp;connections,&nbsp;with&nbsp;no&nbsp;credentials&nbsp;to&nbsp;connect&nbsp;with.&nbsp;Empty&nbsp;start</tt></dd></dl>
+<dl><dt><a name="CeilometerAPIConnection-__init__"><strong>__init__</strong></a>(self, auth_url<font color="#909090">=''</font>, region<font color="#909090">=None</font>, tenant<font color="#909090">=''</font>, user<font color="#909090">=''</font>, passwd<font color="#909090">=''</font>)</dt><dd><tt>Starts&nbsp;with&nbsp;no&nbsp;connections,&nbsp;with&nbsp;no&nbsp;credentials&nbsp;to&nbsp;connect&nbsp;with.&nbsp;Empty&nbsp;start</tt></dd></dl>
 
-<dl><dt><a name="APIConnection-connect"><strong>connect</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Nova&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
-&nbsp;<br>
-Execute&nbsp;after&nbsp;<a href="#APIConnection-setURL">setURL</a>()&nbsp;and&nbsp;<a href="#APIConnection-setCredentials">setCredentials</a>()<br>
+<dl><dt><a name="CeilometerAPIConnection-connect"><strong>connect</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Ceilometer&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
 &nbsp;<br>
 :returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;errors</tt></dd></dl>
 
-<dl><dt><a name="APIConnection-connectImages"><strong>connectImages</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Glance&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
-&nbsp;<br>
-Execute&nbsp;after&nbsp;<a href="#APIConnection-connect">connect</a>()<br>
-&nbsp;<br>
-Could&nbsp;return&nbsp;False&nbsp;in&nbsp;case&nbsp;of&nbsp;error..&nbsp;for&nbsp;now&nbsp;errors&nbsp;are&nbsp;detected&nbsp;though&nbsp;Exceptions<br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;errors</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-connectMetrics"><strong>connectMetrics</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Ceilometer&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
-&nbsp;<br>
-Execute&nbsp;after&nbsp;<a href="#APIConnection-connect">connect</a>()<br>
-&nbsp;<br>
-Could&nbsp;return&nbsp;False&nbsp;in&nbsp;case&nbsp;of&nbsp;error..&nbsp;for&nbsp;now&nbsp;errors&nbsp;are&nbsp;detected&nbsp;though&nbsp;Exceptions<br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;errors</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-createServer"><strong>createServer</strong></a>(self, serverMetadata)</dt><dd><tt>Given&nbsp;a&nbsp;<a href="#ServerMetadata">ServerMetadata</a>&nbsp;describing&nbsp;the&nbsp;desired&nbsp;parameters,&nbsp;a&nbsp;new&nbsp;VM&nbsp;is&nbsp;launched&nbsp;with&nbsp;these&nbsp;parameters<br>
-&nbsp;<br>
-:param&nbsp;serverMetadata:&nbsp;the&nbsp;server&nbsp;metadata&nbsp;description<br>
-:type&nbsp;serverMetadata:&nbsp;<a href="#ServerMetadata">ServerMetadata</a><br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;created&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-deleteImage"><strong>deleteImage</strong></a>(self, imageId)</dt><dd><tt>Given&nbsp;an&nbsp;imageId,&nbsp;it&nbsp;is&nbsp;deleted<br>
-&nbsp;<br>
-:param&nbsp;imageId:&nbsp;the&nbsp;image&nbsp;Id&nbsp;to&nbsp;be&nbsp;deleted<br>
-:type&nbsp;imageId:&nbsp;String&nbsp;as&nbsp;in&nbsp;Glance&nbsp;Server&nbsp;Id<br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;deleted&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-deleteServer"><strong>deleteServer</strong></a>(self, serverId)</dt><dd><tt>Given&nbsp;a&nbsp;ServerId,&nbsp;it&nbsp;is&nbsp;deleted&nbsp;and&nbsp;its&nbsp;Floating&nbsp;IP&nbsp;returned&nbsp;to&nbsp;the&nbsp;Pool<br>
-&nbsp;<br>
-:param&nbsp;serverId:&nbsp;the&nbsp;server&nbsp;Id&nbsp;to&nbsp;be&nbsp;deleted<br>
-:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;in&nbsp;Nova&nbsp;Server&nbsp;Id<br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;deleted&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-disconnect"><strong>disconnect</strong></a>(self)</dt><dd><tt>Disconnects&nbsp;from&nbsp;the&nbsp;Nova,&nbsp;Ceilometer&nbsp;and&nbsp;Keystone&nbsp;API&nbsp;Server</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-getHypervisors"><strong>getHypervisors</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;hypervisors<br>
-&nbsp;<br>
-:returns:&nbsp;List&nbsp;of&nbsp;novaclient.Hypervisors<br>
-:rtype:&nbsp;novaclient.Hypervisor[]</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-getLimits"><strong>getLimits</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;absolute&nbsp;limiting&nbsp;values&nbsp;for&nbsp;the&nbsp;connected&nbsp;tenant&nbsp;<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;nova&nbsp;quota-show<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;nova&nbsp;quota-defaults<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;&nbsp;an&nbsp;<a href="#Limits">Limits</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;the&nbsp;limits<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;<a href="#Limits">Limits</a>&nbsp;class</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-getMetrics"><strong>getMetrics</strong></a>(self, durationHours)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;absolute&nbsp;limiting&nbsp;values&nbsp;for&nbsp;the&nbsp;connected&nbsp;tenant&nbsp;<br>
+<dl><dt><a name="CeilometerAPIConnection-getMetrics"><strong>getMetrics</strong></a>(self, durationHours)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;absolute&nbsp;limiting&nbsp;values&nbsp;for&nbsp;the&nbsp;connected&nbsp;tenant&nbsp;<br>
 &nbsp;<br>
 :param&nbsp;durationHours:&nbsp;are&nbsp;the&nbsp;period&nbsp;to&nbsp;measure;&nbsp;in&nbsp;hours<br>
 :type&nbsp;durationHours:&nbsp;int&nbsp;<br>
@@ -164,7 +99,7 @@ Could&nbsp;return&nbsp;False&nbsp;in&nbsp;case&nbsp;of&nbsp;error..&nbsp;for&nbs
 :rtype:&nbsp;<a href="#Meter">Meter</a>&nbsp;class<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;CLI&nbsp;equivalent:&nbsp;<br>
+CLI&nbsp;equivalent:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;ceilometer&nbsp;&nbsp;statistics&nbsp;-m&nbsp;vcpus&nbsp;-q&nbsp;'timestamp&gt;2016-06-14T00:00:00'&nbsp;-p&nbsp;600<br>
 &nbsp;<br>
 Collects&nbsp;many&nbsp;samples,&nbsp;with&nbsp;the&nbsp;SUM&nbsp;of&nbsp;the&nbsp;values&nbsp;for&nbsp;each&nbsp;tenant.&nbsp;So&nbsp;te&nbsp;SUM&nbsp;of&nbsp;all&nbsp;disk/mem/cpu/net&nbsp;used&nbsp;every&nbsp;10mins(600&nbsp;secs,&nbsp;default&nbsp;sample&nbsp;rate)<br>
@@ -186,17 +121,154 @@ The&nbsp;minimum&nbsp;timeStamp&nbsp;of&nbsp;all&nbsp;the&nbsp;Meters&nbsp;is&nb
 &nbsp;<br>
 ..&nbsp;note::&nbsp;It&nbsp;might&nbsp;get&nbsp;old&nbsp;data&nbsp;because&nbsp;it&nbsp;keeps&nbsp;history&nbsp;of&nbsp;killled/dead&nbsp;instances.&nbsp;This&nbsp;is&nbsp;how&nbsp;Ceiling&nbsp;works</tt></dd></dl>
 
-<dl><dt><a name="APIConnection-getPublicFlavors"><strong>getPublicFlavors</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;flavors,&nbsp;only&nbsp;those&nbsp;marked&nbsp;as&nbsp;public&nbsp;<br>
-&nbsp;<br>
-:returns:&nbsp;List&nbsp;of&nbsp;novaclient.Flavors<br>
-:rtype:&nbsp;novaclient.Flavor[]</tt></dd></dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>CIEL_VERSION</strong> = '2'</dl>
 
-<dl><dt><a name="APIConnection-getServers"><strong>getServers</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;servers<br>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DesignateAPIConnection">class <strong>DesignateAPIConnection</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;represents&nbsp;the&nbsp;connection&nbsp;to&nbsp;the&nbsp;DNS&nbsp;Designate&nbsp;API.<br>
 &nbsp;<br>
-:returns:&nbsp;List&nbsp;of&nbsp;novaclient.Servers<br>
-:rtype:&nbsp;novaclient.Server[]</tt></dd></dl>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dsg&nbsp;=&nbsp;<a href="#DesignateAPIConnection">DesignateAPIConnection</a>(auth_url,region&nbsp;&nbsp;,tenant&nbsp;,user&nbsp;,passwd&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;dsg.<a href="#DesignateAPIConnection-connect">connect</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;=&nbsp;&nbsp;dsg.<a href="#DesignateAPIConnection-findDomain">findDomain</a>("example.com."):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;id:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;google&nbsp;&nbsp;=&nbsp;dsg.<a href="#DesignateAPIConnection-findRecordsByData">findRecordsByData</a>("8.8.8.8")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;google:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dsg.<a href="#DesignateAPIConnection-deleteRecordsByData">deleteRecordsByData</a>("8.8.8.8")<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DesignateAPIConnection-__init__"><strong>__init__</strong></a>(self, auth_url<font color="#909090">=''</font>, region<font color="#909090">=None</font>, tenant<font color="#909090">='admin'</font>, user<font color="#909090">='admin'</font>, passwd<font color="#909090">=''</font>)</dt><dd><tt>..&nbsp;seealso::&nbsp;<a href="#NovaAPIConnection">NovaAPIConnection</a></tt></dd></dl>
 
-<dl><dt><a name="APIConnection-getSnapshotImage"><strong>getSnapshotImage</strong></a>(self, imageId, filename)</dt><dd><tt>Downloads&nbsp;to&nbsp;the&nbsp;filename&nbsp;the&nbsp;Image&nbsp;file&nbsp;of&nbsp;the&nbsp;ImageId&nbsp;<br>
+<dl><dt><a name="DesignateAPIConnection-connect"><strong>connect</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Designate&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="DesignateAPIConnection-createRecord"><strong>createRecord</strong></a>(self, domainId, data, name, rtype<font color="#909090">='A'</font>)</dt><dd><tt>Creates&nbsp;a&nbsp;record&nbsp;of&nbsp;a&nbsp;certain&nbsp;type,&nbsp;to&nbsp;have&nbsp;a&nbsp;certain&nbsp;Data.<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;vcdn1.test.fr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.8.4.4<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CNAME&nbsp;alias1.test.fr&nbsp;&nbsp;&nbsp;&nbsp;the-true.test.fr<br>
+&nbsp;<br>
+:param&nbsp;domainId:&nbsp;DomainID&nbsp;to&nbsp;operate.&nbsp;Can&nbsp;be&nbsp;obtained&nbsp;by&nbsp;<a href="#DesignateAPIConnection-findDomain">findDomain</a>()<br>
+:type&nbsp;domainId:&nbsp;string<br>
+:param&nbsp;rtype:&nbsp;Type&nbsp;of&nbsp;DNS&nbsp;record&nbsp;to&nbsp;create.&nbsp;Can&nbsp;be&nbsp;"A",&nbsp;"AAAA",&nbsp;"CNAME",&nbsp;"MX"<br>
+:type&nbsp;rtype:&nbsp;string<br>
+:param&nbsp;data:&nbsp;Data&nbsp;of&nbsp;the&nbsp;record&nbsp;to&nbsp;create.&nbsp;Depends&nbsp;on&nbsp;the&nbsp;Record&nbsp;Type<br>
+:type&nbsp;data:&nbsp;String<br>
+:param&nbsp;name:&nbsp;Name&nbsp;value&nbsp;of&nbsp;the&nbsp;record&nbsp;to&nbsp;create.&nbsp;Depends&nbsp;on&nbsp;the&nbsp;Record&nbsp;Type<br>
+:type&nbsp;name:&nbsp;String<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;Record&nbsp;was&nbsp;created&nbsp;OK;&nbsp;False&nbsp;if&nbsp;the&nbsp;record&nbsp;already&nbsp;exists,&nbsp;parameters&nbsp;are&nbsp;invalid&nbsp;or&nbsp;some&nbsp;other&nbsp;error&nbsp;occured.<br>
+:rtype:&nbsp;boolean</tt></dd></dl>
+
+<dl><dt><a name="DesignateAPIConnection-deleteRecordsByData"><strong>deleteRecordsByData</strong></a>(self, domainId, rtype, data)</dt><dd><tt>Deletes&nbsp;the&nbsp;records&nbsp;of&nbsp;a&nbsp;certain&nbsp;type&nbsp;that&nbsp;have&nbsp;a&nbsp;certain&nbsp;Data.&nbsp;<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;vcdn1.test.fr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.8.4.4<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;vcdn2.test.fr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.8.4.4<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CNAME&nbsp;alias1.test.fr&nbsp;&nbsp;&nbsp;&nbsp;the-true.test.fr<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CNAME&nbsp;alias2.test.fr&nbsp;&nbsp;&nbsp;&nbsp;the-true.test.fr<br>
+&nbsp;<br>
+:param&nbsp;domainId:&nbsp;DomainID&nbsp;to&nbsp;operate.&nbsp;Can&nbsp;be&nbsp;obtained&nbsp;by&nbsp;<a href="#DesignateAPIConnection-findDomain">findDomain</a>()<br>
+:type&nbsp;domainId:&nbsp;string<br>
+:param&nbsp;rtype:&nbsp;Type&nbsp;of&nbsp;DNS&nbsp;record&nbsp;to&nbsp;delete.&nbsp;Can&nbsp;be&nbsp;"A",&nbsp;"AAAA",&nbsp;"CNAME",&nbsp;"MX"<br>
+:type&nbsp;rtype:&nbsp;string<br>
+:param&nbsp;data:&nbsp;Data&nbsp;of&nbsp;the&nbsp;record&nbsp;to&nbsp;be&nbsp;deleted.&nbsp;Depends&nbsp;on&nbsp;the&nbsp;Record&nbsp;Type<br>
+:type&nbsp;data:&nbsp;String<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;records&nbsp;were&nbsp;deleted;&nbsp;False&nbsp;if&nbsp;an&nbsp;error&nbsp;ocurred<br>
+:rtype:&nbsp;boolean<br>
+&nbsp;<br>
+..&nbsp;note::&nbsp;The&nbsp;deleted&nbsp;records&nbsp;are&nbsp;assumed&nbsp;to&nbsp;exist,&nbsp;verify&nbsp;before&nbsp;with&nbsp;<a href="#DesignateAPIConnection-findRecordsByData">findRecordsByData</a>()</tt></dd></dl>
+
+<dl><dt><a name="DesignateAPIConnection-findDomain"><strong>findDomain</strong></a>(self, dnsDomain)</dt><dd><tt>:param&nbsp;dnsDomain:&nbsp;Name&nbsp;of&nbsp;the&nbsp;Domain&nbsp;to&nbsp;look&nbsp;for.&nbsp;It&nbsp;must&nbsp;end&nbsp;in&nbsp;.<br>
+:type&nbsp;dnsDomain:&nbsp;string<br>
+&nbsp;<br>
+:returns:&nbsp;id&nbsp;of&nbsp;the&nbsp;Domain,&nbsp;if&nbsp;found&nbsp;on&nbsp;Designate,&nbsp;or&nbsp;None&nbsp;if&nbsp;not<br>
+:rtype:&nbsp;String&nbsp;or&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DesignateAPIConnection-findRecordsByData"><strong>findRecordsByData</strong></a>(self, domainId, rtype, data)</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;records&nbsp;of&nbsp;a&nbsp;certain&nbsp;type&nbsp;that&nbsp;have&nbsp;a&nbsp;certain&nbsp;Data.&nbsp;<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;vcdn1.test.fr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.8.4.4<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;vcdn2.test.fr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.8.4.4<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CNAME&nbsp;alias1.test.fr&nbsp;&nbsp;&nbsp;&nbsp;the-true.test.fr<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CNAME&nbsp;alias2.test.fr&nbsp;&nbsp;&nbsp;&nbsp;the-true.test.fr<br>
+&nbsp;<br>
+:param&nbsp;domainId:&nbsp;DomainID&nbsp;to&nbsp;operate.&nbsp;Can&nbsp;be&nbsp;obtained&nbsp;by&nbsp;<a href="#DesignateAPIConnection-findDomain">findDomain</a>()<br>
+:type&nbsp;domainId:&nbsp;string<br>
+:param&nbsp;rtype:&nbsp;Type&nbsp;of&nbsp;DNS&nbsp;record&nbsp;to&nbsp;find.&nbsp;Can&nbsp;be&nbsp;"A",&nbsp;"AAAA",&nbsp;"CNAME",&nbsp;"MX"<br>
+:type&nbsp;rtype:&nbsp;string<br>
+:param&nbsp;data:&nbsp;Data&nbsp;of&nbsp;the&nbsp;record&nbsp;to&nbsp;be&nbsp;found.&nbsp;Depends&nbsp;on&nbsp;the&nbsp;Record&nbsp;Type<br>
+:type&nbsp;data:&nbsp;String<br>
+&nbsp;<br>
+:returns:&nbsp;A&nbsp;list&nbsp;of&nbsp;Records&nbsp;objects&nbsp;found.&nbsp;Empty&nbsp;list&nbsp;if&nbsp;none&nbsp;was&nbsp;found<br>
+:rtype:&nbsp;Designage.Record[]</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GlanceAPIConnection">class <strong>GlanceAPIConnection</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;represents&nbsp;the&nbsp;connection&nbsp;with&nbsp;the&nbsp;OpenStack&nbsp;Glance&nbsp;API,&nbsp;passing&nbsp;by&nbsp;authentication&nbsp;with&nbsp;KeyStone.<br>
+&nbsp;<br>
+The&nbsp;values&nbsp;provided&nbsp;in&nbsp;setURL()&nbsp;and&nbsp;setCredentials()&nbsp;are&nbsp;the&nbsp;same&nbsp;as&nbsp;the&nbsp;ones&nbsp;used&nbsp;for&nbsp;CLI&nbsp;client.<br>
+&nbsp;<br>
+Internally,&nbsp;the&nbsp;client&nbsp;will&nbsp;get&nbsp;the&nbsp;Nova&nbsp;API&nbsp;endpoint&nbsp;from&nbsp;Keystone,&nbsp;so&nbsp;make&nbsp;sure&nbsp;the&nbsp;Endpoints&nbsp;in&nbsp;Keystone&nbsp;are&nbsp;correct&nbsp;and&nbsp;reachable.<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glance&nbsp;=&nbsp;<a href="#GlanceAPIConnection">GlanceAPIConnection</a>(auth_url,region&nbsp;&nbsp;,tenant&nbsp;,user&nbsp;,passwd&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;glance.<a href="#GlanceAPIConnection-connect">connect</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;glance.<a href="#GlanceAPIConnection-isImageReady">isImageReady</a>(imageId):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glance.<a href="#GlanceAPIConnection-getSnapshotImage">getSnapshotImage</a>(&nbsp;imageId,&nbsp;file)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id&nbsp;=&nbsp;glance.<a href="#GlanceAPIConnection-putSnapshotImage">putSnapshotImage</a>(file)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glance.<a href="#GlanceAPIConnection-waitImageReady">waitImageReady</a>(id)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GlanceAPIConnection-__init__"><strong>__init__</strong></a>(self, auth_url<font color="#909090">=''</font>, region<font color="#909090">=None</font>, tenant<font color="#909090">=''</font>, user<font color="#909090">=''</font>, passwd<font color="#909090">=''</font>)</dt><dd><tt>Starts&nbsp;with&nbsp;no&nbsp;connections,&nbsp;with&nbsp;no&nbsp;credentials&nbsp;to&nbsp;connect&nbsp;with.&nbsp;Empty&nbsp;start</tt></dd></dl>
+
+<dl><dt><a name="GlanceAPIConnection-connect"><strong>connect</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Glance&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="GlanceAPIConnection-deleteImage"><strong>deleteImage</strong></a>(self, imageId)</dt><dd><tt>Given&nbsp;an&nbsp;imageId,&nbsp;it&nbsp;is&nbsp;deleted<br>
+&nbsp;<br>
+:param&nbsp;imageId:&nbsp;the&nbsp;image&nbsp;Id&nbsp;to&nbsp;be&nbsp;deleted<br>
+:type&nbsp;imageId:&nbsp;String&nbsp;as&nbsp;in&nbsp;Glance&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;deleted&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
+
+<dl><dt><a name="GlanceAPIConnection-getSnapshotImage"><strong>getSnapshotImage</strong></a>(self, imageId, filename)</dt><dd><tt>Downloads&nbsp;to&nbsp;the&nbsp;filename&nbsp;the&nbsp;Image&nbsp;file&nbsp;of&nbsp;the&nbsp;ImageId&nbsp;<br>
 &nbsp;<br>
 :param&nbsp;imageId:&nbsp;Glance&nbsp;Id&nbsp;of&nbsp;the&nbsp;Image&nbsp;to&nbsp;download<br>
 :type&nbsp;imageId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Glance&nbsp;Id<br>
@@ -205,21 +277,14 @@ The&nbsp;minimum&nbsp;timeStamp&nbsp;of&nbsp;all&nbsp;the&nbsp;Meters&nbsp;is&nb
 &nbsp;<br>
 :returns:&nbsp;True&nbsp;if&nbsp;image&nbsp;was&nbsp;downloaded&nbsp;OK,&nbsp;False&nbsp;else</tt></dd></dl>
 
-<dl><dt><a name="APIConnection-isImageReady"><strong>isImageReady</strong></a>(self, imageId)</dt><dd><tt>Checks&nbsp;is&nbsp;an&nbsp;Image&nbsp;is&nbsp;active&nbsp;or&nbsp;not<br>
+<dl><dt><a name="GlanceAPIConnection-isImageReady"><strong>isImageReady</strong></a>(self, imageId)</dt><dd><tt>Checks&nbsp;is&nbsp;an&nbsp;Image&nbsp;is&nbsp;active&nbsp;or&nbsp;not<br>
 &nbsp;<br>
 :param&nbsp;imageId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;Glance&nbsp;Image&nbsp;to&nbsp;check&nbsp;its&nbsp;status<br>
 :type&nbsp;imageId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Glance&nbsp;Image&nbsp;Id<br>
 &nbsp;<br>
 :returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;image&nbsp;has&nbsp;'ACTIVE'&nbsp;status,&nbsp;False&nbsp;else</tt></dd></dl>
 
-<dl><dt><a name="APIConnection-isServerReady"><strong>isServerReady</strong></a>(self, serverId)</dt><dd><tt>Checks&nbsp;is&nbsp;a&nbsp;VM&nbsp;is&nbsp;active&nbsp;or&nbsp;not<br>
-&nbsp;<br>
-:param&nbsp;serverId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;server&nbsp;to&nbsp;check&nbsp;its&nbsp;status<br>
-:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Nova&nbsp;Server&nbsp;Id<br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;server&nbsp;has&nbsp;'ACTIVE'&nbsp;status,&nbsp;False&nbsp;else</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-putSnapshotImage"><strong>putSnapshotImage</strong></a>(self, imageName, filename)</dt><dd><tt>Uploads&nbsp;the&nbsp;filename&nbsp;the&nbsp;Image&nbsp;and&nbsp;creates&nbsp;the&nbsp;Image&nbsp;named&nbsp;as&nbsp;such&nbsp;<br>
+<dl><dt><a name="GlanceAPIConnection-putSnapshotImage"><strong>putSnapshotImage</strong></a>(self, imageName, filename)</dt><dd><tt>Uploads&nbsp;the&nbsp;filename&nbsp;the&nbsp;Image&nbsp;and&nbsp;creates&nbsp;the&nbsp;Image&nbsp;named&nbsp;as&nbsp;such&nbsp;<br>
 &nbsp;<br>
 :param&nbsp;imageName:&nbsp;Glance&nbsp;name&nbsp;of&nbsp;the&nbsp;Image&nbsp;to&nbsp;create<br>
 :type&nbsp;imageName:&nbsp;String<br>
@@ -229,49 +294,11 @@ The&nbsp;minimum&nbsp;timeStamp&nbsp;of&nbsp;all&nbsp;the&nbsp;Meters&nbsp;is&nb
 :returns:&nbsp;Image&nbsp;Id&nbsp;of&nbsp;the&nbsp;new&nbsp;Image&nbsp;created&nbsp;from&nbsp;the&nbsp;snapshot&nbsp;file<br>
 :rtype:&nbsp;String&nbsp;as&nbsp;per&nbsp;Glance&nbsp;ID</tt></dd></dl>
 
-<dl><dt><a name="APIConnection-serverMetadata"><strong>serverMetadata</strong></a>(self, serverId)</dt><dd><tt>From&nbsp;a&nbsp;ServerId&nbsp;existing&nbsp;in&nbsp;a&nbsp;ComputeNode,&nbsp;a&nbsp;MetaData&nbsp;structure&nbsp;is&nbsp;extracted<br>
-&nbsp;<br>
-This&nbsp;data&nbsp;is&nbsp;usefull&nbsp;to&nbsp;describe&nbsp;the&nbsp;machine&nbsp;when&nbsp;instantiating&nbsp;in&nbsp;another&nbsp;DC<br>
-&nbsp;<br>
-..This&nbsp;is&nbsp;not&nbsp;the&nbsp;Nova&nbsp;Metadata,&nbsp;it&nbsp;is&nbsp;an&nbsp;internal&nbsp;call&nbsp;used&nbsp;to&nbsp;contain&nbsp;all&nbsp;parameters&nbsp;needed&nbsp;to&nbsp;create&nbsp;a&nbsp;clone&nbsp;VM<br>
-&nbsp;<br>
-:param&nbsp;serverId:&nbsp;String&nbsp;of&nbsp;the&nbsp;Server&nbsp;Id&nbsp;to&nbsp;read&nbsp;from<br>
-:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Nova&nbsp;Server&nbsp;Id<br>
-&nbsp;<br>
-:returns:&nbsp;The&nbsp;MetaData&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;serverId<br>
-:rtype:&nbsp;<a href="#ServerMetadata">ServerMetadata</a></tt></dd></dl>
-
-<dl><dt><a name="APIConnection-setCredentials"><strong>setCredentials</strong></a>(self, tenant, user, passwd)</dt><dd><tt>:param&nbsp;tenant:&nbsp;url&nbsp;is&nbsp;the&nbsp;Admin&nbsp;tenant<br>
-:type&nbsp;tenant:&nbsp;String<br>
-:param&nbsp;user:&nbsp;url&nbsp;is&nbsp;the&nbsp;Admin&nbsp;user<br>
-:type&nbsp;user:&nbsp;String<br>
-:param&nbsp;passwd:&nbsp;url&nbsp;is&nbsp;the&nbsp;Admin&nbsp;pass<br>
-:type&nbsp;passwd:&nbsp;String<br>
-&nbsp;<br>
-Same&nbsp;as&nbsp;the&nbsp;credentials&nbsp;file&nbsp;used&nbsp;in&nbsp;CLI</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-setURL"><strong>setURL</strong></a>(self, url, region<font color="#909090">=None</font>)</dt><dd><tt>:param&nbsp;url:&nbsp;url&nbsp;is&nbsp;the&nbsp;KeyStone&nbsp;Auth<br>
-:type&nbsp;url:&nbsp;String<br>
-:param&nbsp;region:&nbsp;Region&nbsp;of&nbsp;the&nbsp;OpenStack&nbsp;services&nbsp;to&nbsp;use.&nbsp;Defaults&nbsp;to&nbsp;None<br>
-:type&nbsp;region:&nbsp;String<br>
-&nbsp;<br>
-Same&nbsp;as&nbsp;the&nbsp;credentials&nbsp;file&nbsp;used&nbsp;in&nbsp;CLI<br>
-&nbsp;<br>
-..&nbsp;note::&nbsp;Make&nbsp;sure&nbsp;that&nbsp;the&nbsp;Nova&nbsp;API&nbsp;URL&nbsp;given&nbsp;in&nbsp;the&nbsp;Keysonte&nbsp;reply&nbsp;is&nbsp;reachable&nbsp;from&nbsp;this&nbsp;host.&nbsp;Do&nbsp;"nova&nbsp;--debug&nbsp;list"&nbsp;to&nbsp;verify&nbsp;where&nbsp;Keystone&nbsp;send&nbsp;the&nbsp;Api&nbsp;Call</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-waitImageReady"><strong>waitImageReady</strong></a>(self, imageId)</dt><dd><tt>Wait&nbsp;for&nbsp;the&nbsp;Glance&nbsp;image&nbsp;to&nbsp;be&nbsp;ready.&nbsp;<br>
+<dl><dt><a name="GlanceAPIConnection-waitImageReady"><strong>waitImageReady</strong></a>(self, imageId)</dt><dd><tt>Wait&nbsp;for&nbsp;the&nbsp;Glance&nbsp;image&nbsp;to&nbsp;be&nbsp;ready.&nbsp;<br>
 It&nbsp;waits&nbsp;IMG_TIMEOUT&nbsp;seconds&nbsp;between&nbsp;each&nbsp;retry,&nbsp;and&nbsp;retries&nbsp;up&nbsp;to&nbsp;IMG_RETRIES&nbsp;times&nbsp;before&nbsp;quiting<br>
 &nbsp;<br>
 :param&nbsp;imageId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;Glance&nbsp;Image&nbsp;to&nbsp;check&nbsp;its&nbsp;status<br>
 :type&nbsp;imageId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Glance&nbsp;Image&nbsp;Id<br>
-&nbsp;<br>
-:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;image&nbsp;has&nbsp;'ACTIVE'&nbsp;status,&nbsp;False&nbsp;else</tt></dd></dl>
-
-<dl><dt><a name="APIConnection-waitServerReady"><strong>waitServerReady</strong></a>(self, serverId)</dt><dd><tt>Wait&nbsp;for&nbsp;the&nbsp;Nova&nbsp;Server&nbsp;to&nbsp;be&nbsp;ready.&nbsp;<br>
-It&nbsp;waits&nbsp;SERVER_TIMEOUT&nbsp;seconds&nbsp;between&nbsp;each&nbsp;retry,&nbsp;and&nbsp;retries&nbsp;up&nbsp;to&nbsp;SERVER_RETRIES&nbsp;times&nbsp;before&nbsp;quiting<br>
-&nbsp;<br>
-:param&nbsp;serverId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;Nova&nbsp;Server&nbsp;to&nbsp;check&nbsp;its&nbsp;status<br>
-:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Nova&nbsp;Server&nbsp;Id<br>
 &nbsp;<br>
 :returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;image&nbsp;has&nbsp;'ACTIVE'&nbsp;status,&nbsp;False&nbsp;else</tt></dd></dl>
 
@@ -285,11 +312,7 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>CIEL_VERSION</strong> = '2'</dl>
-
 <dl><dt><strong>GLANCE_VERSION</strong> = '2'</dl>
-
-<dl><dt><strong>NOVA_VERSION</strong> = '2'</dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -298,7 +321,9 @@ Data and other attributes defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="Limits">class <strong>Limits</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Class&nbsp;representing&nbsp;the&nbsp;absolute&nbsp;values&nbsp;that&nbsp;a&nbsp;Tenant&nbsp;has&nbsp;in&nbsp;a&nbsp;Nova&nbsp;Api.&nbsp;This&nbsp;is&nbsp;to&nbsp;avoid&nbsp;using&nbsp;the&nbsp;awful&nbsp;OpenStack&nbsp;AbsoluteLimit&nbsp;class<br>
+<td colspan=2><tt>Class&nbsp;representing&nbsp;the&nbsp;absolute&nbsp;values&nbsp;that&nbsp;a&nbsp;Tenant&nbsp;has&nbsp;in&nbsp;a&nbsp;Nova&nbsp;Api.&nbsp;<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;to&nbsp;avoid&nbsp;using&nbsp;the&nbsp;awful&nbsp;OpenStack&nbsp;AbsoluteLimit&nbsp;class<br>
 &nbsp;<br>
 &gt;&nbsp;nova&nbsp;quota-show<br>
 &gt;&nbsp;nova&nbsp;quota-default<br>&nbsp;</tt></td></tr>
@@ -360,6 +385,112 @@ Data descriptors defined here:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NovaAPIConnection">class <strong>NovaAPIConnection</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;represents&nbsp;the&nbsp;connection&nbsp;with&nbsp;the&nbsp;OpenStack&nbsp;APIs,&nbsp;passing&nbsp;by&nbsp;authentication&nbsp;with&nbsp;KeyStone<br>
+&nbsp;<br>
+Internally,&nbsp;the&nbsp;client&nbsp;will&nbsp;get&nbsp;the&nbsp;Nova&nbsp;API&nbsp;endpoint&nbsp;from&nbsp;Keystone,&nbsp;so&nbsp;make&nbsp;sure&nbsp;the&nbsp;Endpoints&nbsp;in&nbsp;Keystone&nbsp;are&nbsp;correct&nbsp;and&nbsp;reachable.<br>
+&nbsp;<br>
+:Example:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nova&nbsp;=&nbsp;<a href="#NovaAPIConnection">NovaAPIConnection</a>(auth_url,region&nbsp;&nbsp;,tenant&nbsp;,user&nbsp;,passwd&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;nova.<a href="#NovaAPIConnection-connect">connect</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;s&nbsp;in&nbsp;nova.<a href="#NovaAPIConnection-getServers">getServers</a>():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;nova.<a href="#NovaAPIConnection-isServerReady">isServerReady</a>(s.id):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;"Yes"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l&nbsp;=&nbsp;nova.<a href="#NovaAPIConnection-getLimits">getLimits</a>()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="NovaAPIConnection-__init__"><strong>__init__</strong></a>(self, auth_url, region<font color="#909090">=None</font>, tenant<font color="#909090">=''</font>, user<font color="#909090">=''</font>, passwd<font color="#909090">=''</font>)</dt><dd><tt>Starts&nbsp;with&nbsp;no&nbsp;connections,&nbsp;with&nbsp;no&nbsp;credentials&nbsp;to&nbsp;connect&nbsp;with.&nbsp;Empty&nbsp;start</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-connect"><strong>connect</strong></a>(self)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;Nova&nbsp;API&nbsp;Server&nbsp;after&nbsp;authenticating&nbsp;with&nbsp;Keystone<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;connection&nbsp;went&nbsp;OK,&nbsp;False&nbsp;if&nbsp;errors</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-createServer"><strong>createServer</strong></a>(self, serverMetadata)</dt><dd><tt>Given&nbsp;a&nbsp;<a href="#ServerMetadata">ServerMetadata</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;describing&nbsp;the&nbsp;desired&nbsp;parameters,&nbsp;a&nbsp;new&nbsp;VM&nbsp;is&nbsp;launched&nbsp;with&nbsp;these&nbsp;parameters.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;parameters&nbsp;indicate&nbsp;to&nbsp;have&nbsp;a&nbsp;FloatingIp,&nbsp;a&nbsp;new&nbsp;floating&nbsp;IP&nbsp;is&nbsp;requested&nbsp;from&nbsp;the&nbsp;Public&nbsp;Pool&nbsp;and&nbsp;assigned&nbsp;to&nbsp;the&nbsp;VM.&nbsp;If&nbsp;there&nbsp;is&nbsp;no&nbsp;more&nbsp;capacity&nbsp;in&nbsp;the&nbsp;Pool&nbsp;of&nbsp;FloatingIPs;&nbsp;<br>
+&nbsp;<br>
+:param&nbsp;serverMetadata:&nbsp;the&nbsp;server&nbsp;metadata&nbsp;description<br>
+:type&nbsp;serverMetadata:&nbsp;<a href="#ServerMetadata">ServerMetadata</a><br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;created&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-deleteServer"><strong>deleteServer</strong></a>(self, serverId)</dt><dd><tt>Given&nbsp;a&nbsp;ServerId,&nbsp;it&nbsp;is&nbsp;deleted&nbsp;and&nbsp;its&nbsp;Floating&nbsp;IP&nbsp;returned&nbsp;to&nbsp;the&nbsp;Pool.<br>
+&nbsp;<br>
+:param&nbsp;serverId:&nbsp;the&nbsp;server&nbsp;Id&nbsp;to&nbsp;be&nbsp;deleted<br>
+:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;in&nbsp;Nova&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;VM&nbsp;was&nbsp;deleted&nbsp;OK;&nbsp;False&nbsp;else</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-getHypervisors"><strong>getHypervisors</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;hypervisors<br>
+&nbsp;<br>
+:returns:&nbsp;List&nbsp;of&nbsp;novaclient.Hypervisors<br>
+:rtype:&nbsp;novaclient.Hypervisor[]</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-getLimits"><strong>getLimits</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;absolute&nbsp;limiting&nbsp;values&nbsp;for&nbsp;the&nbsp;connected&nbsp;tenant&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;nova&nbsp;quota-show<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;nova&nbsp;quota-defaults<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;&nbsp;an&nbsp;<a href="#Limits">Limits</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;the&nbsp;limits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rtype:&nbsp;<a href="#Limits">Limits</a>&nbsp;class</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-getPublicFlavors"><strong>getPublicFlavors</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;flavors,&nbsp;only&nbsp;those&nbsp;marked&nbsp;as&nbsp;public&nbsp;<br>
+&nbsp;<br>
+:returns:&nbsp;List&nbsp;of&nbsp;novaclient.Flavors<br>
+:rtype:&nbsp;novaclient.Flavor[]</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-getServerMetadata"><strong>getServerMetadata</strong></a>(self, serverId)</dt><dd><tt>From&nbsp;a&nbsp;ServerId&nbsp;existing&nbsp;in&nbsp;a&nbsp;ComputeNode,&nbsp;a&nbsp;MetaData&nbsp;structure&nbsp;is&nbsp;extracted<br>
+&nbsp;<br>
+This&nbsp;data&nbsp;is&nbsp;usefull&nbsp;to&nbsp;describe&nbsp;the&nbsp;machine&nbsp;when&nbsp;instantiating&nbsp;in&nbsp;another&nbsp;DC.<br>
+&nbsp;<br>
+..This&nbsp;is&nbsp;not&nbsp;the&nbsp;Nova&nbsp;Metadata,&nbsp;it&nbsp;is&nbsp;an&nbsp;internal&nbsp;call&nbsp;used&nbsp;to&nbsp;contain&nbsp;all&nbsp;parameters&nbsp;needed&nbsp;to&nbsp;create&nbsp;a&nbsp;clone&nbsp;VM<br>
+&nbsp;<br>
+:param&nbsp;serverId:&nbsp;String&nbsp;of&nbsp;the&nbsp;Server&nbsp;Id&nbsp;to&nbsp;read&nbsp;from<br>
+:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Nova&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;The&nbsp;MetaData&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;serverId<br>
+:rtype:&nbsp;<a href="#ServerMetadata">ServerMetadata</a></tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-getServers"><strong>getServers</strong></a>(self)</dt><dd><tt>Gets&nbsp;a&nbsp;list&nbsp;of&nbsp;servers<br>
+&nbsp;<br>
+:returns:&nbsp;List&nbsp;of&nbsp;novaclient.Servers<br>
+:rtype:&nbsp;novaclient.Server[]</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-isServerReady"><strong>isServerReady</strong></a>(self, serverId)</dt><dd><tt>Checks&nbsp;is&nbsp;a&nbsp;VM&nbsp;is&nbsp;active&nbsp;or&nbsp;not<br>
+&nbsp;<br>
+:param&nbsp;serverId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;server&nbsp;to&nbsp;check&nbsp;its&nbsp;status<br>
+:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Nova&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;server&nbsp;has&nbsp;'ACTIVE'&nbsp;status,&nbsp;False&nbsp;else</tt></dd></dl>
+
+<dl><dt><a name="NovaAPIConnection-waitServerReady"><strong>waitServerReady</strong></a>(self, serverId)</dt><dd><tt>Wait&nbsp;for&nbsp;the&nbsp;Nova&nbsp;Server&nbsp;to&nbsp;be&nbsp;ready.&nbsp;<br>
+It&nbsp;waits&nbsp;SERVER_TIMEOUT&nbsp;seconds&nbsp;between&nbsp;each&nbsp;retry,&nbsp;and&nbsp;retries&nbsp;up&nbsp;to&nbsp;SERVER_RETRIES&nbsp;times&nbsp;before&nbsp;quiting<br>
+&nbsp;<br>
+:param&nbsp;serverId:&nbsp;Id&nbsp;of&nbsp;the&nbsp;Nova&nbsp;Server&nbsp;to&nbsp;check&nbsp;its&nbsp;status<br>
+:type&nbsp;serverId:&nbsp;String&nbsp;as&nbsp;per&nbsp;Nova&nbsp;Server&nbsp;Id<br>
+&nbsp;<br>
+:returns:&nbsp;True&nbsp;if&nbsp;the&nbsp;image&nbsp;has&nbsp;'ACTIVE'&nbsp;status,&nbsp;False&nbsp;else</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>NOVA_VERSION</strong> = '2'</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="ServerMetadata">class <strong>ServerMetadata</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
@@ -370,7 +501,7 @@ This&nbsp;metadata&nbsp;is&nbsp;used&nbsp;for&nbsp;cloning&nbsp;VMs<br>
 This&nbsp;assumes&nbsp;that&nbsp;all&nbsp;OpenStack&nbsp;controllers&nbsp;are&nbsp;uniform,&nbsp;having&nbsp;the&nbsp;same&nbsp;Flavors,&nbsp;Images,&nbsp;NetworkNames&nbsp;and&nbsp;SecurityGroups<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="ServerMetadata-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, imageName<font color="#909090">=''</font>, flavorName<font color="#909090">=''</font>, NetworkNames<font color="#909090">=[]</font>, SecurityGroups<font color="#909090">=[]</font>, floating_ip<font color="#909090">=False</font>)</dt></dl>
+<dl><dt><a name="ServerMetadata-__init__"><strong>__init__</strong></a>(self, name<font color="#909090">=''</font>, imageName<font color="#909090">=''</font>, flavorName<font color="#909090">=''</font>, NetworkNames<font color="#909090">=[]</font>, SecurityGroups<font color="#909090">=[]</font>, floating_ip<font color="#909090">=None</font>)</dt></dl>
 
 <dl><dt><a name="ServerMetadata-to_dict"><strong>to_dict</strong></a>(self)</dt></dl>
 
@@ -390,7 +521,7 @@ Data and other attributes defined here:<br>
 
 <dl><dt><strong>flavorName</strong> = ''</dl>
 
-<dl><dt><strong>floating_ip</strong> = False</dl>
+<dl><dt><strong>floating_ip</strong> = None</dl>
 
 <dl><dt><strong>imageName</strong> = ''</dl>
 
@@ -448,7 +579,17 @@ This&nbsp;is&nbsp;so&nbsp;that&nbsp;we&nbsp;add&nbsp;or&nbsp;remove&nbsp;options
 ..&nbsp;note::&nbsp;Make&nbsp;sure&nbsp;to&nbsp;pass&nbsp;a&nbsp;valid&nbsp;ConfigParser&nbsp;<a href="__builtin__.html#object">object</a><br>
 &nbsp;<br>
 :param&nbsp;SettingsParser:&nbsp;A&nbsp;SettingsParser&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;starts&nbsp;from&nbsp;SettingsFile.py<br>
-:type&nbsp;SettingsParser:&nbsp;SettingsParser</tt></dd></dl>
+:type&nbsp;SettingsParser:&nbsp;SettingsParser<br>
+&nbsp;<br>
+INI&nbsp;File:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[openstack]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;connection_timeout&nbsp;=&nbsp;HTTP&nbsp;API&nbsp;Connection&nbsp;timeOut.&nbsp;In&nbsp;Seconds.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ceilometer_period&nbsp;=&nbsp;Ceilometer,&nbsp;by&nbsp;default,&nbsp;takes&nbsp;samples&nbsp;every&nbsp;600&nbsp;seconds.&nbsp;This&nbsp;is&nbsp;the&nbsp;most&nbsp;granular&nbsp;the&nbsp;default&nbsp;Ceilometer&nbsp;gets.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glance_poll_timeout&nbsp;=&nbsp;Seconds&nbsp;to&nbsp;wait&nbsp;before&nbsp;polling&nbsp;the&nbsp;Glance&nbsp;Service&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;Image&nbsp;is&nbsp;ready.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glance_poll_retries&nbsp;=&nbsp;Max&nbsp;times&nbsp;to&nbsp;poll&nbsp;the&nbsp;Glance&nbsp;Service&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;Image&nbsp;is&nbsp;ready.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nova_poll_timeout&nbsp;=&nbsp;Seconds&nbsp;to&nbsp;wait&nbsp;before&nbsp;polling&nbsp;the&nbsp;Nova&nbsp;Service&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;VM&nbsp;is&nbsp;ready.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nova_poll_retries&nbsp;=&nbsp;Max&nbsp;times&nbsp;to&nbsp;poll&nbsp;the&nbsp;Nova&nbsp;Service&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;VM&nbsp;is&nbsp;ready.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

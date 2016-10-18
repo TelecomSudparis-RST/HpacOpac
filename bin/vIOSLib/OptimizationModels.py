@@ -932,9 +932,11 @@ class FakeDemand(object):
 		This object is used in the Simulation of the Migrations
 		
 		Because while simulating the Demands are placed according to the Migrations, if the Demands objects are used for analysis the changes will impact the DB
+		
 		This is because in the internal methods the DataModel relationships are used to get related objects; requiring the relationship to be effectively existing in the DB
+		
 		In our case, if a Demand is deplaced, before using any other method the ORM will try to update the DB  to get the new relationships.
-		So, to avoid that, we use a fake object that has per separate the 3 elements of a Demand
+		So, to avoid that, we use a fake object that has per separate the 3 elements of a Demand.
 		
 	"""
 	
@@ -960,6 +962,7 @@ class FakeRedirect(object):
 		
 		Because a Demand would need to be redirected when the vCND is migrated
 		
+		.. seealso:: FakeDemand
 	"""
 	
 	def __init__(self, fakeDemand, dstPopName = "",dstPopId = 1 ):
@@ -1136,7 +1139,7 @@ class OMAC(object):
 			omacModel.setMigrationCost(clientGroups)
 			omacModel.optimize()	
 		
-		By running the Model's function, some of these functions are already executed and the execution path changes a bit:
+		By running the Model's function, some of these functions are already executed and the execution sequence changes a bit:
 		
 		:Example:
 		
@@ -1168,12 +1171,6 @@ class OMAC(object):
 	
 	topologieGraph = Graph()
 	
-	def __init__(self):
-		"""
-			
-		"""
-		
-	#enddef
 	
 	def setPOPs(self, listPOPs):
 		"""
@@ -1216,8 +1213,6 @@ class OMAC(object):
 		
 		
 	#enddef
-	
-
 	
 	def setvCDNs(self, listvCDNs):
 		"""

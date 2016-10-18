@@ -22,12 +22,16 @@ This&nbsp;is&nbsp;the&nbsp;WEB&nbsp;interface&nbsp;of&nbsp;OMAC&nbsp;demo.&nbsp;
 Use&nbsp;this&nbsp;sequence&nbsp;to&nbsp;operate&nbsp;this&nbsp;module<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WebAdmin.<a href="#-readSettingsFile">readSettingsFile</a>()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WebAdmin.<a href="#-initialize">initialize</a>()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;WebAdmin.<a href="#-connect">connect</a>(DB&nbsp;URL):<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WebAdmin.<a href="#-build">build</a>()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WebAdmin.<a href="#-start">start</a>()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-Site&nbsp;Map:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Site&nbsp;Map:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---------<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/index.html&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/POPs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/pops.html&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List&nbsp;the&nbsp;POPs,&nbsp;Update&nbsp;POP&nbsp;button<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/POP/&lt;id&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/popDetail.html&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;View&nbsp;instances&nbsp;in&nbsp;a&nbsp;POP<br>
@@ -743,7 +747,7 @@ Methods defined here:<br>
 
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>column_exclude_list</strong> = ['id', 'created_at', 'invalidInstance']</dl>
+<dl><dt><strong>column_exclude_list</strong> = ['id', 'created_at', 'invalidInstance', 'migration']</dl>
 
 <dl><dt><strong>column_labels</strong> = {'bw': 'BW [Mbps]', 'volume': 'Volume'}</dl>
 
@@ -3823,7 +3827,7 @@ Methods defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>column_exclude_list</strong> = ['id', 'created_at', 'loginPass']</dl>
 
-<dl><dt><strong>column_labels</strong> = {'defaultQosBW': 'Default BW for clients [kbps]', 'loginUser': 'OpenStack User', 'vCPU': 'Needed CPUs', 'vDisk': 'Needed Storage[GB]', 'vInstances': 'Needed VMs', 'vNetBW': 'Needed Net BW [Mbps]', 'vRAM': 'Needed memory [MB]'}</dl>
+<dl><dt><strong>column_labels</strong> = {'defaultQosBW': 'Default BW for clients [kbps]', 'loginPass': 'OpenStack Password', 'loginUser': 'OpenStack User', 'vCPU': 'Needed CPUs', 'vDisk': 'Needed Storage[GB]', 'vInstances': 'Needed VMs', 'vNetBW': 'Needed Net BW [Mbps]', 'vRAM': 'Needed memory [MB]'}</dl>
 
 <dl><dt><strong>form_excluded_columns</strong> = ['id', 'created_at', 'modified_at', 'instances', 'demands']</dl>
 
@@ -4405,17 +4409,14 @@ Methods inherited from <a href="flask_admin.actions.html#ActionsMixin">flask_adm
 &nbsp;<br>
 Here&nbsp;is&nbsp;where&nbsp;the&nbsp;Site&nbsp;Map&nbsp;is&nbsp;constructed;&nbsp;using&nbsp;Route&nbsp;Rules.&nbsp;This&nbsp;implements&nbsp;the&nbsp;Site&nbsp;schema&nbsp;as&nbsp;shown&nbsp;above<br>
 &nbsp;<br>
-..&nbsp;warning::&nbsp;Under&nbsp;/admin&nbsp;there&nbsp;is&nbsp;a&nbsp;FlaskAdmin&nbsp;app,&nbsp;so&nbsp;please&nbsp;do&nbsp;not&nbsp;route&nbsp;anything&nbsp;to&nbsp;/admin/*<br>
-&nbsp;<br>
-:raises:&nbsp;&nbsp;Any&nbsp;internal&nbsp;exception</tt></dd></dl>
+..&nbsp;warning::&nbsp;Under&nbsp;/admin&nbsp;there&nbsp;is&nbsp;a&nbsp;FlaskAdmin&nbsp;app,&nbsp;so&nbsp;please&nbsp;do&nbsp;not&nbsp;route&nbsp;anything&nbsp;to&nbsp;/admin/*</tt></dd></dl>
  <dl><dt><a name="-connect"><strong>connect</strong></a>(url)</dt><dd><tt>Connects&nbsp;to&nbsp;the&nbsp;provided&nbsp;DB&nbsp;String<br>
 &nbsp;<br>
-:param&nbsp;url&nbsp;is&nbsp;a&nbsp;sqlalchemy&nbsp;string,&nbsp;just&nbsp;like&nbsp;the&nbsp;ones&nbsp;in&nbsp;nova.conf&nbsp;[database]<br>
-:type&nbsp;url&nbsp;String<br>
-:returns:&nbsp;True&nbsp;if&nbsp;connection&nbsp;OK,&nbsp;False&nbsp;if&nbsp;not</tt></dd></dl>
- <dl><dt><a name="-initialize"><strong>initialize</strong></a>()</dt><dd><tt>Prepares&nbsp;the&nbsp;Flask&nbsp;object&nbsp;before&nbsp;anything<br>
+:param&nbsp;url&nbsp;is&nbsp;a&nbsp;sqlalchemy&nbsp;string,&nbsp;just&nbsp;like&nbsp;the&nbsp;ones&nbsp;in&nbsp;nova.conf&nbsp;[database].<br>
+:type&nbsp;url&nbsp;String.<br>
 &nbsp;<br>
-:raises:&nbsp;&nbsp;any&nbsp;internal&nbsp;exception</tt></dd></dl>
+:returns:&nbsp;True&nbsp;if&nbsp;connection&nbsp;OK,&nbsp;False&nbsp;if&nbsp;not.</tt></dd></dl>
+ <dl><dt><a name="-initialize"><strong>initialize</strong></a>()</dt><dd><tt>Prepares&nbsp;the&nbsp;Flask&nbsp;object&nbsp;before&nbsp;anything</tt></dd></dl>
  <dl><dt><a name="-readSettingsFile"><strong>readSettingsFile</strong></a>()</dt><dd><tt>This&nbsp;function&nbsp;asks&nbsp;the&nbsp;INI&nbsp;file&nbsp;parser&nbsp;module,&nbsp;that&nbsp;must&nbsp;have&nbsp;read&nbsp;the&nbsp;INI&nbsp;file,&nbsp;to&nbsp;look&nbsp;for&nbsp;the&nbsp;options&nbsp;in&nbsp;the&nbsp;sections&nbsp;and&nbsp;variables&nbsp;that&nbsp;are&nbsp;of&nbsp;interest&nbsp;for&nbsp;this&nbsp;module.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;options&nbsp;are&nbsp;not&nbsp;present&nbsp;in&nbsp;the&nbsp;INI&nbsp;file,&nbsp;the&nbsp;existing&nbsp;values&nbsp;are&nbsp;not&nbsp;modified<br>
@@ -4426,12 +4427,16 @@ This&nbsp;is&nbsp;so&nbsp;that&nbsp;we&nbsp;add&nbsp;or&nbsp;remove&nbsp;options
 &nbsp;<br>
 ::Example::<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SettingsFile.read(INI_file)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WebAdmin.<a href="#-readSettingsFile">readSettingsFile</a>()</tt></dd></dl>
- <dl><dt><a name="-start"><strong>start</strong></a>()</dt><dd><tt>Starts&nbsp;the&nbsp;Web&nbsp;Server&nbsp;at&nbsp;TCP&nbsp;5000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WebAdmin.<a href="#-readSettingsFile">readSettingsFile</a>()<br>
 &nbsp;<br>
-:returns:&nbsp;&nbsp;When&nbsp;the&nbsp;server&nbsp;has&nbsp;finished;&nbsp;either&nbsp;normally&nbsp;or&nbsp;abnormally<br>
+INI&nbsp;File:<br>
 &nbsp;<br>
-:raises:&nbsp;&nbsp;any&nbsp;internal&nbsp;exception</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[web]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;listen_ip&nbsp;=&nbsp;Ip&nbsp;where&nbsp;the&nbsp;HTTP&nbsp;server&nbsp;would&nbsp;listen&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;listen_port&nbsp;=&nbsp;TCP&nbsp;Port&nbsp;where&nbsp;the&nbsp;HTTP&nbsp;server&nbsp;will&nbsp;listen</tt></dd></dl>
+ <dl><dt><a name="-start"><strong>start</strong></a>()</dt><dd><tt>Starts&nbsp;the&nbsp;Web&nbsp;Server,&nbsp;blocking&nbsp;method.<br>
+&nbsp;<br>
+:returns:&nbsp;&nbsp;When&nbsp;the&nbsp;server&nbsp;has&nbsp;finished;&nbsp;either&nbsp;normally&nbsp;or&nbsp;abnormally</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

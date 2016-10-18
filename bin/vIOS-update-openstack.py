@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 #Execute using python 2.7
 
 """
@@ -11,7 +12,8 @@ OMAC Demo daemon
 
 OMAC Daemon to be run in the Crontab (or similar)
 
-This daemon automatically loads the configuration file, connects to the DB, connects to all OpenStack POPs and updates the information. This is intended not to leave any output or trace.
+This scripts reads the configuration file, connects to the DB, connects to all OpenStack POPs and updates the information. 
+This is intended not to leave any output or trace, to be executed in a CRONTAB or UPSTART mechanism.
 
 .. note:: This is an executable file, make sure permissions are in place
 
@@ -73,7 +75,7 @@ def main(argv):
 		 
 	try:                                
 		opts, args = getopt.getopt(argv, "hdf:l:", ["help","debug", "config-file=", "log-file="])		
-		#<!> "config-file=" works both for CLI "--config-file=X" and "--config-file X" 
+		
 	except : 
 		print Messages.ERROR_in_options                         
 		sys.exit(2)                     

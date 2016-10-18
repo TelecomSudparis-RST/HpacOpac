@@ -61,7 +61,7 @@ Date: Sept 2016
                     OpenStack NetBW (Used)*** [Mbps]
                 </th>
                 <th class="column-header">
-                    Running VMs*
+                    Running VMs**
                 </th>
                  <th class="column-header">
                     Updated At
@@ -70,7 +70,7 @@ Date: Sept 2016
         </thead>
         {% for pop in popList %}
 			<tr>
-				<!--td class="col-name" onclick="doPostPopId({{ pop.id }});"> {{ pop.name }} </td-->
+				
 				<td class="col-name" > <a href="{{ url_for('popDetails',popId=pop.id ) }}"> {{ pop.name }} </td>
 				<td class="col-name"> {{ pop.location.name }}</td>
 				<td class="col-name"> {{ pop.totalDisk }} </td>
@@ -91,9 +91,9 @@ Date: Sept 2016
   <small> 
 	(*) The <b>Installed</b> values are input by the Operator, indicating what is supposed to be physically installed in the POP. 
 	<br>
-	(**) The <b>OpenStack (Total/Used)</b> are the actual capacity values as taken from the OpenStack Controllers, might differ from the <i>Installed</i> values.
+	(**) The <b>OpenStack (Total/Used)</b> are the actual capacity values as taken from the OpenStack Controllers. It might differ from the <i>Installed</i> values.
 	<br>
-	(***)The <b>Used OpenStack NetBW </b> is calculated as the sum of all the average network input+output rates from all the <i>vCDNs</i> in the <i>POP</i>.
+	(***)The <b>OpenStack NetBW </b> is calculated as the sum of all the average network input+output rates from all the <i>vCDNs</i> in the <i>POP</i>.
 	
 </small>
 <br>     

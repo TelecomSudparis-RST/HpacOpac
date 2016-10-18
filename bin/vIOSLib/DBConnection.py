@@ -9,16 +9,9 @@ Module to interact with the DB for vIOSimulator
 
 Uses sqlalchemy. Uses any DB back-end supported by SQLAlchemy.
 
-No method prints messages, no exceptions raised, no logging performed. These methods are silent.
 
-"""
 
-"""
-
-For methods that take parameters; the parameters are expected to be Values, not complete objects. 
-This is to detach any change in the Model values of attributes from the DB operations (DB only cares about indexes and values)
-
-A single Session object is used internally, and it is renewed/recreated 
+.. seealso:: DataModel.py
 
 """
 
@@ -59,6 +52,13 @@ class DBConnection(object):
 	
 	This is done as a object so that different modules or packages can have its own independent connection to the DB.
 	
+	No method prints messages, no exceptions raised, no logging performed. These methods are silent.
+
+	For methods that take parameters; the parameters are expected to be Values, not complete objects. 
+	This is to detach any change in the Model values of attributes from the DB operations (DB only cares about indexes and values)
+
+	A single Session object is used internally, and it is renewed/recreated.
+	
 	The interactions with the DB are thought to be performed in blocks delimited by
 	
 		DBConnection.start()
@@ -69,7 +69,7 @@ class DBConnection(object):
 	:Example:
 
 	DBobj = DBConnection.DBConnection(url)
-	if DBobj.connect:
+	if DBobj.connect():
 		DBobj.start()
 			
 			# Operations getting objects from the Model.
@@ -90,7 +90,7 @@ class DBConnection(object):
 	
 	def __init__(self, connString):
 		""" 
-			Constructor, does not connect
+			Constructor, does not connect yet, just set the DB URI.
 			
 			:param connString: Connection string to use, just like the ones in nova.conf for SqlAlchemy
 			:type connString: String
@@ -108,7 +108,7 @@ class DBConnection(object):
 		""" 
 			Connects to the DB
 			
-			:returns:  True if the connection was OK, False if not
+			:returns:  True if the connection was OK, False if not.
 			:rtype: boolean
 		"""
 		try:
@@ -135,7 +135,7 @@ class DBConnection(object):
 	
 	def getLocations(self):
 		"""  
-		Returns a list of all the available Locations.
+			Returns a list of all the available Locations.
 		
 			:returns: list of Location class
 			:rtype: Location[] or None
@@ -148,7 +148,7 @@ class DBConnection(object):
 	
 	def getNetworkLinks(self):
 		"""  
-		Returns a list of all the Network Links. 
+			Returns a list of all the Network Links. 
 		
 			:returns: list of NetworkLink class
 			:rtype: NetworkLink[] or None
@@ -162,7 +162,7 @@ class DBConnection(object):
 
 	def getMigrationCostMultiplierList(self):
 		""" 
-		 Get all the HmacResult Costs Multipliers 
+			Get all the HmacResult Costs Multipliers 
 		 
 			:returns: list of MigrationCostMultiplier class
 			:rtype: MigrationCostMultiplier[] or None
@@ -175,7 +175,7 @@ class DBConnection(object):
 
 	def getHmacResults(self):
 		""" 
-		 Get all the HmacResult 
+			Get all the HmacResult 
 		 
 			:returns: list of HmacResult class
 			:rtype: HmacResult[] or None
@@ -189,11 +189,9 @@ class DBConnection(object):
 	
 	def getMigrationsSorted(self,field = "id"):
 		"""  
-			Get all the HmacResult entries in the DB that have the `migrate` field set to True, sorted by the argument field.
+			Get all the HmacResult entries in the DB, sorted by the argument field.
 			
-			Sorting field can be {"vcdn","fromPOP","toPOP","cost", "delay" }. 
-			
-			If any else, the results are sorted by ID
+			Sorting field can be {"vcdn","fromPOP","toPOP","cost", "delay" }. If any else, the results are sorted by ID.
 			
 			:param field: A Field of the HmacResult table to sort the results, 
 			:type field: String 
@@ -228,8 +226,6 @@ class DBConnection(object):
 				for element in self.DBSession.query(HmacResult).order_by(HmacResult.delay):
 					dataset.append(element)
 				
-			
-				
 			else:
 				
 				for element in self.DBSession.query(HmacResult).order_by(HmacResult.id):
@@ -244,9 +240,7 @@ class DBConnection(object):
 		"""  
 			Get all the AlteredDemand entries in the DB, sorted by the argument field.
 			
-			Sorting field can be {"vcdn","fromPOP","toPOP", "demand"}. 
-			
-			If any else, the results are sorted by ID
+			Sorting field can be {"vcdn","fromPOP","toPOP", "demand"}. If any else, the results are sorted by ID
 			
 			:param field: A Field of the list ["vcdn","fromPOP","toPOP", "demand"]
 			:type field: String 
@@ -287,7 +281,9 @@ class DBConnection(object):
 	#enddef	
 	
 	def getPOPList(self):
-		"""  Get a list of the POPs
+		"""  
+			Get a list of the POPs
+		
 			:returns: list of POP class, or None if not found
 			:rtype: POP[] or None if error
 			
@@ -300,10 +296,10 @@ class DBConnection(object):
 
 	def getPOPbyId(self,id):
 		"""  
-		Get a certain POP based on the ID.
+			Get a certain POP based on the ID.
 		
-		:returns: a POP object, or None if not found
-		:rtype: POP or None if error
+			:returns: a POP object, or None if not found
+			:rtype: POP or None if error
 			
 		"""
 		try:
@@ -314,10 +310,10 @@ class DBConnection(object):
 	
 	def getvCDNbyId(self,id):
 		"""  
-		Get a certain vCDN based on the ID.
-		
-		:returns: a vCDN object, or None if not found
-		:rtype: vCDN or None if error
+			Get a certain vCDN based on the ID.
+			
+			:returns: a vCDN object, or None if not found
+			:rtype: vCDN or None if error
 			
 		"""
 		try:
@@ -328,10 +324,10 @@ class DBConnection(object):
 	
 	def getMetricList(self):
 		"""  
-		Get a list of the POPs.
-		
-		:returns: list of POP class
-		:rtype: Metric[] or None
+			Get a list of the POPs.
+			
+			:returns: list of POP class
+			:rtype: Metric[] or None
 		"""
 		try:
 			return self._getArray(Metric)
@@ -341,10 +337,10 @@ class DBConnection(object):
 
 	def getInstanceList(self):
 		"""  
-		Get a list of the Instances.
-		
-		:returns: list of Instances class
-		:rtype: Instance[] or None
+			Get a list of the Instances.
+			
+			:returns: list of Instances class
+			:rtype: Instance[] or None
 		"""
 		try:
 			return self._getArray(Instance)
@@ -354,10 +350,10 @@ class DBConnection(object):
 	
 	def getInstanceById(self,id):
 		"""  
-		Get a certain Instance based on the ID.
-		
-		:returns: an Instance object, or None if not found
-		:rtype: Instance or None if error
+			Get a certain Instance based on the ID.
+			
+			:returns: an Instance object, or None if not found
+			:rtype: Instance or None if error
 			
 		"""
 		try:
@@ -367,15 +363,15 @@ class DBConnection(object):
 	
 	def getInstanceOf(self,vcdnId ,popId ):
 		"""
-		For a given pair of vCDN and POP (their ids), returns the instance that matches the pair; or None if not found
-		
-		:param vcdnId: Id of the vCDN to look for instances
-		:type vcdnId: int
-		:param popId: Id of the POP to look for instances
-		:type popId: int
-		
-		:returns:   the Instance object or None if not found
-		:rtype: Instance or None
+			For a given pair of vCDN and POP (their ids), returns the instance that matches the pair; or None if not found
+			
+			:param vcdnId: Id of the vCDN to look for instances
+			:type vcdnId: int
+			:param popId: Id of the POP to look for instances
+			:type popId: int
+			
+			:returns:   the Instance object or None if not found
+			:rtype: Instance or None
 		
 		"""
 		try:
@@ -418,7 +414,7 @@ class DBConnection(object):
 	
 	def getDemands(self):
 		"""  
-		Get a list of the current Demands
+			Get a list of the current Demands
 		
 			:returns: list of Demand class, or None
 			:rtype: Demand[] or None
@@ -431,7 +427,7 @@ class DBConnection(object):
 	
 	def getAlteredDemands(self):
 		"""  
-		Get a list of the current AlteredDemands, caused by the simulation
+			Get a list of the current AlteredDemands, caused by the simulation
 		
 			:returns: list of AlteredDemand class, or None
 			:rtype: AlteredDemand[] or None
@@ -474,10 +470,7 @@ class DBConnection(object):
 			return self._getItemById(HmacResult, id)
 		except LookupError:
 			return None
-
-		
 	#enddef
-	
 	
 	def getAlteredDemandById(self, id):
 		"""
@@ -498,9 +491,9 @@ class DBConnection(object):
 	
 	def getInvalidDemandsSorted(self, field = "id"):
 		"""  
-		Get a list of the  Demands that have set the field `invalidInstance` to True, sorted by the parameter field
+			Get a list of the  Demands that have set the field `invalidInstance` to True, sorted by the parameter field
 		
-			:param field: Any of the fields in the list {"demand","pop","vcdn"}
+			:param field: Any of the fields in the list {"demand","pop","vcdn"}. If else, the Demands are sorted by ID.
 			:type field: String
 			
 			:returns: list of Demand class, or None
@@ -509,17 +502,14 @@ class DBConnection(object):
 		dataset = []
 		try:
 			if field=="vcdn":
-				
 				for element in self.DBSession.query(Demand).join(vCDN,Demand.vcdnId == vCDN.id).filter(Demand.invalidInstance==True).order_by(vCDN.name):
 					dataset.append(element)
 				
 			elif field=="demand":
-				
 				for element in self.DBSession.query(Demand).filter(Demand.invalidInstance==True).order_by(Demand.volume.desc()):
 					dataset.append(element)
 				
 			else:
-				
 				for element in self.DBSession.query(Demand).filter(Demand.invalidInstance==True).order_by(Demand.id):
 					dataset.append(element)
 		except:
@@ -529,7 +519,7 @@ class DBConnection(object):
 	
 	def getvCDNs(self):
 		""" 
-		Get a list of the vCDNs
+			Get a list of the vCDNs
 		
 			:returns: list of vCDN class
 			:rtype: vCDN[] or None
@@ -542,7 +532,7 @@ class DBConnection(object):
 
 	def getClientGroups(self):
 		"""  
-		Get a list of the ClientGroups. 
+			Get a list of the ClientGroups. 
 		
 			:returns: list of ClientGroup class
 			:rtype: ClientGroup[] or None
@@ -552,70 +542,6 @@ class DBConnection(object):
 		except LookupError:
 			return None
 	#enddef	
-
-
-	### Internal Functions ###
-
-	def _getArray(self,ModelClass):
-		"""  
-		Gets all the values in the DB of a model class
-		
-			:param ModelClass: is the Table/Class to lookup and get the values
-			
-			:returns: list of elemenst of the ModelClass class
-			:rtype: ModelClass[]
-			
-			:raises:  LookupError
-		"""
-		Array = []
-		try:
-			for element in self.DBSession.query(ModelClass).order_by(ModelClass.id):
-				Array.append(element)
-		except:
-			raise LookupError
-		return Array
-	#enddef
-	
-	def _getArraySorted(self,ModelClass,ModelField):
-		"""  
-		Gets all the values in the DB of a model class
-		
-			:param ModelClass: is the Table/Class to lookup and get the values
-			:param ModelField: is the Table/Class field to sort this. 'Must be ModelClass.x'
-		
-			:returns: list of elements of the ModelClass class
-			:rtype: ModelClass[]
-		
-			:raises:  LookupError
-		"""
-		Array = []
-		try:
-			for element in self.DBSession.query(ModelClass).order_by(ModelField):
-				Array.append(element)
-		except:
-			raise LookupError
-		return Array
-	#enddef			
-
-	def _getItemById(self,ModelClass,id):
-		"""  
-		Gets the value in the DB of a model class that matches the id
-		
-			:param ModelClass: is the Table/Class to lookup and get the values
-			:param id: the ID
-			
-			:returns: an object ModelClass class
-			:rtype: ModelClass
-			
-			:raises:   LookupError
-		"""
-		item = None
-		try:
-			item =  self.DBSession.query(ModelClass).filter(ModelClass.id==id).one()
-		except:
-			raise LookupError
-		return item
-	#enddef		
 	
 	### AddDrop Operations ###
 	
@@ -694,3 +620,66 @@ class DBConnection(object):
 			self.connect()
 		
 	#enddef
+	
+	### Internal Functions ###
+
+	def _getArray(self,ModelClass):
+		"""  
+		Gets all the values in the DB of a model class
+		
+			:param ModelClass: is the Table/Class to lookup and get the values
+			
+			:returns: list of elemenst of the ModelClass class
+			:rtype: ModelClass[]
+			
+			:raises:  LookupError
+		"""
+		Array = []
+		try:
+			for element in self.DBSession.query(ModelClass).order_by(ModelClass.id):
+				Array.append(element)
+		except:
+			raise LookupError
+		return Array
+	#enddef
+	
+	def _getArraySorted(self,ModelClass,ModelField):
+		"""  
+		Gets all the values in the DB of a model class
+		
+			:param ModelClass: is the Table/Class to lookup and get the values
+			:param ModelField: is the Table/Class field to sort this. 'Must be ModelClass.x'
+		
+			:returns: list of elements of the ModelClass class
+			:rtype: ModelClass[]
+		
+			:raises:  LookupError
+		"""
+		Array = []
+		try:
+			for element in self.DBSession.query(ModelClass).order_by(ModelField):
+				Array.append(element)
+		except:
+			raise LookupError
+		return Array
+	#enddef			
+
+	def _getItemById(self,ModelClass,id):
+		"""  
+		Gets the value in the DB of a model class that matches the id
+		
+			:param ModelClass: is the Table/Class to lookup and get the values
+			:param id: the ID
+			
+			:returns: an object ModelClass class
+			:rtype: ModelClass
+			
+			:raises:   LookupError
+		"""
+		item = None
+		try:
+			item =  self.DBSession.query(ModelClass).filter(ModelClass.id==id).one()
+		except:
+			raise LookupError
+		return item
+	#enddef		

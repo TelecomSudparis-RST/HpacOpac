@@ -166,7 +166,9 @@
                 <th class="column-header">
                     Created At
                 </th>
-               
+                <th class="column-header">
+                    Instantiate*
+                </th>
             </tr>
         </thead>
     {% for d in invalidDemandList %}
@@ -181,8 +183,10 @@
 	{% endfor %}
 	</table>
 	<br>
+	<small> 
+	(*) The <b> Instantiation </b> option is possible only if there is not a valid Instance of the vCDN in the demanded POP.
+</small>
 	
-
 	<p>
 		<input type="submit" value="Simulate" name="simulate"  id="simulate" onclick="this.style.display='none';">
 	</p>

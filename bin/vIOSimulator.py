@@ -32,9 +32,7 @@ This module does:
 
 .. note:: Check vIOSLib.Messages for settings on the log file. Logging happens to STDOUT, additionally a log file can be used
 
-.. warning:: For every config file passed as parameter, they are processed sequentially and overridden.
-
-.. warning:: Debug and LogFile command-line options override the settings in the configuration files
+.. warning:: For every config file passed as parameter, they are processed sequentially and overridden. The last config file wins. Debug and LogFile command-line options override the settings in the configuration files
 
 :Example:
 
@@ -91,7 +89,7 @@ def main(argv):
 		 
 	try:                                
 		opts, args = getopt.getopt(argv, "hdf:l:", ["help","debug", "config-file=", "log-file="])		
-		#<!> "config-file=" works both for CLI "--config-file=X" and "--config-file X" 
+		
 	except : 
 		print Messages.ERROR_in_options
 		usage()                         

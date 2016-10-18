@@ -169,10 +169,13 @@ Restart the Service Daemon
  * Demand BW adjustment by QoE, for the Operator to consider this.
  * All options possible are in the INI file
 
+### TODO
+
+ * Treat Instantiations as Migrations to prevent showing duplicates, relating several Demands to a single Instantiation
+
 ### Feature Pipeline
 
  * Deploy Types of vCDNs.
- * Test coverage program, Decision Coverage.
  * Use of Client's connection BW and hosting capacities. ClientGroups connections integrated in the Gomory Tree. Check migration to client
  * Insert Logic for handling individual VMs
 

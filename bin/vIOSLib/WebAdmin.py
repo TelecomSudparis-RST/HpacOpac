@@ -11,12 +11,16 @@ This is the WEB interface of OMAC demo.
 Use this sequence to operate this module
 
 	:Example:
+	
+		WebAdmin.readSettingsFile()
 		WebAdmin.initialize()
 		if WebAdmin.connect(DB URL):
 			WebAdmin.build()
 			WebAdmin.start()
 			
-Site Map:
+			
+	Site Map:
+	---------
 	/ 			/index.html				
 	/POPs		/pops.html				List the POPs, Update POP button
 	/POP/<id>	/popDetail.html			View instances in a POP
@@ -40,6 +44,7 @@ Site Map:
 	.. note:: install flask package from `pip install flask`
 	.. note:: install flask-admin package from `pip install flask-admin`
 	.. note:: This module does not modify or alter directly with the DB, only does queries
+	
 """
 
 
@@ -75,7 +80,6 @@ import os
 from DataModels import *
 import DBConnection
 import Messages 
-#from Optimizer import getQoSBWforDemand
 import Optimizer
 
 logger = logging.getLogger(__name__)
@@ -108,9 +112,6 @@ TCPport = 5000
 def initialize():
 	"""
 		Prepares the Flask object before anything
-		
-		:raises:  any internal exception
-		
 	"""
 	
 	global app
@@ -122,17 +123,18 @@ def initialize():
 	app = Flask(__name__)
 	admin = Admin(app, name= Messages.AdminPageTitle, template_mode= _TEMPLATE)
 	app.config['SECRET_KEY'] = uuid.uuid4().hex	
-
 	## Needed for the session to work. Make this key really secret
 
 #enddef
 
 def connect(url):
-	""" Connects to the provided DB String
+	""" 
+		Connects to the provided DB String
 	
-		:param url is a sqlalchemy string, just like the ones in nova.conf [database]
-		:type url String
-		:returns: True if connection OK, False if not
+		:param url is a sqlalchemy string, just like the ones in nova.conf [database].
+		:type url String.
+		
+		:returns: True if connection OK, False if not.
 		
 	"""
 	global DBConn	
@@ -148,8 +150,6 @@ def build():
 		
 		.. warning:: Under /admin there is a FlaskAdmin app, so please do not route anything to /admin/*
 		
-		:raises:  Any internal exception
-
 	"""
 	
 	global admin
@@ -346,8 +346,7 @@ def build():
 					Optimizer.resetQoE()
 					flash(Messages.QoE_reset)
 				
-				#if  ('drawTopologieDemands' in request.form) or draw:
-			
+				
 			#endif		 
 			
 			try:
@@ -553,11 +552,10 @@ def build():
 
 def start():
 	""" 
-		Starts the Web Server at TCP 5000
+		Starts the Web Server, blocking method.
 		
 		:returns:  When the server has finished; either normally or abnormally
 		
-		:raises:  any internal exception
 	"""
 	
 	app.run(host=ListenIp,port=TCPport, debug=False)
@@ -578,17 +576,23 @@ def readSettingsFile():
 			SettingsFile.read(INI_file)
 			WebAdmin.readSettingsFile()
 		
+		INI File:
+		
+			[web]
+			listen_ip = Ip where the HTTP server would listen to
+			listen_port = TCP Port where the HTTP server will listen
 	"""
+	
 	global ListenIp
 	global TCPport
-	
-
 	
 	if SettingsFile.getOptionString(INI_Section,"listen_ip"):
 		ListenIp = SettingsFile.getOptionString(INI_Section,"listen_ip")
 	if SettingsFile.getOptionInt(INI_Section,"listen_port"):
 		TCPport = SettingsFile.getOptionInt(INI_Section,"listen_port")
 	#endif
+
+#endclass
 
 ### Views used in the Admin Site. Check Flask-Admin documentation ###
 
@@ -663,7 +667,7 @@ class vCDNView(ModelView):
 
 	column_exclude_list = ['id','created_at','loginPass']	# hide these fields when viewing
 	form_excluded_columns = ['id','created_at','modified_at','instances','demands'] 	# hide these fields when editing
-	column_labels = dict(loginUser = "OpenStack User", vNetBW='Needed Net BW [Mbps]',vDisk='Needed Storage[GB]' , vRAM = "Needed memory [MB]",vCPU = "Needed CPUs" ,vInstances = "Needed VMs", defaultQosBW = "Default BW for clients [kbps]" ) # Rename the title of the fields
+	column_labels = dict(loginUser = "OpenStack User", loginPass = "OpenStack Password", vNetBW='Needed Net BW [Mbps]',vDisk='Needed Storage[GB]' , vRAM = "Needed memory [MB]",vCPU = "Needed CPUs" ,vInstances = "Needed VMs", defaultQosBW = "Default BW for clients [kbps]" ) # Rename the title of the fields
 #endclass
 
 class ClientGroupView(ModelView):
@@ -689,7 +693,7 @@ class DemandView(ModelView):
 		
 	"""
 	
-	column_exclude_list = ['id','created_at','invalidInstance']			# hide these fields when viewing
+	column_exclude_list = ['id','created_at','invalidInstance','migration']			# hide these fields when viewing
 	form_excluded_columns = ['id','created_at','modified_at','redirect','migration','invalidInstance'] 	# hide these fields when editing
 	column_labels = dict(volume = "Volume" ,bw = "BW [Mbps]") # Rename the title of the fields
 	column_sortable_list = (('vCDN','vcdn.name'), ('POP','pop.name'),('clientGroup','clientGroup.name'),'volume','bw')
